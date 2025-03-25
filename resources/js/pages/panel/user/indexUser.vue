@@ -14,7 +14,7 @@ import { Head } from '@inertiajs/vue3';
 import TableUser from './components/tableUser.vue';
 import { useUser } from '@/composables/useUser';
 
-const {principal, loadingUsers} = useUser();
+const {principal} = useUser();
 
 </script>
 <style lang="css" scoped></style>

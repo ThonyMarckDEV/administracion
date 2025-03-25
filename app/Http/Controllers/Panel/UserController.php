@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -13,9 +17,35 @@ class UserController extends Controller
      */
     public function index()
     {
+        Gate::authorize('viewAny', User::class);
         return Inertia::render('panel/user/indexUser');
     }
 
+    public function listarUsers(Request $request){
+        Gate::authorize('viewAny', User::class);
+        try {
+            $name = $request->get('name');
+            $users = User::when($name, function ($query, $name) {
+                return $query->where('name', 'like', "%$name%");
+            })->paginate(10);
+            return response()->json([
+                'users' => UserResource::collection($users),
+                'pagination' => [
+                    'total' => $users->total(),
+                    'current_page' => $users->currentPage(),
+                    'per_page' => $users->perPage(),
+                    'last_page' => $users->lastPage(),
+                    'from' => $users->firstItem(),
+                    'to' => $users->lastItem()
+                ]
+                ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Error al listar los usuarios',
+                'error' => $th->getMessage()
+            ], 500);
+        }
+    }
     /**
      * Show the form for creating a new resource.
      */

@@ -40,10 +40,13 @@ import TableRow from '@/components/ui/table/TableRow.vue';
 import TableHead from '@/components/ui/table/TableHead.vue';
 import TableBody from '@/components/ui/table/TableBody.vue';
 import Button from '@/components/ui/button/Button.vue';
+
 const {userList,userPaginate} = defineProps<{
     userList: UserResource[];
     userPaginate: Pagination;
 }>();
+
+console.log(userPaginate); 
 
 </script>
 <style scoped lang="css"></style>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,13 +25,12 @@ class UserController extends Controller
         Gate::authorize('viewAny', User::class);
         try {
             $name = $request->get('name');
-            Log::info('name: '.$name);
             $users = User::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
             })->paginate(10);
             return response()->json([
-                'users' => $users,
-                'paginacion' => [
+                'users' => UserResource::collection($users),
+                'pagination' => [
                     'total' => $users->total(),
                     'current_page' => $users->currentPage(),
                     'per_page' => $users->perPage(),

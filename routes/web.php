@@ -18,7 +18,9 @@ Route::get('dashboard', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('panel')->name('panel.')->group(function () {
         # module users
-        Route::resource('users', UserController::class);
+            Route::resource('users', UserController::class);
+        # list users
+            Route::get('listar-users',[UserController::class,'listarUsers'])->name('users.listar');
     });
 });
 

@@ -18,7 +18,7 @@ defineProps<{
             <div class="absolute inset-0 bg-zinc-900" />
             <Link :href="route('home')" class="relative z-20 flex items-center text-lg font-medium">
                 <AppLogoIcon class="mr-2 size-8 fill-current text-white" />
-                {{ name }}
+                <span>{{ name }}</span>
             </Link>
             <div v-if="quote" class="relative z-20 mt-auto">
                 <blockquote class="space-y-2">

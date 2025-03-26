@@ -5,7 +5,7 @@ export type UserResource = {
   name: string;
   email: string;
   username: string;
-  status: string;
+  status: boolean;
   created_at: string;
 };
 

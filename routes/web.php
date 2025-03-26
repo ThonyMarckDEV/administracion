@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Panel\UserController;
+use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,6 +22,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('users', UserController::class);
         # list users
             Route::get('listar-users',[UserController::class,'listarUsers'])->name('users.listar');
+        # module Services
+            Route::resource('services', ServiceController::class);
+        # list Services
+            Route::get('listar-services',[ServiceController::class,'listarServices'])->name('services.listar');
     });
 });
 

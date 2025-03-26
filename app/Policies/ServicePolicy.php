@@ -13,7 +13,7 @@ class ServicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view services');
+        return $user->can('ver servicios');
     }
 
     /**
@@ -21,7 +21,7 @@ class ServicePolicy
      */
     public function view(User $user, Service $service): bool
     {
-        return $user->can('view services');
+        return $user->can('ver servicios');
     }
 
     /**
@@ -29,7 +29,7 @@ class ServicePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create services');
+        return $user->can('crear servicios');
     }
 
     /**
@@ -37,7 +37,7 @@ class ServicePolicy
      */
     public function update(User $user, Service $service): bool
     {
-        return $user->can(abilities: 'edit services');
+        return $user->can(abilities: 'editar servicios');
     }
 
     /**

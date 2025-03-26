@@ -16,9 +16,9 @@ class ServiceFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'costo' => $this->faker->randomFloat(2, 10, 500),
-            'fecha_inicio' => $this->faker->date(),
-            'estado' => $this->faker->randomElement(['activo', 'inactivo', 'pendiente']),
+            'cost' => $this->faker->randomFloat(2, 10, 500),
+            'ini_date' => $this->faker->date(),
+            'state' => $this->faker->randomElement(['activo', 'inactivo', 'pendiente']),
         ];
     }
 }

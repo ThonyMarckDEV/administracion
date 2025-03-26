@@ -21,9 +21,9 @@ class StoreServiceRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'costo' => 'required|numeric|min:0',
-            'fecha_inicio' => 'required|date',
-            'estado' => 'required|in:activo,inactivo,pendiente',
+            'cost' => 'required|numeric|min:0',
+            'ini_date' => 'required|date',
+            'state' => 'required|in:activo,inactivo,pendiente',
         ];
     }
 }

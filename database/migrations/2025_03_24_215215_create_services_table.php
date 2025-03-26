@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Nombre del servicio
-            $table->decimal('costo', 10, 2); // Costo del servicio con 2 decimales
-            $table->date('fecha_inicio'); // Fecha de inicio del servicio
-            $table->enum('estado', ['activo', 'inactivo', 'pendiente'])->default('activo'); // Estado del servicio
+            $table->decimal('cost', 10, 2)->default(0);
+            $table->date('ini_date'); // Fecha de inicio del servicio
+            $table->enum('state', ['activo', 'inactivo', 'pendiente'])->default('activo'); // Estado del servicio
             $table->timestamps(); // created_at y updated_at
         });
     }

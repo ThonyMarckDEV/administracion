@@ -21,9 +21,9 @@ class UpdateServiceRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|string|max:255',
-            'costo' => 'sometimes|numeric|min:0',
-            'fecha_inicio' => 'sometimes|date',
-            'estado' => 'sometimes|in:activo,inactivo,pendiente',
+            'cost' => 'sometimes|numeric|min:0',
+            'ini_date' => 'sometimes|date',
+            'state' => 'sometimes|in:activo,inactivo,pendiente',
         ];
     }
 }

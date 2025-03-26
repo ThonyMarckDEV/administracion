@@ -84,14 +84,14 @@ class UserSeeder extends Seeder
             'password' => Hash::make('12345678'),
             'status' => 1,
         ]);
-      
-        $admin_3 = User::create([
-            'name' => 'Jesus Junior',
-            'email' => 'junior3@gmail.com',
-            'username' => 'jesus16',
+        $admin_9 = User::create([
+            'name' => 'Anthony Marck',
+            'email' => 'thonymarck385213xd@gmail.com',
+            'username' => 'thonymarck',
             'password' => Hash::make('12345678'),
             'status' => 1,
         ]);
+      
   
         $adminRole->syncPermissions($permissions);
         $admin_1->assignRole($adminRole);
@@ -102,5 +102,6 @@ class UserSeeder extends Seeder
         $admin_6->assignRole($adminRole);
         $admin_7->assignRole($adminRole);
         $admin_8->assignRole($adminRole);
+        $admin_9->assignRole($adminRole);
     }
 }

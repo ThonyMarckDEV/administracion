@@ -15,14 +15,14 @@ class Service extends Model
 
     protected $fillable = [
         'name',
-        'costo',
-        'fecha_inicio',
-        'estado',
+        'cost',
+        'ini_date',
+        'state',
     ];
 
     protected $casts = [
-        'costo' => 'decimal:2', // Asegura que el costo tenga 2 decimales
-        'fecha_inicio' => 'date', // Convierte automáticamente a Carbon
+        'cost' => 'decimal:2', // Asegura que el costo tenga 2 decimales
+        'ini_date' => 'date', // Convierte automáticamente a Carbon
     ];
 
     /**

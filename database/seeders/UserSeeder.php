@@ -76,6 +76,14 @@ class UserSeeder extends Seeder
             'status' => 1,
         ]);
 
+        $admin_8 = User::create([
+            'name' => 'Gustavo Siancas',
+            'email' => 'gustavo@gmail.com',
+            'username' => 'gustavo25',
+            'password' => Hash::make('12345678'),
+            'status' => 1,
+        ]);
+
   
         $adminRole->syncPermissions($permissions);
         $admin_1->assignRole($adminRole);

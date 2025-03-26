@@ -1,16 +1,16 @@
 <template>
     <Pagination 
       v-slot="{ page }" 
-      :items-per-page="meta.per_page" 
-      :total="meta.total" 
+      :items-per-page="props.meta.per_page" 
+      :total="props.meta.total" 
       :sibling-count="1" 
       show-edges 
-      :default-page="meta.current_page"
+      :default-page="props.meta.current_page"
       class="flex justify-center gap-2"
     >
       <PaginationList v-slot="{ items }" class="flex items-center gap-1">
         <PaginationFirst @click="handlePageChange(1)" />
-        <PaginationPrev @click="handlePageChange(meta.current_page - 1)" />
+        <PaginationPrev @click="handlePageChange(props.meta.current_page - 1)" />
         
         <template v-for="(item, index) in items" :key="index">
           <PaginationListItem v-if="item.type === 'page'" :value="item.value" as-child>
@@ -25,8 +25,8 @@
           <PaginationEllipsis v-else :index="index" />
         </template>
         
-        <PaginationNext @click="handlePageChange(meta.current_page + 1)" />
-        <PaginationLast @click="handlePageChange(meta.last_page)" />
+        <PaginationNext @click="handlePageChange(props.meta.current_page + 1)" />
+        <PaginationLast @click="handlePageChange(props.meta.last_page)" />
       </PaginationList>
     </Pagination>
   </template>

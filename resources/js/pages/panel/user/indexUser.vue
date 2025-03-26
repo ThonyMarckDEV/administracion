@@ -14,7 +14,7 @@ import { Head } from '@inertiajs/vue3';
 import TableUser from './components/tableUser.vue';
 import { useUser } from '@/composables/useUser';
 
-const {principal} = useUser();
+const {principal,loadingUsers} = useUser();
 
 // get pagination
 const handlePageChange = (page: number) => {

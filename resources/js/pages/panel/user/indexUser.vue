@@ -17,7 +17,7 @@ import { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'crear usuario',
         href: '/dashboard',
     },
 ];

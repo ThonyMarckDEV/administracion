@@ -27,7 +27,7 @@ class UserController extends Controller
             $name = $request->get('name');
             $users = User::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->paginate(2);
+            })->paginate(10);
             return response()->json([
                 'users' => UserResource::collection($users),
                 'pagination' => [

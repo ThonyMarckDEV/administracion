@@ -1,5 +1,6 @@
 <template>
     <Pagination 
+      :key="props.meta.current_page"
       v-slot="{ page }" 
       :items-per-page="props.meta.per_page" 
       :total="props.meta.total" 

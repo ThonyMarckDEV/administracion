@@ -1,11 +1,11 @@
 <template>
      <div class="container mx-auto py-6 px-0">
-            <Table class="w-full border border-gray-100 rounded-lg overflow-clip">
-                <TableCaption>lista de usuarios</TableCaption>
+            <Table class="w-full border border-gray-100 rounded-lg overflow-clip ">
+                <TableCaption >lista de usuarios</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead class="text-center">ID</TableHead>    
-                        <TableHead class="w-[100px]">Nombre</TableHead>
+                        <TableHead class="w-[200px]">Nombre</TableHead>
                         <TableHead>Correo</TableHead>
                         <TableHead>Usuario</TableHead>
                         <TableHead>Fecha de creación</TableHead>
@@ -13,7 +13,7 @@
                         <TableHead class="text-center">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody class="cursor-pointer">
                     <TableRow v-for="user in userList" :key="user.id">
                         <td class="text-center font-bold">{{ user.id }}</td>
                         <td>{{ user.name }}</td>
@@ -25,10 +25,10 @@
                             <span v-else class="bg-red-400 text-white px-2 py-1 rounded-full">Inactivo</span>
                         </td>
                         <td class="flex gap-2 justify-center">
-                            <Button variant="outline">
+                            <Button variant="ghost" class="bg-orange-300" >
                                 <UserPen class="w-4 h-4" />
                             </Button>
-                            <Button variant="link">
+                            <Button variant="ghost" class="bg-red-300" >
                                 <Trash class="w-4 h-4" />
                             </Button>
                         </td>

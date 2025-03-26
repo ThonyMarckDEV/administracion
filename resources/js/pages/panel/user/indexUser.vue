@@ -3,7 +3,7 @@
     <AppLayout>
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <TableUser :user-list="principal.userList" :user-paginate="principal.paginacion"/>
+                <TableUser :user-list="principal.userList" :user-paginate="principal.paginacion" @page-change="handlePageChange"/>
             </div>
         </div>
     </AppLayout>
@@ -16,5 +16,10 @@ import { useUser } from '@/composables/useUser';
 
 const {principal, loadingUsers} = useUser();
 
+// get pagination
+const handlePageChange = (page: number) => {
+    console.log(page);
+    loadingUsers(page);
+}
 </script>
 <style lang="css" scoped></style>

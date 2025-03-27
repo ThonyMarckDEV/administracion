@@ -87,12 +87,10 @@ import SelectValue from '@/components/ui/select/SelectValue.vue';
 import { useToast } from '@/components/ui/toast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
-import { h } from 'vue';
 import * as z from 'zod';
-import { router } from '@inertiajs/vue3'
 const { toast } = useToast();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -113,17 +111,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Form validation
 const formSchema = toTypedSchema(
     z.object({
-        name: z.string({message:'campo obligatorio'}).min(1,{message: 'nombre mayor a 2 letras'}).max(50, {message: 'nombre menor a 50 letras'}),
-        email: z.string({message:'campo obligatorio'}).email({message: 'correo invalido'}),
-        username: z.string({message:'campo obligatorio'}).min(2,{message: 'usuario mayor a 2 letras'}).max(50,{message: 'usuario menor a 50 letras'}),
-        password: z.string({message:'campo obligatorio'}).min(8,{message: 'contraseña debe ser mayor de 8 digitos'}).max(50,{message: 'contraseña menor a 50 digitos'}),
-        status: z.enum(['activo', 'inactivo'], {message: 'estado invalido'}),
+        name: z
+            .string({ message: 'campo obligatorio' })
+            .min(1, { message: 'nombre mayor a 2 letras' })
+            .max(50, { message: 'nombre menor a 50 letras' }),
+        email: z.string({ message: 'campo obligatorio' }).email({ message: 'correo invalido' }),
+        username: z
+            .string({ message: 'campo obligatorio' })
+            .min(2, { message: 'usuario mayor a 2 letras' })
+            .max(50, { message: 'usuario menor a 50 letras' }),
+        password: z
+            .string({ message: 'campo obligatorio' })
+            .min(8, { message: 'contraseña debe ser mayor de 8 digitos' })
+            .max(50, { message: 'contraseña menor a 50 digitos' }),
+        status: z.enum(['activo', 'inactivo'], { message: 'estado invalido' }),
     }),
 );
 
-// Form submit 
+// Form submit
 const { handleSubmit } = useForm({
-  validationSchema: formSchema,
+    validationSchema: formSchema,
 });
 const onSubmit = handleSubmit((values) => {
     // toast({
@@ -134,7 +141,7 @@ const onSubmit = handleSubmit((values) => {
     //         h('code', { class: 'text-white' }, JSON.stringify(values, null, 2)),
     //     ),
     // });
-    router.post(route('panel.users.store'),values);
+    router.post(route('panel.users.store'), values);
 });
 </script>
 <style scoped></style>

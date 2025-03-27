@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -27,7 +29,7 @@ class UserController extends Controller
             $name = $request->get('name');
             $users = User::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->paginate(10);
+            })->paginate(15);
             return response()->json([
                 'users' => UserResource::collection($users),
                 'pagination' => [
@@ -57,9 +59,15 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
+        Gate::authorize('create', User::class);
+        $validated = $request->validated();
+        $validated['password'] = Hash::make($validated['password']);
+        $validated = $request->safe()->except(['status']);
+        $user = User::create(Arr::except($validated, ['status']));
+        // // $validated['status'] = $validated['status'] === 'activo' ? true : false;
+        return redirect()->route('panel.users.index')->with('message', 'Usuario creado correctamente');   
     }
 
     /**

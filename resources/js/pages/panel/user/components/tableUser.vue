@@ -28,6 +28,7 @@
                         <Button variant="outline" class="bg-orange-400 text-white shadow-md hover:bg-orange-600">
                             <UserPen class="h-5 w-5" />
                         </Button>
+                        <EditUser :id_user="user.id" />
                         <Button variant="outline" class="bg-red-400 text-white shadow-md hover:bg-red-600">
                             <Trash class="h-5 w-5" />
                         </Button>
@@ -55,6 +56,7 @@ import { UserResource } from '../interface/User';
 import PaginationUser from './paginationUser.vue';
 
 import { useToast } from '@/components/ui/toast';
+import EditUser from './editUser.vue';
 const { toast } = useToast();
 
 defineEmits(['page-change']);

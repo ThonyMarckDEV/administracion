@@ -131,14 +131,6 @@ const { handleSubmit } = useForm({
     validationSchema: formSchema,
 });
 const onSubmit = handleSubmit((values) => {
-    // toast({
-    //     title: 'Datos a enviar al servidor',
-    //     description: h(
-    //         'pre',
-    //         { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
-    //         h('code', { class: 'text-white' }, JSON.stringify(values, null, 2)),
-    //     ),
-    // });
     router.post(route('panel.users.store'), values);
 });
 </script>

@@ -84,14 +84,12 @@ import { Select, SelectGroup, SelectItem, SelectLabel } from '@/components/ui/se
 import SelectContent from '@/components/ui/select/SelectContent.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
-import { useToast } from '@/components/ui/toast';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
-const { toast } = useToast();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

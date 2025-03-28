@@ -39,7 +39,7 @@ export const useService = () => {
             name: '',
             cost: 0,
             ini_date: '',
-            state: true,
+            state: '',
         },
     });
 

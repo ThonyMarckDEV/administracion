@@ -1,3 +1,4 @@
+// service/interface/Service.ts
 import { Pagination } from "@/interface/paginacion";
 
 export type ServiceResource = {

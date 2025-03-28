@@ -45,7 +45,7 @@ class ServicePolicy
      */
     public function delete(User $user, Service $service): bool
     {
-        return false;
+        return $user->can(abilities: 'eliminar servicios');
     }
 
     /**

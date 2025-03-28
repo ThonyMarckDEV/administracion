@@ -66,8 +66,8 @@
                             </FormItem>
                         </FormField>
                         <div class="container flex justify-end gap-4">
-                            <Button type="submit" variant="default" class="bg-green-500"> Enviar </Button>
-                            <Button type="reset" variant="destructive"> Borrar </Button>
+                            <Button type="submit" variant="default"> Enviar </Button>
+                            <Button type="reset" variant="outline"> Borrar </Button>
                         </div>
                     </form>
                 </CardContent>

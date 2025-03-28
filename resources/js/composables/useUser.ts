@@ -1,7 +1,7 @@
 import { Pagination } from '@/interface/paginacion';
 import { UserRequest, UserResource } from '@/pages/panel/user/interface/User';
 import { UserServices } from '@/services/userServices';
-import { onMounted, reactive } from 'vue';
+import { reactive } from 'vue';
 
 export const useUser = () => {
     const principal = reactive<{
@@ -11,7 +11,6 @@ export const useUser = () => {
         filter: string;
         idUser: number;
         statusModal: {
-            register: boolean;
             update: boolean;
             delete: boolean;
         };
@@ -30,7 +29,6 @@ export const useUser = () => {
         filter: '',
         idUser: 0,
         statusModal: {
-            register: false,
             update: false,
             delete: false,
         },
@@ -43,6 +41,17 @@ export const useUser = () => {
             created_at: '',
         },
     });
+    //reset user data
+    const resetUserData = () => {
+        principal.userData = {
+            id: 0,
+            name: '',
+            email: '',
+            username: '',
+            status: true,
+            created_at: '',
+        };
+    };
     // loading users
     const loadingUsers = async (page: number = 1, name: string = '', status: boolean = true) => {
         if (status) {
@@ -67,12 +76,36 @@ export const useUser = () => {
             console.error(error);
         }
     };
-    onMounted(() => {
-        loadingUsers();
-    });
+    // get user by id
+    const getUserById = async (id: number) => {
+        try {
+            if (id === 0) {
+                principal.userData = {
+                    id: 0,
+                    name: '',
+                    email: '',
+                    username: '',
+                    status: true,
+                    created_at: '',
+                };
+                return;
+            }
+            const response = await UserServices.show(id);
+            if (response.status) {
+                principal.userData = response.user;
+                console.log(principal.userData.name);
+                principal.idUser = response.user.id;
+                principal.statusModal.update = true;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
     return {
         principal,
         loadingUsers,
         createUser,
+        getUserById,
+        resetUserData,
     };
 };

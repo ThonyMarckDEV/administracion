@@ -25,10 +25,9 @@
                         <span v-else class="rounded-full bg-red-400 px-2 py-1 text-white">Inactivo</span>
                     </td>
                     <td class="flex justify-center gap-2">
-                        <Button variant="outline" class="bg-orange-400 text-white shadow-md hover:bg-orange-600">
+                        <Button variant="outline" class="bg-orange-400 text-white shadow-md hover:bg-orange-600" @click="openModal(user.id)">
                             <UserPen class="h-5 w-5" />
                         </Button>
-                        <EditUser :id_user="user.id" />
                         <Button variant="outline" class="bg-red-400 text-white shadow-md hover:bg-red-600">
                             <Trash class="h-5 w-5" />
                         </Button>
@@ -56,11 +55,12 @@ import { UserResource } from '../interface/User';
 import PaginationUser from './paginationUser.vue';
 
 import { useToast } from '@/components/ui/toast';
-import EditUser from './editUser.vue';
 const { toast } = useToast();
 
-defineEmits(['page-change']);
-
+const emit = defineEmits<{
+    (e: 'page-change', page: number): void;
+    (e: 'open-modal', id_user: number): void;
+}>();
 const page = usePage<SharedData>();
 
 const message = ref(page.props.flash?.message || '');
@@ -77,5 +77,9 @@ const { userList, userPaginate } = defineProps<{
     userList: UserResource[];
     userPaginate: Pagination;
 }>();
+
+const openModal = (id: number) => {
+    emit('open-modal', id);
+};
 </script>
 <style scoped lang="css"></style>

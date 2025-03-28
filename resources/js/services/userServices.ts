@@ -1,4 +1,4 @@
-import { UserRequest, UserResponse } from '@/pages/panel/user/interface/User';
+import { showUserResponse, UserRequest, UserResponse } from '@/pages/panel/user/interface/User';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 
@@ -11,8 +11,9 @@ export const UserServices = {
     async store(data: UserRequest) {
         router.post(route('panel.users.store'), data);
     },
-    async show(id: number): Promise<any> {
-        return await axios.get(`/users/${id}`);
+    async show(id: number): Promise<showUserResponse> {
+        const response = await axios.get(`users/${id}`);
+        return response.data;
     },
     async update(id: number, data: any): Promise<any> {
         return await axios.put(`/users/${id}`, data);

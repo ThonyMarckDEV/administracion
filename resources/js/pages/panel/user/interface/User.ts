@@ -17,6 +17,12 @@ export type UserRequest = {
     status: 'activo' | 'inactivo';
 };
 
+export type showUserResponse = {
+    status: boolean;
+    message: string;
+    user: UserResource;
+};
+
 export type UserResponse = {
     users: UserResource[];
     pagination: Pagination;

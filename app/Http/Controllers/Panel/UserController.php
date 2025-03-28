@@ -73,9 +73,14 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        Gate::authorize('view', $user);
+        return response()->json([
+            'status' => true,
+            'message' => 'Usuario encontrado',
+            'user' => new UserResource($user),
+        ], 200);
     }
 
     /**
@@ -89,7 +94,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
         //
     }

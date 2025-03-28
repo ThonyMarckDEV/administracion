@@ -1,5 +1,5 @@
 <template>
-    <Dialog :open="modal" @update:open="emit('closeModal', false)">
+    <Dialog :open="props.modal" @update:open="emit('closeModal', false)">
         <DialogContent class="sm:max-w-[425px]">
             <DialogHeader>
                 <DialogTitle>Eliminar usuario</DialogTitle>
@@ -7,7 +7,7 @@
             </DialogHeader>
             <div class="flex justify-end gap-2">
                 <Button variant="outline" @click="emit('closeModal', false)">Cancelar</Button>
-                <Button variant="destructive" @click="$emit('deleteUser', userId)">Eliminar</Button>
+                <Button variant="destructive" @click="$emit('deleteUser', props.userId)">Eliminar</Button>
             </div>
         </DialogContent>
     </Dialog>

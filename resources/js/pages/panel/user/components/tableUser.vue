@@ -29,7 +29,7 @@
                         <Button variant="outline" class="bg-orange-400 text-white shadow-md hover:bg-orange-600" @click="openModal(user.id)">
                             <UserPen class="h-5 w-5" />
                         </Button>
-                        <Button variant="outline" class="bg-red-400 text-white shadow-md hover:bg-red-600">
+                        <Button variant="outline" class="bg-red-400 text-white shadow-md hover:bg-red-600" @click="openModalDelete(user.id)">
                             <Trash class="h-5 w-5" />
                         </Button>
                     </td>
@@ -56,6 +56,7 @@ const { toast } = useToast();
 const emit = defineEmits<{
     (e: 'page-change', page: number): void;
     (e: 'open-modal', id_user: number): void;
+    (e: 'open-modal-delete', id_user: number): void;
 }>();
 const page = usePage<SharedData>();
 
@@ -77,6 +78,10 @@ const { userList, userPaginate } = defineProps<{
 
 const openModal = (id: number) => {
     emit('open-modal', id);
+};
+
+const openModalDelete = (id: number) => {
+    emit('open-modal-delete', id);
 };
 </script>
 <style scoped lang="css"></style>

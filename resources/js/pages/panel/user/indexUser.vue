@@ -8,6 +8,7 @@
                     :user-paginate="principal.paginacion"
                     @page-change="handlePageChange"
                     @open-modal="getIdUser"
+                    @open-modal-delete="openDeleteModal"
                     :loading="principal.loading"
                 />
                 <EditUser
@@ -15,6 +16,12 @@
                     :modal="principal.statusModal.update"
                     @emit-close="closeModal"
                     @update-user="emitUpdateUser"
+                />
+                <DeleteUser
+                    :modal="principal.statusModal.delete"
+                    :user-id="principal.idUser"
+                    @close-modal="closeModalDelete"
+                    @delete-user="emitDeleteUser"
                 />
             </div>
         </div>
@@ -26,6 +33,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import DeleteUser from './components/deleteUser.vue';
 import EditUser from './components/editUser.vue';
 import TableUser from './components/tableUser.vue';
 import { UserUpdateRequest } from './interface/User';
@@ -49,14 +57,14 @@ onMounted(() => {
     loadingUsers();
 });
 
-const { principal, loadingUsers, getUserById, updateUser } = useUser();
+const { principal, loadingUsers, getUserById, updateUser, deleteUser } = useUser();
 
 // get pagination
 const handlePageChange = (page: number) => {
     console.log(page);
     loadingUsers(page);
 };
-// get user by id
+// get user by id for edit
 const getIdUser = (id: number) => {
     getUserById(id);
 };
@@ -64,10 +72,25 @@ const getIdUser = (id: number) => {
 const closeModal = (open: boolean) => {
     principal.statusModal.update = open;
 };
+// close modal delete
+const closeModalDelete = (open: boolean) => {
+    principal.statusModal.delete = open;
+};
 
 // update user
 const emitUpdateUser = (user: UserUpdateRequest, id_user: number) => {
     updateUser(id_user, user);
+};
+
+// delete user
+const openDeleteModal = (userId: number) => {
+    principal.statusModal.delete = true;
+    principal.idUser = userId;
+    console.log('Eliminar usuario con ID:', userId);
+};
+// delete user
+const emitDeleteUser = (userId: number) => {
+    deleteUser(userId);
 };
 </script>
 <style lang="css" scoped></style>

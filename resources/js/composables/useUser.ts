@@ -112,6 +112,21 @@ export const useUser = () => {
             console.error(error);
         }
     };
+    // delete user
+    const deleteUser = async (id: number) => {
+        try {
+            const response = await UserServices.destroy(id);
+            if (response.status) {
+                showSuccessMessage('Usuario eliminado', 'El usuario se elimino correctamente');
+                principal.statusModal.delete = false;
+                loadingUsers(principal.paginacion.current_page, principal.filter);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            principal.statusModal.delete = false;
+        }
+    };
     return {
         principal,
         loadingUsers,
@@ -119,5 +134,6 @@ export const useUser = () => {
         getUserById,
         resetUserData,
         updateUser,
+        deleteUser,
     };
 };

@@ -23,6 +23,11 @@ export type showUserResponse = {
     user: UserResource;
 };
 
+export type UserDeleteResponse = {
+    status: boolean;
+    message: string;
+};
+
 export type UserUpdateRequest = {
     name: string;
     email: string;

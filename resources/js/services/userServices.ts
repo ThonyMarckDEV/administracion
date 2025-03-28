@@ -1,4 +1,4 @@
-import { showUserResponse, UserRequest, UserResponse, UserUpdateRequest } from '@/pages/panel/user/interface/User';
+import { showUserResponse, UserDeleteResponse, UserRequest, UserResponse, UserUpdateRequest } from '@/pages/panel/user/interface/User';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 
@@ -22,7 +22,7 @@ export const UserServices = {
         const response = await axios.put(`/panel/users/${id}`, data);
         return response.data;
     },
-    async destroy(id: number): Promise<any> {
-        return await axios.delete(`/users/${id}`);
+    async destroy(id: number): Promise<UserDeleteResponse> {
+        return await axios.delete(`/panel/users/${id}`);
     },
 };

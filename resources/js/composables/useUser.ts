@@ -1,5 +1,5 @@
 import { Pagination } from '@/interface/paginacion';
-import { UserResource } from '@/pages/panel/user/interface/User';
+import { UserRequest, UserResource } from '@/pages/panel/user/interface/User';
 import { UserServices } from '@/services/userServices';
 import { onMounted, reactive } from 'vue';
 
@@ -54,17 +54,25 @@ export const useUser = () => {
                 console.log(response);
             } catch (error) {
                 console.error(error);
-            }finally{
+            } finally {
                 principal.loading = false;
             }
         }
     };
-
+    // creating user
+    const createUser = async (data: UserRequest) => {
+        try {
+            await UserServices.store(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
     onMounted(() => {
         loadingUsers();
     });
     return {
         principal,
         loadingUsers,
+        createUser,
     };
 };

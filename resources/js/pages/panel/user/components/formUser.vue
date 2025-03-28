@@ -86,10 +86,14 @@ import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import * as z from 'zod';
+
+//composable
+import { useUser } from '@/composables/useUser';
+const { createUser } = useUser();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -131,7 +135,7 @@ const { handleSubmit } = useForm({
     validationSchema: formSchema,
 });
 const onSubmit = handleSubmit((values) => {
-    router.post(route('panel.users.store'), values);
+    createUser(values);
 });
 </script>
 <style scoped></style>

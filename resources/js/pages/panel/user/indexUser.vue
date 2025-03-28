@@ -9,7 +9,12 @@
                     @page-change="handlePageChange"
                     @open-modal="getIdUser"
                 />
-                <EditUser :user-data="principal.userData" :modal="principal.statusModal.update" @emit-close="closeModal" />
+                <EditUser
+                    :user-data="principal.userData"
+                    :modal="principal.statusModal.update"
+                    @emit-close="closeModal"
+                    @update-user="emitUpdateUser"
+                />
             </div>
         </div>
     </AppLayout>
@@ -22,6 +27,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import EditUser from './components/editUser.vue';
 import TableUser from './components/tableUser.vue';
+import { UserUpdateRequest } from './interface/User';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -42,7 +48,7 @@ onMounted(() => {
     loadingUsers();
 });
 
-const { principal, loadingUsers, getUserById, resetUserData } = useUser();
+const { principal, loadingUsers, getUserById, updateUser } = useUser();
 
 // get pagination
 const handlePageChange = (page: number) => {
@@ -56,7 +62,11 @@ const getIdUser = (id: number) => {
 
 const closeModal = (open: boolean) => {
     principal.statusModal.update = open;
-    resetUserData();
+};
+
+// update user
+const emitUpdateUser = (user: UserUpdateRequest, id_user: number) => {
+    updateUser(id_user, user);
 };
 </script>
 <style lang="css" scoped></style>

@@ -23,6 +23,13 @@ export type showUserResponse = {
     user: UserResource;
 };
 
+export type UserUpdateRequest = {
+    name: string;
+    email: string;
+    username: string;
+    status: 'activo' | 'inactivo';
+};
+
 export type UserResponse = {
     users: UserResource[];
     pagination: Pagination;

@@ -1,5 +1,5 @@
 import { Pagination } from '@/interface/paginacion';
-import { UserRequest, UserResource } from '@/pages/panel/user/interface/User';
+import { UserRequest, UserResource, UserUpdateRequest } from '@/pages/panel/user/interface/User';
 import { UserServices } from '@/services/userServices';
 import { reactive } from 'vue';
 
@@ -101,11 +101,24 @@ export const useUser = () => {
             console.error(error);
         }
     };
+    // update user
+    const updateUser = async (id: number, data: UserUpdateRequest) => {
+        try {
+            const response = await UserServices.update(id, data);
+            if (response.status) {
+                principal.statusModal.update = false;
+                loadingUsers(principal.paginacion.current_page, principal.filter);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
     return {
         principal,
         loadingUsers,
         createUser,
         getUserById,
         resetUserData,
+        updateUser,
     };
 };

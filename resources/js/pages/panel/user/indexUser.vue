@@ -8,6 +8,7 @@
                     :user-paginate="principal.paginacion"
                     @page-change="handlePageChange"
                     @open-modal="getIdUser"
+                    :loading="principal.loading"
                 />
                 <EditUser
                     :user-data="principal.userData"

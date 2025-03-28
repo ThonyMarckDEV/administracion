@@ -1,6 +1,7 @@
 <template>
     <div class="container mx-auto px-0 py-6">
-        <Table class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
+        <LoadingTable v-if="loading" />
+        <Table v-else class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
             <TableCaption>{{ userPaginate.current_page }} de {{ userPaginate.total }}</TableCaption>
             <TableHeader>
                 <TableRow>
@@ -54,6 +55,7 @@ import { onMounted, ref } from 'vue';
 import { UserResource } from '../interface/User';
 import PaginationUser from './paginationUser.vue';
 
+import LoadingTable from '@/components/loadingTable.vue';
 import { useToast } from '@/components/ui/toast';
 const { toast } = useToast();
 
@@ -76,6 +78,7 @@ onMounted(() => {
 const { userList, userPaginate } = defineProps<{
     userList: UserResource[];
     userPaginate: Pagination;
+    loading: boolean;
 }>();
 
 const openModal = (id: number) => {

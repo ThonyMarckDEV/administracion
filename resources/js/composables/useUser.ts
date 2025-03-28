@@ -53,19 +53,17 @@ export const useUser = () => {
         };
     };
     // loading users
-    const loadingUsers = async (page: number = 1, name: string = '', status: boolean = true) => {
-        if (status) {
-            principal.loading = true;
-            try {
-                const response = await UserServices.index(page, name);
-                principal.userList = response.users;
-                principal.paginacion = response.pagination;
-                console.log(response);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                principal.loading = false;
-            }
+    const loadingUsers = async (page: number = 1, name: string = '') => {
+        principal.loading = true;
+        try {
+            const response = await UserServices.index(page, name);
+            principal.userList = response.users;
+            principal.paginacion = response.pagination;
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            principal.loading = false;
         }
     };
     // creating user

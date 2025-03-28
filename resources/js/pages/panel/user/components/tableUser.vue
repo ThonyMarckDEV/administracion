@@ -1,6 +1,6 @@
 <template>
     <div class="container mx-auto px-0 py-6">
-        <LoadingTable v-if="loading" />
+        <LoadingTable v-if="loading" :headers="7" :row-count="15" />
         <Table v-else class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
             <TableCaption>{{ userPaginate.current_page }} de {{ userPaginate.total }}</TableCaption>
             <TableHeader>
@@ -40,13 +40,10 @@
     </div>
 </template>
 <script setup lang="ts">
+import LoadingTable from '@/components/loadingTable.vue';
 import Button from '@/components/ui/button/Button.vue';
-import Table from '@/components/ui/table/Table.vue';
-import TableBody from '@/components/ui/table/TableBody.vue';
-import TableCaption from '@/components/ui/table/TableCaption.vue';
-import TableHead from '@/components/ui/table/TableHead.vue';
-import TableHeader from '@/components/ui/table/TableHeader.vue';
-import TableRow from '@/components/ui/table/TableRow.vue';
+import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/interface/paginacion';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/vue3';
@@ -54,9 +51,6 @@ import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { UserResource } from '../interface/User';
 import PaginationUser from './paginationUser.vue';
-
-import LoadingTable from '@/components/loadingTable.vue';
-import { useToast } from '@/components/ui/toast';
 const { toast } = useToast();
 
 const emit = defineEmits<{

@@ -56,11 +56,11 @@ const handlePageChange = (page: number) => {
     console.log(page);
     loadingUsers(page);
 };
-
+// get user by id
 const getIdUser = (id: number) => {
     getUserById(id);
 };
-
+// close modal
 const closeModal = (open: boolean) => {
     principal.statusModal.update = open;
 };

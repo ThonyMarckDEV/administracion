@@ -1,8 +1,8 @@
 import { Pagination } from '@/interface/paginacion';
 import { UserRequest, UserResource, UserUpdateRequest } from '@/pages/panel/user/interface/User';
 import { UserServices } from '@/services/userServices';
+import { showSuccessMessage } from '@/utils/message';
 import { reactive } from 'vue';
-
 export const useUser = () => {
     const principal = reactive<{
         userList: UserResource[];
@@ -104,6 +104,7 @@ export const useUser = () => {
         try {
             const response = await UserServices.update(id, data);
             if (response.status) {
+                showSuccessMessage('Usuario actualizado', 'El usuario se actualizo correctamente');
                 principal.statusModal.update = false;
                 loadingUsers(principal.paginacion.current_page, principal.filter);
             }

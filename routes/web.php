@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClientTypeController;
 use App\Http\Controllers\Panel\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ServiceController;
@@ -31,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('services', ServiceController::class);
         # list Services
             Route::get('listar-services',[ServiceController::class,'listarServices'])->name('services.listar');
+        # module Client Types
+            Route::resource('clientTypes', ClientTypeController::class);
+        # list Client Types
+            Route::get('listar-clientTypes',[ClientTypeController::class,'listarClientTypes'])->name('clientTypes.listar');
     });
 });
 

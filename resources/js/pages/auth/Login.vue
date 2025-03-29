@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -12,6 +11,7 @@ import { LoaderCircle } from 'lucide-vue-next';
 defineProps<{
     status?: string;
     canResetPassword: boolean;
+    image?: string;
 }>();
 
 const form = useForm({
@@ -28,13 +28,8 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthBase title="inicio sesion" description="sistema de administracion">
-        <Head title="Log in" />
-
-        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
-            {{ status }}
-        </div>
-
+    <AuthBase title="inicio sesion" description="sistema de administracion" :image="image">
+        <Head title="inicio" />
         <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
@@ -83,7 +78,7 @@ const submit = () => {
                     ingresar
                 </Button>
             </div>
-<!-- 
+            <!-- 
             <div class="text-center text-sm text-muted-foreground">
                 Don't have an account?
                 <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>

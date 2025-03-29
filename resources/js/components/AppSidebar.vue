@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Map, PackageCheck, Settings2, Shield, SquareTerminal, Truck, UserSquare } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Map, PackageCheck, Settings2, Shield, Truck, UserSquare } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -13,11 +13,6 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
-    },
-    {
-        title: 'Usuarios',
-        href: '/panel/users',
-        icon: Shield,
     },
     {
         title: 'Servicios',
@@ -38,20 +33,20 @@ const mainNavItems: NavItem[] = [
 
 const mainNavItems2: NavItem[] = [
     {
-        title: 'Playground',
+        title: 'Seguridad',
         href: '#',
-        icon: SquareTerminal,
+        icon: Shield,
         items: [
             {
-                title: 'History',
+                title: 'usuarios',
                 href: '/panel/users',
             },
             {
-                title: 'Starred',
+                title: 'Roles',
                 href: '#',
             },
             {
-                title: 'Settings',
+                title: 'Permisos',
                 href: '#',
             },
         ],
@@ -99,13 +94,13 @@ const mainNavItems2: NavItem[] = [
         ],
     },
     {
-        title: 'Settings',
+        title: 'Configuraciones',
         href: '#',
         icon: Settings2,
         items: [
             {
                 title: 'General',
-                href: '#',
+                href: '/settings/profile',
             },
             {
                 title: 'Team',

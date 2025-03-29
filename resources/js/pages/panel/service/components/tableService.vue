@@ -1,6 +1,6 @@
 <template>
     <div class="container mx-auto px-0 py-6">
-        <LoadingTable v-if="loading" :headers="7" :row-count="15" />
+        <LoadingTable v-if="loading" :headers="6" :row-count="15" />
         <Table v-else class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
             <TableCaption>{{ servicePaginate.current_page }} de {{ servicePaginate.total }}</TableCaption>
             <TableHeader>
@@ -20,28 +20,15 @@
                     <td>{{ service.cost.toLocaleString('es-Pe', { style: 'currency', currency: 'PEN' }) }}</td>
                     <td>{{ formatDate(service.ini_date) }}</td>
                     <td class="text-center">
-                        <span 
-                            :class="[
-                                'rounded-full px-2 py-1 text-white',
-                                getStateDisplay(service.state).color
-                            ]"
-                        >
+                        <span :class="['rounded-full px-2 py-1 text-white', getStateDisplay(service.state).color]">
                             {{ getStateDisplay(service.state).text }}
                         </span>
                     </td>
                     <td class="flex justify-center gap-2">
-                        <Button 
-                            variant="outline" 
-                            class="bg-orange-400 text-white shadow-md hover:bg-orange-600" 
-                            @click="openModal(service.id)"
-                        >
+                        <Button variant="outline" class="bg-orange-400 text-white shadow-md hover:bg-orange-600" @click="openModal(service.id)">
                             <UserPen class="h-5 w-5" />
                         </Button>
-                        <Button 
-                            variant="outline" 
-                            class="bg-red-400 text-white shadow-md hover:bg-red-600" 
-                            @click="openModalDelete(service.id)"
-                        >
+                        <Button variant="outline" class="bg-red-400 text-white shadow-md hover:bg-red-600" @click="openModalDelete(service.id)">
                             <Trash class="h-5 w-5" />
                         </Button>
                     </td>
@@ -104,18 +91,16 @@ const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-CL', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
     });
 };
 
-const getStateDisplay = (state: boolean | string): { text: string, color: string } => {
-    const stateString = typeof state === 'boolean' 
-        ? (state ? 'Activo' : 'Inactivo')
-        : (state.toLowerCase() === 'activo' ? 'Activo' : 'Inactivo');
-    
+const getStateDisplay = (state: boolean | string): { text: string; color: string } => {
+    const stateString = typeof state === 'boolean' ? (state ? 'Activo' : 'Inactivo') : state.toLowerCase() === 'activo' ? 'Activo' : 'Inactivo';
+
     return {
         text: stateString,
-        color: stateString === 'Activo' ? 'bg-green-400' : 'bg-red-400'
+        color: stateString === 'Activo' ? 'bg-green-400' : 'bg-red-400',
     };
 };
 </script>

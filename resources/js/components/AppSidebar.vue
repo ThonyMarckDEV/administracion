@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Car, Folder, LayoutGrid, Map, Settings2, Shield, SquareTerminal, Truck, UserSquare } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Map, PackageCheck, Settings2, Shield, SquareTerminal, Truck, UserSquare } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -22,7 +22,7 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Servicios',
         href: '/panel/services',
-        icon: Shield,
+        icon: PackageCheck,
     },
     {
         title: 'Proveedores',
@@ -38,90 +38,90 @@ const mainNavItems: NavItem[] = [
 
 const mainNavItems2: NavItem[] = [
     {
-      title: 'Playground',
-      href: '#',
-      icon: SquareTerminal,
-      items: [
-        {
-          title: 'History',
-          href: '/panel/users',
-        },
-        {
-          title: 'Starred',
-          href: '#',
-        },
-        {
-          title: 'Settings',
-          href: '#',
-        },
-      ],
+        title: 'Playground',
+        href: '#',
+        icon: SquareTerminal,
+        items: [
+            {
+                title: 'History',
+                href: '/panel/users',
+            },
+            {
+                title: 'Starred',
+                href: '#',
+            },
+            {
+                title: 'Settings',
+                href: '#',
+            },
+        ],
     },
     {
-      title: 'Models',
-      href: '#',
-      icon: Map,
-      items: [
-        {
-          title: 'Genesis',
-          href: '#',
-        },
-        {
-          title: 'Explorer',
-          href: '#',
-        },
-        {
-          title: 'Quantum',
-          href: '#',
-        },
-      ],
+        title: 'Models',
+        href: '#',
+        icon: Map,
+        items: [
+            {
+                title: 'Genesis',
+                href: '#',
+            },
+            {
+                title: 'Explorer',
+                href: '#',
+            },
+            {
+                title: 'Quantum',
+                href: '#',
+            },
+        ],
     },
     {
-      title: 'Documentation',
-      href: '#',
-      icon: BookOpen,
-      items: [
-        {
-          title: 'Introduction',
-          href: '#',
-        },
-        {
-          title: 'Get Started',
-          href: '#',
-        },
-        {
-          title: 'Tutorials',
-          href: '#',
-        },
-        {
-          title: 'Changelog',
-          href: '#',
-        },
-      ],
+        title: 'Documentation',
+        href: '#',
+        icon: BookOpen,
+        items: [
+            {
+                title: 'Introduction',
+                href: '#',
+            },
+            {
+                title: 'Get Started',
+                href: '#',
+            },
+            {
+                title: 'Tutorials',
+                href: '#',
+            },
+            {
+                title: 'Changelog',
+                href: '#',
+            },
+        ],
     },
     {
-      title: 'Settings',
-      href: '#',
-      icon: Settings2,
-      items: [
-        {
-          title: 'General',
-          href: '#',
-        },
-        {
-          title: 'Team',
-          href: '#',
-        },
-        {
-          title: 'Billing',
-          href: '#',
-        },
-        {
-          title: 'Limits',
-          href: '#',
-        },
-      ],
+        title: 'Settings',
+        href: '#',
+        icon: Settings2,
+        items: [
+            {
+                title: 'General',
+                href: '#',
+            },
+            {
+                title: 'Team',
+                href: '#',
+            },
+            {
+                title: 'Billing',
+                href: '#',
+            },
+            {
+                title: 'Limits',
+                href: '#',
+            },
+        ],
     },
-]
+];
 
 const footerNavItems: NavItem[] = [
     {
@@ -152,7 +152,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" :items2="mainNavItems2"/>
+            <NavMain :items="mainNavItems" :items2="mainNavItems2" />
         </SidebarContent>
 
         <SidebarFooter>

@@ -27,7 +27,7 @@ class ServiceController extends Controller
             $name = $request->get('name');
             $services = Service::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->paginate(10);
+            })->orderBy('id')->paginate(15);
 
             return response()->json([
                 'services' => ServiceResource::collection($services),

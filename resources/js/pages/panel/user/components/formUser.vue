@@ -2,6 +2,17 @@
     <Head title="Nuevo Usuario"></Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <Alert v-if="hasErrors" variant="destructive">
+                <AlertCircle class="h-4 w-4"></AlertCircle>
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>
+                    <ul class="mt-2 list-inside list-disc text-sm">
+                        <li v-for="(message, field) in page.props.errors" :key="field">
+                            {{ message }}
+                        </li>
+                    </ul>
+                </AlertDescription>
+            </Alert>
             <Card class="mt-4 flex flex-col gap-4">
                 <CardHeader>
                     <CardTitle>NUEVO USUARIO</CardTitle>
@@ -76,6 +87,7 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Button from '@/components/ui/button/Button.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -85,7 +97,7 @@ import SelectContent from '@/components/ui/select/SelectContent.vue';
 import SelectTrigger from '@/components/ui/select/SelectTrigger.vue';
 import SelectValue from '@/components/ui/select/SelectValue.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem } from '@/types';
+import { BreadcrumbItem, SharedData } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
@@ -93,7 +105,14 @@ import * as z from 'zod';
 
 //composable
 import { useUser } from '@/composables/useUser';
+import { usePage } from '@inertiajs/vue3';
+import { AlertCircle } from 'lucide-vue-next';
+import { computed } from 'vue';
 const { createUser } = useUser();
+const page = usePage<SharedData>();
+const hasErrors = computed(() => {
+    return page.props.errors && Object.keys(page.props.errors).length > 0;
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

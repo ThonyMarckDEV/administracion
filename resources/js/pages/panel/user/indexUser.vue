@@ -3,6 +3,7 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
+                <FilterUser @search="searchUser" />
                 <TableUser
                     :user-list="principal.userList"
                     :user-paginate="principal.paginacion"
@@ -35,6 +36,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import DeleteUser from './components/deleteUser.vue';
 import EditUser from './components/editUser.vue';
+import FilterUser from './components/filterUser.vue';
 import TableUser from './components/tableUser.vue';
 import { UserUpdateRequest } from './interface/User';
 
@@ -91,6 +93,11 @@ const openDeleteModal = (userId: number) => {
 // delete user
 const emitDeleteUser = (userId: number) => {
     deleteUser(userId);
+};
+
+// search user
+const searchUser = (text: string) => {
+    loadingUsers(1, text);
 };
 </script>
 <style lang="css" scoped></style>

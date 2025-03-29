@@ -48,6 +48,13 @@ class ServiceController extends Controller
         }
     }
 
+
+    public function create()
+    {
+        Gate::authorize('create', Service::class);
+        return Inertia::render('panel/service/components/formService');
+    }
+
     /**
      * Store a newly created service.
      */

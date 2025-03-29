@@ -21,7 +21,7 @@ class SupplierPolicy
      */
     public function view(User $user, Supplier $supplier): bool
     {
-        return $user->can('ver proveedor');
+        return $user->can('ver proveedores');
     }
 
     /**

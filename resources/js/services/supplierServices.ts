@@ -1,22 +1,32 @@
-import { SupplierResponse } from "@/pages/panel/supplier/interface/Supplier";
+import { showSupplierResponse, SupplierDeleteResponse, SupplierRequest, SupplierResponse, SupplierUpdateRequest } from "@/pages/panel/supplier/interface/Supplier";
+import { router } from '@inertiajs/vue3';
 import axios from "axios";
 
 
 export const SupplierServices = {
+
+    //list suppliers
     async index(page: number, name: string): Promise<SupplierResponse> {
         const response = await axios.get(`/panel/listar-suppliers?page=${page}&name=${encodeURIComponent(name)}`);
         return response.data;
     },
-    async store(data: any): Promise<any> {
-        return await axios.post('/suppliers', data);
+    //inertia
+    async store(data: SupplierRequest)  {
+        router.post(route('panel.suppliers.store'), data);
     },
-    async show(id: number): Promise<any> {
-        return await axios.get(`/suppliers/${id}`);
+    // show supplier
+    async show(id: number): Promise<showSupplierResponse> {
+        const response = await axios.get(`suppliers/${id}`);
+        return response.data;
     },
-    async update(id: number, data: any): Promise<any> {
-        return await axios.put(`/suppliers/${id}`, data);
+    // update supplier
+    async update(id: number, data: SupplierUpdateRequest): Promise<showSupplierResponse> {
+        const response = await axios.put(`suppliers/${id}`, data);
+        return response.data;
     },
-    async destroy(id: number): Promise<any> {
-        return await axios.delete(`/suppliers/${id}`);
-    }
-}
+    // detele supplier
+    async destroy(id: number): Promise<SupplierDeleteResponse> {
+        const response = await axios.delete(`suppliers/${id}`);
+        return response.data;
+    },
+};

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprTrueNode;
 
 class StoreSupplierRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class StoreSupplierRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,9 +24,9 @@ class StoreSupplierRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'ruc' => 'required|string|size:11|unique:supplier',
+            'ruc' => 'required|string|size:11|unique:suppliers',
             'address' => 'required|string|max:100',
-            'state' => 'required|boolean',
+            'state' => 'required|string|in:activo,inactivo',
         ];
     }
 }

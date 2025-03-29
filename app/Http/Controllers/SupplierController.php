@@ -7,6 +7,7 @@ use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 
@@ -31,7 +32,7 @@ class SupplierController extends Controller
             $name = $request->get('name');
             $suppliers = Supplier::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->paginate(5);
+            })->orderBy('id','asc')->paginate(15);
             return response()->json([
                 'suppliers'=> SupplierResource::collection($suppliers),
                 'pagination' => [
@@ -51,15 +52,17 @@ class SupplierController extends Controller
         }
     }
 
+    public function create()
+    {
+        return Inertia::render('panel/supplier/components/formSupplier');
+    }
     public function store(StoreSupplierRequest $request)
     {
         Gate::authorize('create', Supplier::class);
         $validated = $request->validated();
         $validated = $request->safe()->except(['state']);
-        $supplier = Supplier::create($validated);
-        return response()->json([
-            'suppliers' => new SupplierResource($supplier),
-        ], 201);
+        $supplier = Supplier::create(Arr::except($validated, ['state']));
+        return redirect()->route('panel.suppliers.index')->with('message', 'Proveedor creado correctamente');   
     }
 
     /**
@@ -69,7 +72,9 @@ class SupplierController extends Controller
     {
         Gate::authorize('view', $supplier);
         return response()->json([
-            'suppliers' => new SupplierResource($supplier),
+            'state' => true,
+            'message' => 'Proveedor encontrado',
+            'supplier' => new SupplierResource($supplier),
         ], 200);
     }
     /**
@@ -79,10 +84,13 @@ class SupplierController extends Controller
     {
         Gate::authorize('update', $supplier);
         $validated = $request->validated();
+        $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
         $supplier->update($validated);
         return response()->json([
-            'suppliers' => new SupplierResource($supplier),
-        ], 200);
+            'state' => true,
+            'message' => 'Proveedor actualizado de manera correcta',
+            'supplier' => new SupplierResource($supplier->refresh()),
+        ]);
     }
 
     /**
@@ -93,6 +101,8 @@ class SupplierController extends Controller
         Gate::authorize('delete', $supplier);
         $supplier->delete();
         return response()->json([
-        ], 200);
+            'state' => true,
+            'message' => 'Proveedor eliminado de manera correcta',
+        ]);
     }
 }

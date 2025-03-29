@@ -1,7 +1,8 @@
 import { Pagination } from '@/interface/paginacion';
-import { SupplierResource } from '@/pages/panel/supplier/interface/Supplier';
+import { SupplierResource, SupplierRequest, SupplierUpdateRequest } from '@/pages/panel/supplier/interface/Supplier';
 import { SupplierServices } from '@/services/supplierServices';
-import { onMounted, reactive } from 'vue';
+import { showSuccessMessage } from '@/utils/message';
+import { reactive } from 'vue';
 
 export const useSupplier = () => {
     const principal = reactive<{
@@ -10,8 +11,7 @@ export const useSupplier = () => {
         loading: boolean;
         filter: string;
         idSupplier: number;
-        statusModal: {
-            register: boolean;
+        stateModal: {
             update: boolean;
             delete: boolean;
         };
@@ -29,8 +29,7 @@ export const useSupplier = () => {
         loading: false,
         filter: '',
         idSupplier: 0,
-        statusModal: {
-            register: false,
+        stateModal: {
             update: false,
             delete: false,
         },
@@ -42,10 +41,20 @@ export const useSupplier = () => {
             state: true,
         },
     });
+        //reset supplier data
+        const resetSupplierData = () => {
+            principal.supplierData = {
+                id: 0,
+                name: '',
+                ruc: '',
+                address: '',
+                state: true,
+            };
+        };
 
     // loading suppliers
-    const loadingSuppliers = async (page: number = 1, name: string = '', status: boolean = true) => {
-        if (status) {
+    const loadingSuppliers = async (page: number = 1, name: string = '', state: boolean = true) => {
+        if (state) {
             principal.loading = true;
             try {
                 const response = await SupplierServices.index(page, name);
@@ -59,13 +68,74 @@ export const useSupplier = () => {
             }
         }
     };
-
-    onMounted(() => {
-        loadingSuppliers();
-    });
-
+            // creating suppliers
+            const createSupplier = async (data: SupplierRequest) => {
+                try {
+                    await SupplierServices.store(data);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+        // get Supplier by id
+        const getSupplierById = async (id: number) => {
+            try {
+                if (id === 0) {
+                    principal.supplierData = {
+                        id: 0,
+                        name: '',
+                        ruc: '',
+                        address: '',
+                        state: true,
+                    };
+                    return;
+                }
+            const response = await SupplierServices.show(id);
+            if (response.state) {
+                principal.supplierData = response.supplier;
+                console.log(principal.supplierData.name);
+                principal.idSupplier = response.supplier.id;
+                principal.stateModal.update = true;
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    // update supplier
+    const updateSupplier = async (id: number, data: SupplierUpdateRequest) => {
+        try {
+            const response = await SupplierServices.update(id, data);
+            if (response.state) {
+                showSuccessMessage('Proveedor actualizado', 'El proveedor se actualizo correctamente');
+                principal.stateModal.update = false;
+                loadingSuppliers(principal.paginacion.current_page, principal.filter);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    // delete supplier
+    const deleteSupplier = async (id: number) => {
+        try {
+            const response = await SupplierServices.destroy(id);
+            console.log(response.state);
+            if (response.state) {
+                showSuccessMessage('Proveedor eliminado', 'El Proveedor se elimino correctamente');
+                principal.stateModal.delete = false;
+                loadingSuppliers(principal.paginacion.current_page, principal.filter);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            principal.stateModal.delete = false;
+        }
+    };
     return {
         principal,
         loadingSuppliers,
+        createSupplier,
+        getSupplierById,
+        resetSupplierData,
+        updateSupplier,
+        deleteSupplier,
     };
 };

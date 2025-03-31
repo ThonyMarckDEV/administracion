@@ -4,6 +4,7 @@ use App\Http\Controllers\ClientTypeController;
 use App\Http\Controllers\Panel\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\DiscountController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -36,6 +37,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('clientTypes', ClientTypeController::class);
         # list Client Types
             Route::get('listar-clientTypes',[ClientTypeController::class,'listarClientTypes'])->name('clientTypes.listar');
+        # module Discount
+            Route::resource('discounts', DiscountController::class);
+        # list Discount
+            Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');
     });
 });
 

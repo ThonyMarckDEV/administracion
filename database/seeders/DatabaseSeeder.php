@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             SupplierSeeder::class,
             ClientTypeSeeder::class,
             ServiceSeeder::class,
+            DiscountSeeder::class,
         ]);
     }
 }

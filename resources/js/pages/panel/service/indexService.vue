@@ -3,6 +3,7 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
+                <FilterService @search="searchService" />
                 <TableService
                     :service-list="principal.serviceList"
                     :service-paginate="principal.paginacion"
@@ -37,7 +38,9 @@ import { onMounted } from 'vue';
 import DeleteService from './components/deleteService.vue';
 import EditService from './components/editService.vue';
 import TableService from './components/tableService.vue';
+import FilterService from './components/filterService.vue';
 import { ServiceUpdateRequest } from './interface/Service'; // You'll need to create this interface
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -102,6 +105,11 @@ const openDeleteModal = (serviceId: number) => {
 // delete service
 const emitDeleteService = (serviceId: number) => {
     deleteService(serviceId);
+};
+
+// search Service
+const searchService = (text: string) => {
+    loadingServices(1, text);
 };
 </script>
 

@@ -15,11 +15,6 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-         title: 'Usuarios',
-         href: '/panel/users',
-         icon: Shield,
-     },
-    {
         title: 'Servicios',
         href: '/panel/services',
         icon: PackageCheck,

@@ -13,6 +13,6 @@ use App\Models\Discount;
       */
      public function run(): void
      {
-         Discount::factory()->count(5)->create();
+         Discount::factory()->count(100)->create();
      }
 }

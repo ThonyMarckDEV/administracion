@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ClientTypesExport;
 use App\Models\ClientType;
 use App\Http\Requests\StoreClientTypeRequest;
 use App\Http\Requests\UpdateClientTypeRequest;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ClientTypeController extends Controller
 {
@@ -109,5 +111,11 @@ class ClientTypeController extends Controller
             'state' => true,
             'message' => 'Tipo de cliente eliminado de manera correcta',
         ]);
+    }
+
+    // EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        return Excel::download(new ClientTypesExport, 'tipos_cliente.xlsx');
     }
 }

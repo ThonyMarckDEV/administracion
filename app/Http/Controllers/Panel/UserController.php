@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
+use App\Exports\UsersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
@@ -12,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -119,5 +121,11 @@ class UserController extends Controller
             'status' => true,
             'message' => 'Usuario eliminado correctamente',
         ]);
+    }
+
+    // EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        return Excel::download(new UsersExport, 'usuarios.xlsx');
     }
 }

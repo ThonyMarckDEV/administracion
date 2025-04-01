@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Exports\ServicesExport;
 use App\Models\Service;
 use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
@@ -8,6 +9,7 @@ use App\Http\Resources\ServiceResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ServiceController extends Controller
 {
@@ -115,5 +117,11 @@ class ServiceController extends Controller
                 'error' => $th->getMessage()
             ], 500);
         }
+    }
+
+    // EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        return Excel::download(new ServicesExport, 'servicios.xlsx');
     }
 }

@@ -44,8 +44,14 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/panel/clientTypes/create',
     },
     {
-        title: 'Exportar',
-        href: '/panel/clientTypes/export',
+        title: 'Exportar a Excel',
+        href: '/panel/reports/export-excel-clientTypes',
+        download: true,
+    },
+    {
+        title: 'Exportar a PDF',
+        href: '/panel/reports/export-pdf-clientTypes',
+        download: true,
     },
     {
         title: 'Tipos de cliente',

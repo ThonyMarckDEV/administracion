@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SuppliersExport;
 use App\Models\Supplier;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
@@ -10,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SupplierController extends Controller
 {
@@ -104,5 +106,11 @@ class SupplierController extends Controller
             'state' => true,
             'message' => 'Proveedor eliminado de manera correcta',
         ]);
+    }
+
+    // EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        return Excel::download(new SuppliersExport, 'proveedores.xlsx');
     }
 }

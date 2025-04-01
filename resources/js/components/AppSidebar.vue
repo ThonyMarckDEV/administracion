@@ -48,7 +48,7 @@ const mainNavItems2: NavItem[] = [
         icon: Shield,
         items: [
             {
-                title: 'usuarios',
+                title: 'Usuarios',
                 href: '/panel/users',
             },
             {

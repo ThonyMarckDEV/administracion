@@ -48,8 +48,14 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/panel/services/create',
     },
     {
-        title: 'Exportar',
-        href: '/panel/services/export',
+        title: 'Exportar a Excel',
+        href: '/panel/reports/export-excel-services',
+        download: true,
+    },
+    {
+        title: 'Exportar a PDF',
+        href: '/panel/reports/export-pdf-services',
+        download: true,
     },
     {
         title: 'Servicios',

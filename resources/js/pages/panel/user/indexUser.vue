@@ -41,16 +41,22 @@ import TableUser from './components/tableUser.vue';
 import { UserUpdateRequest } from './interface/User';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'crear usuario',
+{
+        title: 'Crear Usuario',
         href: '/panel/users/create',
     },
     {
-        title: 'Exportar',
-        href: '/panel/users/export',
+        title: 'Exportar a Excel',
+        href: '/panel/reports/export-excel-users',
+        download: true,
     },
     {
-        title: 'usuarios',
+        title: 'Exportar a PDF',
+        href: '/panel/reports/export-pdf-users',
+        download: true,
+    },
+    {
+        title: 'Usuarios',
         href: '/panel/users',
     },
 ];

@@ -88,7 +88,7 @@ const { createSupplier } = useSupplier();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'proveedores',
+        title: 'Proveedores',
         href: '/panel/suppliers',
     },
     {
@@ -96,7 +96,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/panel/suppliers/export',
     },
     {
-        title: 'crear proveedor',
+        title: 'Crear proveedor',
         href: '/panel/suppliers/create',
     },
 ];

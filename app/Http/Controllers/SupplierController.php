@@ -31,7 +31,7 @@ class SupplierController extends Controller
         try {
             $name = $request->get('name');
             $suppliers = Supplier::when($name, function ($query, $name) {
-                return $query->where('name', 'like', "%$name%");
+                return $query->whereLike('name', "%$name%");
             })->orderBy('id','asc')->paginate(15);
             return response()->json([
                 'suppliers'=> SupplierResource::collection($suppliers),

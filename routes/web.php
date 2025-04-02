@@ -9,6 +9,7 @@ use App\Http\Controllers\Reportes\ServicePDFController;
 use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\Panel\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -45,7 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('discounts', DiscountController::class);
         # list Discount
             Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');
-      
+        # module Customers
+            Route::resource('customers', CustomerController::class); 
+        # list Customers
+            Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
       
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {

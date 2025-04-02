@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ClientType extends Model
 {
@@ -12,5 +13,9 @@ class ClientType extends Model
     protected $fillable = [
         'name',
         'state',
-    ];
+    ]; 
+ 
+    public function Customers():HasMany{
+        return $this->hasMany(Customer::class); 
+    }
 }

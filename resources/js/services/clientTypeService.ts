@@ -1,9 +1,13 @@
-import { ClientTypeDeleteResponse, ClientTypeRequest, ClientTypeResponse, showClientTypeResponse } from "@/pages/panel/clientType/interface/ClientType";
+import {
+    ClientTypeDeleteResponse,
+    ClientTypeRequest,
+    ClientTypeResponse,
+    showClientTypeResponse,
+} from '@/pages/panel/clientType/interface/ClientType';
 import { router } from '@inertiajs/vue3';
-import axios from "axios";
+import axios from 'axios';
 
 export const ClientTypeServices = {
-
     //List clientTypes
     async index(page: number, name: string): Promise<ClientTypeResponse> {
         const response = await axios.get(`/panel/listar-clientTypes?page=${page}&name=${encodeURIComponent(name)}`);
@@ -11,7 +15,7 @@ export const ClientTypeServices = {
     },
 
     //Inertia
-    async store(data: ClientTypeRequest){
+    async store(data: ClientTypeRequest) {
         router.post(route('panel.clientTypes.store'), data);
     },
 

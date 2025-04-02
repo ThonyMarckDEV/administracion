@@ -19,6 +19,7 @@ class CustomerResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'codigo' => $this->codigo,
+            'client_type_id' => $this->clienteType->id,
             'client_type' => $this->clienteType->name,
             'state' => $this->state,
             'created_at' => Carbon::parse($this->created_at)->format('d/m/Y H:i:s'),

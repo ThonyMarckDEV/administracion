@@ -1,5 +1,5 @@
 <template>
-    <div class="relative ml-auto max-w-sm items-center py-2">
+    <div class="relative ml-auto max-w-sm items-center p-2">
         <Input v-model="searchText" id="search" type="text" placeholder="Buscar..." class="pl-10" @input="debounceSearch" />
         <span class="absolute inset-y-2 flex items-center justify-center px-2">
             <Search class="size-6 text-muted-foreground" />

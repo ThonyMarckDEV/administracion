@@ -19,9 +19,7 @@ class CustomerController extends Controller
     public function index()
     {
        Gate::authorize('viewAny', Customer::class);
-    //    return Inertia::render('panel/customer/indexCustomer');
-        $customers = Customer::with('clienteType')->orderBy('id','asc')->paginate(15);
-        return response()->json(CustomerResource::collection($customers));
+        return Inertia::render('panel/customer/indexCustomer');
     }
 
     public function listarCustomers(Request $request){
@@ -30,7 +28,7 @@ class CustomerController extends Controller
             $name = $request->get('name');
             $customers = Customer::when($name, function ($query, $name) {
                 return $query->whereLike('name', "%$name%");
-            })->orderBy('id','asc')->paginate(15);
+            })->orderBy('id','asc')->paginate(10);
             return response()->json([
                 'customers' => CustomerResource::collection($customers),
                 'pagination' => [
@@ -62,10 +60,10 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        Gate::authorize('create', Customer::class);
+        Gate::authorize('create', Customer::class); 
         $validated = $request->validated();
         $customer = Customer::create($validated);
-        return redirect()->route('customers.index')->with('success', 'Cliente creado correctamente');
+        return redirect()->route('panel.customers.index')->with('message', 'Cliente creado correctamente');
     }
 
     /**
@@ -88,7 +86,7 @@ class CustomerController extends Controller
     {
         Gate::authorize('update', $customer);
         $validated = $request->validated();
-        $validated['status'] = ($validated['status'] ?? 'inactivo') === 'activo';
+        $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
         $customer->update($validated);
         return response()->json([
             'status' => true,  

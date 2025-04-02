@@ -25,7 +25,7 @@ class UpdateCustomerRequest extends FormRequest
             'name' => 'required|string|max:150',
             'codigo' => 'required|string|max:11|unique:customers,codigo,' . $this->route('customer')->id,
             'client_type_id' => 'required|exists:client_types,id',
-            'state' => 'boolean',
+            'state' => 'required|string|in:activo,inactivo',
         ];
     }
 }

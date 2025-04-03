@@ -11,7 +11,6 @@ use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
-use App\Models\Category;
 use App\Http\Controllers\Panel\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;

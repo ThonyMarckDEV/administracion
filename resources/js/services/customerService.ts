@@ -1,3 +1,4 @@
+import { InputClientTypeResponse } from '@/interface/Inputs';
 import {
     CustomerDeleteResponse,
     CustomerRequest,
@@ -30,5 +31,9 @@ export const CustomerServices = {
     },
     async destroy(id: number): Promise<CustomerDeleteResponse> {
         return await axios.delete(`/panel/customers/${id}`);
+    },
+    // get client_type
+    async getClientType(): Promise<InputClientTypeResponse> {
+        return await axios.get('/panel/inputs/client_type_list');
     },
 };

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
+use App\Models\ClientType;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -52,7 +53,13 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return Inertia::render('panel/customer/components/formCustomer');
+        $client_types = ClientType::select('id', 'name')
+            ->where('state', 1)
+            ->orderBy('id')
+            ->get();
+        return Inertia::render('panel/customer/components/formCustomer', [
+            'customerTypes' => $client_types
+        ]);
     }
 
     /**

@@ -26,15 +26,6 @@
                         <FormMessage />
                     </FormItem>
                 </FormField>
-                <FormField v-slot="{ componentField }" name="client_type_id">
-                    <FormItem>
-                        <FormLabel>Tipo de Cliente</FormLabel>
-                        <FormControl>
-                            <Input id="client_type_id" type="number" v-bind="componentField" />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                </FormField>
                 <FormField v-slot="{ componentField }" name="state">
                     <FormItem>
                         <FormLabel>Estado</FormLabel>
@@ -48,6 +39,27 @@
                                         <SelectLabel>Estado</SelectLabel>
                                         <SelectItem value="activo">Activo</SelectItem>
                                         <SelectItem value="inactivo">Inactivo</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
+                <FormField v-slot="{ componentField }" name="client_type_id">
+                    <FormItem>
+                        <FormLabel>Tipo cliente</FormLabel>
+                        <FormControl>
+                            <Select v-bind="componentField">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el tipo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Tipo cliente</SelectLabel>
+                                        <SelectItem v-for="type in props.customerTypes" :key="type.id" :value="type.id">
+                                            {{ type.name }}
+                                        </SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -69,6 +81,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { InputClientType } from '@/interface/Inputs';
 import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { watch } from 'vue';
@@ -78,6 +91,7 @@ import { CustomerRequestUpdate, CustomerResource } from '../interface/Customer';
 const props = defineProps<{
     modal: boolean;
     customerData: CustomerResource;
+    customerTypes: InputClientType[];
 }>();
 
 const emit = defineEmits<{

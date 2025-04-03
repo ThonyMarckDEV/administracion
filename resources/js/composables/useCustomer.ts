@@ -1,3 +1,4 @@
+import { InputClientType } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
 import { CustomerRequest, CustomerRequestUpdate, CustomerResource } from '@/pages/panel/customer/interface/Customer';
 import { CustomerServices } from '@/services/customerService';
@@ -16,6 +17,7 @@ export const useCustomer = () => {
             delete: boolean;
         };
         customerData: CustomerResource;
+        clientTypeList: InputClientType[];
     }>({
         customerList: [],
         paginacion: {
@@ -42,6 +44,7 @@ export const useCustomer = () => {
             state: true,
             created_at: '',
         },
+        clientTypeList: [],
     });
 
     // reset customer data
@@ -65,6 +68,11 @@ export const useCustomer = () => {
             principal.customerList = response.customers;
             principal.paginacion = response.pagination;
             console.log(response);
+            if (principal.clientTypeList.length === 0 && principal.paginacion.current_page === 1) {
+                const clientTypeResponse = await CustomerServices.getClientType();
+                principal.clientTypeList = clientTypeResponse.data;
+                console.log('envie la peticion');
+            }
         } catch (error) {
             console.error(error);
         } finally {
@@ -93,6 +101,11 @@ export const useCustomer = () => {
                 principal.customerData = response.customer;
                 console.log(principal.customerData.name);
                 principal.idCustomer = response.customer.id;
+                if (principal.clientTypeList.length === 0) {
+                    const clientTypeResponse = await CustomerServices.getClientType();
+                    principal.clientTypeList = clientTypeResponse.data;
+                    console.log('envie la peticion');
+                }
                 principal.statusModal.update = true;
             }
         } catch (error) {
@@ -111,6 +124,8 @@ export const useCustomer = () => {
             }
         } catch (error) {
             console.error(error);
+        } finally {
+            principal.clientTypeList = [];
         }
     };
 

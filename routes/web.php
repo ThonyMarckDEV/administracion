@@ -10,6 +10,7 @@ use App\Http\Controllers\Reportes\ServicePDFController;
 use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\Inputs\SelectController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
 use App\Http\Controllers\Panel\CustomerController;
 use Illuminate\Support\Facades\Route;
@@ -75,6 +76,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-pdf-services', [ServicePDFController::class, 'exportPDF']);
             Route::get('/export-pdf-clientTypes', [ClientTypePDFController::class, 'exportPDF']);
             Route::get('/export-pdf-categories', [CategoryPDFController::class, 'exportPDF']);
+        });
+
+        # Route group for inputs, selects and autocomplete
+        Route::prefix('inputs')->name('inputs.')->group(function(){
+            # get client_type list
+            Route::get('client_type_list',[SelectController::class,'getClientTypeList'])->name('client_type_list');
         });
     });
 });

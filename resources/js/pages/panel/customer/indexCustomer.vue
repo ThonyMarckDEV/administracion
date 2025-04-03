@@ -15,6 +15,7 @@
                 <EditCustomer
                     :customer-data="principal.customerData"
                     :modal="principal.statusModal.update"
+                    :customer-types="principal.clientTypeList"
                     @close-modal="closeModel"
                     @update-customer="emitUpdateCustomer"
                 />
@@ -36,8 +37,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
-import FilterCustomer from '../../../components/filter.vue';
 import DeleteCustomer from '../../../components/delete.vue';
+import FilterCustomer from '../../../components/filter.vue';
 import EditCustomer from './components/editCustomer.vue';
 import TableCustomer from './components/tableCustomer.vue';
 import { CustomerRequestUpdate } from './interface/Customer';

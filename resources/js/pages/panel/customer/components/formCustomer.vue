@@ -38,11 +38,23 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField v-slot="{ componentField }" name="client_type_id">
+                        <FormField v-if="props.customerTypes" v-slot="{ componentField }" name="client_type_id">
                             <FormItem>
-                                <FormLabel>Tipo de Cliente</FormLabel>
+                                <FormLabel>Tipo cliente</FormLabel>
                                 <FormControl>
-                                    <Input type="number" placeholder="tipo de cliente" v-bind="componentField" />
+                                    <Select v-bind="componentField">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona el tipo" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Tipo cliente</SelectLabel>
+                                                <SelectItem v-for="type in props.customerTypes" :key="type.id" :value="type.id">
+                                                    {{ type.name }}
+                                                </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -61,7 +73,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCustomer } from '@/composables/useCustomer';
+import { InputClientType } from '@/interface/Inputs';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem, SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/vue3';
@@ -72,6 +86,11 @@ import { computed } from 'vue';
 import { z } from 'zod';
 const { createCustomer } = useCustomer();
 const page = usePage<SharedData>();
+
+const props = defineProps<{
+    customerTypes: InputClientType[];
+}>();
+
 const hasErrors = computed(() => {
     return page.props.errors && Object.keys(page.props.errors).length > 0;
 });

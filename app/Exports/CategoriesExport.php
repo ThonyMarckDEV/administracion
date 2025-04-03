@@ -2,7 +2,7 @@
 
 namespace App\Exports;
 
-use App\Models\User;
+use App\Models\Category;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -10,25 +10,22 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class UsersExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
+class CategoriesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
 {
     /**
     * @return \Illuminate\Support\Collection
     */
     public function collection()
     {
-        return User::orderBy('id', 'asc')->get();
+        return Category::orderBy('id', 'asc')->get();
     }
 
-    public function map($user): array
+    public function map($supplier): array
     {
         return [
-            $user->id,
-            $user->name,
-            $user->email,
-            $user->username,
-            $user->created_at,
-            $user->status == 1 ? 'Activo' : 'Inactivo'
+            $supplier->id,
+            $supplier->name,
+            $supplier->status == 1 ? 'Activo' : 'Inactivo'
         ];
     }
 
@@ -36,9 +33,6 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, WithStyl
         return[
             'ID',
             'Nombre',
-            'Correo',
-            'Usuario',
-            'Fecha de creación',
             'Estado'
         ];
     }
@@ -50,7 +44,7 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, WithStyl
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->getStyle('A1:F1')->applyFromArray([
+        $sheet->getStyle('A1:C1')->applyFromArray([
             'font' => [
                 'bold' => true,
             ],
@@ -65,7 +59,7 @@ class UsersExport implements FromCollection, WithHeadings, WithMapping, WithStyl
             ],
         ]);
 
-        $sheet->getStyle('A2:F' . ($sheet->getHighestRow()))->applyFromArray([
+        $sheet->getStyle('A2:C' . ($sheet->getHighestRow()))->applyFromArray([
 
             'alignment' => [
                 'horizontal' => 'center',

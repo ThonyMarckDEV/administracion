@@ -9,9 +9,9 @@ use TCPDF;
 
 class ServicePDFController extends Controller
 {
-    public function exportPdf()
+    public function exportPDF()
     {
-        $services = Service::all();
+        $services = Service::orderBy('id', 'asc')->get();
 
         $servicesArray = $services->map(function ($service) {
             return [
@@ -19,7 +19,7 @@ class ServicePDFController extends Controller
                 'name' => $service->name,
                 'cost' => $service->cost,
                 'ini_date' => $service->ini_date,
-                'state' => $service->status === 'activo' ? 'Activo' : ($service->state === 'pendiente' ? 'Pendiente' : 'Inactivo'),
+                'state' => $service->state === 'activo' ? 'Activo' : ($service->state === 'pendiente' ? 'Pendiente' : 'Inactivo'),
             ];
         })->toArray();
 
@@ -32,9 +32,12 @@ class ServicePDFController extends Controller
         // Configuración de márgenes
         $pdf->SetMargins(10, 10, 10);
         $pdf->SetAutoPageBreak(true, 10);
-
+        
         // Eliminar la línea de encabezado (borde superior)
         $pdf->SetHeaderData('', 0, '', '', [0, 0, 0], [255, 255, 255]);
+
+        // Personalizar el pie de página (eliminar línea predeterminada)
+        $pdf->setFooterData(array(0,0,0), array(255,255,255));
 
         $pdf->AddPage();
 
@@ -72,7 +75,7 @@ class ServicePDFController extends Controller
             }
             $pdf->SetFont('helvetica', '', 10);
 
-            $pdf->MultiCell($widths[0], 10, ' ' . $service['id'] . ' ', 1, 'C', 0, 0);
+            $pdf->MultiCell($widths[0], 10, $service['id'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[1], 10, $service['name'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[2], 10, 'S/ ' . number_format($service['cost'], 2), 1, 'C', 0, 0);            
             $pdf->MultiCell($widths[3], 10, $service['ini_date'], 1, 'C', 0, 0);

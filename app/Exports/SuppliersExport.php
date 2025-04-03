@@ -17,7 +17,7 @@ class SuppliersExport implements FromCollection, WithHeadings, WithMapping, With
     */
     public function collection()
     {
-        return Supplier::all();
+        return Supplier::orderBy('id', 'asc')->get();
     }
 
     public function map($supplier): array

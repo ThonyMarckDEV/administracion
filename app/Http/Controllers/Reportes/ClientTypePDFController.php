@@ -9,9 +9,9 @@ use TCPDF;
 
 class ClientTypePDFController extends Controller
 {
-    public function exportPdf()
+    public function exportPDF()
     {
-        $clientTypes = ClientType::all();
+        $clientTypes = ClientType::orderBy('id', 'asc')->get();
 
         $clientTypesArray = $clientTypes->map(function ($clientType) {
             return [
@@ -33,6 +33,9 @@ class ClientTypePDFController extends Controller
         
         // Eliminar la línea de encabezado (borde superior)
         $pdf->SetHeaderData('', 0, '', '', [0, 0, 0], [255, 255, 255]);
+
+        // Personalizar el pie de página (eliminar línea predeterminada)
+        $pdf->setFooterData(array(0,0,0), array(255,255,255));
 
         $pdf->AddPage();
 
@@ -70,7 +73,7 @@ class ClientTypePDFController extends Controller
         }
         $pdf->SetFont('helvetica', '', 10);
 
-        $pdf->MultiCell($widths[0], 10, ' ' . $clientType['id'] . ' ', 1, 'C', 0, 0);
+        $pdf->MultiCell($widths[0], 10, $clientType['id'], 1, 'C', 0, 0);
         $pdf->MultiCell($widths[1], 10, $clientType['name'], 1, 'C', 0, 0);
         $pdf->MultiCell($widths[2], 10, $clientType['state'], 1, 'C', 0, 0);
         $pdf->Ln();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientTypeController;
 use App\Http\Controllers\Reportes\ClientTypePDFController;
 use App\Http\Controllers\Panel\UserController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\Reportes\ServicePDFController;
 use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\Reportes\CategoryPDFController;
+use App\Models\Category;
 use App\Http\Controllers\Panel\CustomerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,12 +48,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         # module Discount
             Route::resource('discounts', DiscountController::class);
         # list Discount
-            Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');
+            Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');  
+            
+        # module Categories
+        Route::resource('categories', CategoryController::class);
+        # list Categories
+        Route::get('listar-categories',[CategoryController::class,'listarCategories'])->name('categories.listar');
+      
         # module Customers
             Route::resource('customers', CustomerController::class); 
         # list Customers
             Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
       
+
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {
             # Exports to Excel
@@ -58,12 +68,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-excel-suppliers',[SupplierController::class,'exportExcel'])->name('suppliers.excel');
             Route::get('/export-excel-services',[ServiceController::class,'exportExcel'])->name('services.excel');
             Route::get('/export-excel-clientTypes',[ClientTypeController::class,'exportExcel'])->name('clientTypes.excel');
+            Route::get('/export-excel-categories',[CategoryController::class,'exportExcel'])->name('categories.excel');
 
-            # Exports to PDF con TCPDF
+            # Exports to PDF
             Route::get('/export-pdf-users', [UserPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-suppliers', [SupplierPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-services', [ServicePDFController::class, 'exportPDF']);
             Route::get('/export-pdf-clientTypes', [ClientTypePDFController::class, 'exportPDF']);
+            Route::get('/export-pdf-categories', [CategoryPDFController::class, 'exportPDF']);
         });
     });
 });

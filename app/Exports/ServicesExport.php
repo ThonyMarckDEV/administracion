@@ -17,7 +17,7 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithS
     */
     public function collection()
     {
-        return Service::all();
+        return Service::orderBy('id', 'asc')->get();
     }
 
     public function map($service): array

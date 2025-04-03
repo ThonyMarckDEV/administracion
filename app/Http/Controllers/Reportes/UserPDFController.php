@@ -9,9 +9,9 @@ use App\Models\User;
 
 class UserPDFController extends Controller
 {
-    public function exportPdf()
+    public function exportPDF()
     {
-        $users = User::all();
+        $users = User::orderBy('id', 'asc')->get();
 
         $usersArray = $users->map(function ($user) {
             return [
@@ -37,6 +37,9 @@ class UserPDFController extends Controller
         // Eliminar la línea de encabezado (borde superior)
         $pdf->SetHeaderData('', 0, '', '', [0, 0, 0], [255, 255, 255]);
 
+        // Personalizar el pie de página (eliminar línea predeterminada)
+        $pdf->setFooterData(array(0,0,0), array(255,255,255));
+
         $pdf->AddPage();
 
         // Encabezado del PDF
@@ -59,7 +62,7 @@ class UserPDFController extends Controller
 
         $pdf->SetFont('helvetica', '', 10);
 
-        // Imprimir los datos de cada servicio
+        // Imprimir los datos de cada usuario
         foreach ($usersArray as $user) {
             if ($pdf->GetY() > 260) { // Si la posición Y está cerca del final de la página
                 $pdf->AddPage(); // Añadir una nueva página
@@ -73,7 +76,7 @@ class UserPDFController extends Controller
             }
             $pdf->SetFont('helvetica', '', 10);
 
-            $pdf->MultiCell($widths[0], 10, ' ' . $user['id'] . ' ', 1, 'C', 0, 0);
+            $pdf->MultiCell($widths[0], 10, $user['id'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[1], 10, $user['name'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[2], 10, $user['email'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[3], 10, $user['username'], 1, 'C', 0, 0);

@@ -17,7 +17,7 @@ class ClientTypesExport implements FromCollection, WithHeadings, WithMapping, Wi
     */
     public function collection()
     {
-        return ClientType::all();
+        return ClientType::orderBy('id', 'asc')->get();
     }
 
     public function map($clientType): array

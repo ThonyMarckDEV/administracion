@@ -20,9 +20,11 @@
                 />
                 <DeleteDiscount
                     :modal="principal.stateModal.delete"
-                    :discount-id="principal.idDiscount"
+                    :itemId="principal.idDiscount"
+                    title="Eliminar Servicio"
+                    description="¿Está seguro de que desea eliminar este servicio?"
                     @close-modal="closeModalDelete"
-                    @delete-discount="emitDeleteDiscount"
+                    @delete-item="emitDeleteDiscount"
                 />
             </div>
         </div>
@@ -34,9 +36,9 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import TableDiscount from './components/tableDiscount.vue';
 import { DiscountUpdateRequest } from './interface/Discount';
-import DeleteDiscount from './components/deleteDiscount.vue';
+import DeleteDiscount from '../../../components/delete.vue';
 import EditDiscount from './components/editDiscount.vue';
-import FilterDiscount from './components/filterDiscount.vue';
+import FilterDiscount from '../../../components/filter.vue';
 import { useDiscount } from '@/composables/useDiscount';
 import { BreadcrumbItem } from '@/types';
 
@@ -91,8 +93,8 @@ const openDeleteModal = (discountId: number) => {
     console.log('Eliminar descuento con ID:', discountId);
 };
 // delete discount
-const emitDeleteDiscount = (discountId: number) => {
-    deleteDiscount(discountId);
+const emitDeleteDiscount = (discountId: number | string) => {
+    deleteDiscount(Number(discountId));
 };
 // search user
 const searchDiscount = (text: string) => {

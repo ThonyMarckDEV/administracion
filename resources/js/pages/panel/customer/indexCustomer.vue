@@ -3,7 +3,7 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <FilterUser @search="searchCustomer" />
+                <FilterCustomer @search="searchCustomer" />
                 <TableCustomer
                     :customer-list="principal.customerList"
                     :customer-paginate="principal.paginacion"
@@ -20,9 +20,11 @@
                 />
                 <DeleteCustomer
                     :modal="principal.statusModal.delete"
-                    :user-id="principal.idCustomer"
+                    :itemId="principal.idCustomer"
+                    title="Eliminar Servicio"
+                    description="¿Está seguro de que desea eliminar este servicio?"
                     @close-modal="closeModalDelete"
-                    @delete-customer="emitDeleteCustomer"
+                    @delete-item="emitDeleteCustomer"
                 />
             </div>
         </div>
@@ -34,8 +36,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
-import FilterUser from '../user/components/filterUser.vue';
-import DeleteCustomer from './components/deleteCustomer.vue';
+import FilterCustomer from '../../../components/filter.vue';
+import DeleteCustomer from '../../../components/delete.vue';
 import EditCustomer from './components/editCustomer.vue';
 import TableCustomer from './components/tableCustomer.vue';
 import { CustomerRequestUpdate } from './interface/Customer';
@@ -91,8 +93,8 @@ const openDeleteModal = (id: number) => {
     principal.idCustomer = id;
 };
 
-const emitDeleteCustomer = (id: number) => {
-    deleteCustomer(id);
+const emitDeleteCustomer = (id: number | string) => {
+    deleteCustomer(Number(id));
 };
 const searchCustomer = (text: string) => {
     loadingCustomers(1, text);

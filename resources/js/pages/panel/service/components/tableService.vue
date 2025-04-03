@@ -50,7 +50,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { ServiceResource } from '../interface/Service';
-import PaginationService from './paginationService.vue';
+import PaginationService from '../../../../components/pagination.vue';
 
 const { toast } = useToast();
 

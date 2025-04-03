@@ -47,7 +47,7 @@ import { usePage } from '@inertiajs/vue3';
 import { SharedData } from '@/types';
 import { onMounted, ref } from 'vue';
 import { useToast } from '@/components/ui/toast';
-import PaginationSupplier from './paginationSupplier.vue';
+import PaginationSupplier from '../../../../components/pagination.vue';
 import { Trash, UserPen } from 'lucide-vue-next';
 
 const { toast }  = useToast();

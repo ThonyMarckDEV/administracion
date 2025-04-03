@@ -50,7 +50,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { UserResource } from '../interface/User';
-import PaginationUser from './paginationUser.vue';
+import PaginationUser from '../../../../components/pagination.vue';
 const { toast } = useToast();
 
 const emit = defineEmits<{

@@ -86,7 +86,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import { CustomerResource } from '../interface/Customer';
-import PaginationCustomer from './paginationCustomer.vue';
+import PaginationCustomer from '../../../../components/pagination.vue';
 
 const { toast } = useToast();
 const emit = defineEmits<{

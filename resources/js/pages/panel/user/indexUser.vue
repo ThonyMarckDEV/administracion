@@ -20,9 +20,11 @@
                 />
                 <DeleteUser
                     :modal="principal.statusModal.delete"
-                    :user-id="principal.idUser"
+                    :itemId="principal.idUser"
+                    title="Eliminar Servicio"
+                    description="¿Está seguro de que desea eliminar este servicio?"
                     @close-modal="closeModalDelete"
-                    @delete-user="emitDeleteUser"
+                    @delete-item="emitDeleteUser"
                 />
             </div>
         </div>
@@ -34,9 +36,9 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
-import DeleteUser from './components/deleteUser.vue';
+import DeleteUser from '../../../components/delete.vue';
 import EditUser from './components/editUser.vue';
-import FilterUser from './components/filterUser.vue';
+import FilterUser from '../../../components/filter.vue';
 import TableUser from './components/tableUser.vue';
 import { UserUpdateRequest } from './interface/User';
 
@@ -97,8 +99,8 @@ const openDeleteModal = (userId: number) => {
     console.log('Eliminar usuario con ID:', userId);
 };
 // delete user
-const emitDeleteUser = (userId: number) => {
-    deleteUser(userId);
+const emitDeleteUser = (userId: number | string) => {
+    deleteUser(Number(userId));
 };
 
 // search user

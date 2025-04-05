@@ -2,20 +2,24 @@
     <div class="container mx-auto px-0">
         <LoadingTable v-if="loading" :headers="6" :row-count="10" />
            <Table v-else class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
-               <TableCaption>Lista de categorías</TableCaption>
+               <TableCaption>{{ categoryPaginate.current_page }} de {{ categoryPaginate.total }}</TableCaption>
                <TableHeader>
                    <TableRow>
-                       <TableHead class="text-center">ID</TableHead>    
-                       <TableHead class="w-[200px]">Nombre</TableHead>
-                       <TableHead>Estado</TableHead>
-                       <TableHead class="text-center">Acciones</TableHead>
+                       <TableHead class="w-[100px] text-center">ID</TableHead>    
+                       <TableHead class="w-[400px]">Nombre</TableHead>
+                       <TableHead class="w-[300px]">Fecha de creación</TableHead>
+                       <TableHead class="w-[250px]">Fecha de modificación</TableHead>
+                       <TableHead class="w-[20px] text-center">Estado</TableHead>
+                       <TableHead class="text-center w-[200px]">Acciones</TableHead>
                    </TableRow>
                </TableHeader>
                <TableBody class="cursor-pointer">
                    <TableRow v-for="category in categoryList" :key="category.id">
                        <td class="text-center font-bold">{{ category.id }}</td>
-                       <td class="text-left px-2">{{ category.name }}</td>
-                       <td class="w-[100px] text-center">
+                       <td class="text-left px-3">{{ category.name }}</td>
+                       <td class="text-left px-3">{{ category.created_at }}</td>
+                       <td class="text-left px-4">{{ category.updated_at }}</td>
+                       <td class="w-[200px] text-center">
                         <span v-if="category.status === true" class="rounded-full bg-green-400 px-2 py-1 text-white">Activo</span>
                         <span v-else class="rounded-full bg-red-400 px-2 py-1 text-white">Inactivo</span>
                        </td>
@@ -44,7 +48,7 @@ import { onMounted, ref } from 'vue';
 import { useToast } from '@/components/ui/toast';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { CategoryResource } from '../interface/Category';
-import PaginationCategory from './paginationCategory.vue';
+import PaginationCategory from '../../../../components/pagination.vue';
 
 const { toast }  = useToast();
 

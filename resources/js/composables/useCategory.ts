@@ -37,6 +37,8 @@ export const useCategory = () => {
             id: 0,
             name: '',
             status: true,
+            created_at: '',
+            updated_at: '',
         },
     });
         //reset category data
@@ -45,6 +47,8 @@ export const useCategory = () => {
                 id: 0,
                 name: '',
                 status: true,
+                created_at: '',
+                updated_at: '',
             };
         };
 
@@ -80,6 +84,8 @@ export const useCategory = () => {
                         id: 0,
                         name: '',
                         status: true,
+                        created_at: '',
+                        updated_at: '',
                     };
                     return;
                 }

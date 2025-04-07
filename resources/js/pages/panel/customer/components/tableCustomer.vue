@@ -1,7 +1,6 @@
 <template>
     <div class="container mx-auto px-4 py-2">
         <LoadingTable v-if="loading" :headers="6" :row-count="10" />
-
         <div v-else class="space-y-4">
             <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-700 dark:shadow-none">
                 <Table class="w-full">
@@ -11,7 +10,7 @@
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">NOMBRE</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CÓDIGO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ESTADO</TableHead>
-                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">TIPO_CLIENTE</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">TIPO DE CLIENTE</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">FECHA</TableHead>
                             <TableHead class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
                         </TableRow>

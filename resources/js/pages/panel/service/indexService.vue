@@ -1,9 +1,12 @@
 <template>
-    <Head title="servicios"></Head>
+    <Head title="Servicios"></Head>
     <AppLayout :breadcrumbs="breadcrumbs">
       <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
         <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-          <FilterService @search="searchService" />
+          <div class="flex justify-between items-center mb-4 px-6 mt-4">
+            <ToolsService @import-success="loadingServices" />
+            <FilterService @search="searchService" />
+          </div>
           <TableService
             :service-list="principal.serviceList"
             :service-paginate="principal.paginacion"
@@ -42,22 +45,13 @@ import EditService from './components/editService.vue';
 import TableService from './components/tableService.vue';
 import FilterService from '../../../components/filter.vue';
 import { ServiceUpdateRequest } from './interface/Service';
+import ToolsService from './components/toolsService.vue';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Crear servicio',
         href: '/panel/services/create',
-    },
-    {
-        title: 'Exportar a Excel',
-        href: '/panel/reports/export-excel-services',
-        download: true,
-    },
-    {
-        title: 'Exportar a PDF',
-        href: '/panel/reports/export-pdf-services',
-        download: true,
     },
     {
         title: 'Servicios',

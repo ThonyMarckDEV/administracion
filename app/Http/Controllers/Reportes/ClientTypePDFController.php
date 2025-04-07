@@ -79,6 +79,15 @@ class ClientTypePDFController extends Controller
         $pdf->Ln();
         }
 
-        return response($pdf->Output('tipos_cliente.pdf', 'D'))->header('Content-Type', 'application/pdf');
+        // Detenemos cualquier salida previa
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+        
+        // Generamos el PDF como string en memoria
+        $pdfOutput = $pdf->Output('tipos_Cliente.pdf', 'S'); // "S" = string, no lo imprime directo
+        
+        // Laravel se encarga del response
+        return response($pdfOutput)->header('Content-Type', 'application/pdf')->header('Content-Disposition', 'attachment; filename="tipos_Cliente.pdf"');
     }
 }

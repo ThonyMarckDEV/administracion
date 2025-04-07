@@ -80,10 +80,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         title: 'Tipos de cliente',
         href: '/panel/clientTypes',
     },
-    {
-        title: 'Exportar',
-        href: '/panel/clientTypes/export',
-    },
+    
     {
         title: 'Crear tipo de cliente',
         href: '/panel/clientTypes/create',

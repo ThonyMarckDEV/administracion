@@ -4,6 +4,7 @@ export type ClientTypeResource = {
     id: number;
     name: string;
     state: boolean;
+    created_at: string;
 };
 
 export type ClientTypeRequest = {

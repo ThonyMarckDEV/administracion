@@ -1,9 +1,12 @@
 <template>
-    <Head title="supplier"></Head>
+    <Head title="Proveedores"></Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <FilterSupplier @search="searchSupplier" />
+                <div class="flex justify-between items-center mb-4 px-6 mt-4">
+                    <ToolsSupplier @import-success="loadingSuppliers" />
+                    <FilterSupplier @search="searchSupplier" />
+                </div>
                 <TableSupplier
                     :supplier-list="principal.supplierList"
                     :supplier-paginate="principal.paginacion"
@@ -41,21 +44,12 @@ import EditSupplier from './components/editSupplier.vue';
 import { useSupplier } from '@/composables/useSupplier';
 import { BreadcrumbItem } from '@/types';
 import FilterSupplier from '../../../components/filter.vue';
+import ToolsSupplier from './components/toolsSupplier.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
 {
         title: 'Crear proveedor',
         href: '/panel/suppliers/create',
-    },
-    {
-        title: 'Exportar a Excel',
-        href: '/panel/reports/export-excel-suppliers',
-        download: true,
-    },
-    {
-        title: 'Exportar a PDF',
-        href: '/panel/reports/export-pdf-suppliers',
-        download: true,
     },
     {
         title: 'Proveedores',

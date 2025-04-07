@@ -7,6 +7,7 @@ use App\Models\Supplier;
 use App\Http\Requests\StoreSupplierRequest;
 use App\Http\Requests\UpdateSupplierRequest;
 use App\Http\Resources\SupplierResource;
+use App\Imports\SupplierImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
@@ -112,5 +113,18 @@ class SupplierController extends Controller
     public function exportExcel()
     {
         return Excel::download(new SuppliersExport, 'proveedores.xlsx');
+    }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        Excel::import(new SupplierImport, $request->file('archivo'));
+        return response()->json([
+            'message' => 'Importación de proveedores realizado correctamente',
+        ]);
     }
 }

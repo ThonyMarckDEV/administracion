@@ -1,9 +1,12 @@
 <template>
-    <Head title="users"></Head>
+    <Head title="Usuarios"></Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <FilterUser @search="searchUser" />
+                <div class="flex justify-between items-center mb-4 px-6 mt-4">
+                    <ToolsUser @import-success="loadingUsers" />
+                    <FilterUser @search="searchUser" />
+                </div>
                 <TableUser
                     :user-list="principal.userList"
                     :user-paginate="principal.paginacion"
@@ -41,21 +44,12 @@ import EditUser from './components/editUser.vue';
 import FilterUser from '../../../components/filter.vue';
 import TableUser from './components/tableUser.vue';
 import { UserUpdateRequest } from './interface/User';
+import ToolsUser from './components/toolsUser.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
 {
         title: 'Crear Usuario',
         href: '/panel/users/create',
-    },
-    {
-        title: 'Exportar a Excel',
-        href: '/panel/reports/export-excel-users',
-        download: true,
-    },
-    {
-        title: 'Exportar a PDF',
-        href: '/panel/reports/export-pdf-users',
-        download: true,
     },
     {
         title: 'Usuarios',

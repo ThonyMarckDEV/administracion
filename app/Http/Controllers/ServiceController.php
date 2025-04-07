@@ -6,6 +6,7 @@ use App\Models\Service;
 use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
+use App\Imports\ServiceImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -123,5 +124,18 @@ class ServiceController extends Controller
     public function exportExcel()
     {
         return Excel::download(new ServicesExport, 'servicios.xlsx');
+    }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new ServiceImport, $request->file('archivo'));
+        return response()->json([
+            'message' => 'Servicios importados de manera correcta',
+        ]);
     }
 }

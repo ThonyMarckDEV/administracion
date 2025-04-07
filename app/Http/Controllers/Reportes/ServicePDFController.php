@@ -83,6 +83,15 @@ class ServicePDFController extends Controller
             $pdf->Ln();
         }
 
-        return response($pdf->Output('servicios.pdf', 'D'))->header('Content-Type', 'application/pdf');
+        // Detenemos cualquier salida previa
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+        
+        // Generamos el PDF como string en memoria
+        $pdfOutput = $pdf->Output('servicios.pdf', 'S'); // "S" = string, no lo imprime directo
+        
+        // Laravel se encarga del response
+        return response($pdfOutput)->header('Content-Type', 'application/pdf')->header('Content-Disposition', 'attachment; filename="servicios.pdf"');
     }
 }

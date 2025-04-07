@@ -1,9 +1,12 @@
 <template>
-    <Head title="Customers"></Head>
+    <Head title="Clientes"></Head>
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <FilterCustomer @search="searchCustomer" />
+                <div class="flex justify-between items-center mb-4 px-6 mt-4">
+                    <ToolsCustomer @import-success="loadingCustomers" />
+                    <FilterCustomer @search="searchCustomer" />
+                </div>
                 <TableCustomer
                     :customer-list="principal.customerList"
                     :customer-paginate="principal.paginacion"
@@ -42,6 +45,7 @@ import FilterCustomer from '../../../components/filter.vue';
 import EditCustomer from './components/editCustomer.vue';
 import TableCustomer from './components/tableCustomer.vue';
 import { CustomerRequestUpdate } from './interface/Customer';
+import ToolsCustomer from './components/toolsCustomer.vue';
 
 const { principal, loadingCustomers, getCustomerById, updateCustomer, deleteCustomer } = useCustomer();
 
@@ -53,16 +57,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Crear Cliente',
         href: '/panel/customers/create',
-    },
-    {
-        title: 'Exportar a Excel',
-        href: '#',
-        download: true,
-    },
-    {
-        title: 'Exportar a PDF',
-        href: '#',
-        download: true,
     },
     {
         title: 'Clientes',

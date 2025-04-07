@@ -7,6 +7,7 @@ use App\Models\ClientType;
 use App\Http\Requests\StoreClientTypeRequest;
 use App\Http\Requests\UpdateClientTypeRequest;
 use App\Http\Resources\ClientTypeResource;
+use App\Imports\ClientTypeImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
@@ -118,4 +119,19 @@ class ClientTypeController extends Controller
     {
         return Excel::download(new ClientTypesExport, 'tipos_cliente.xlsx');
     }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+    
+        Excel::import(new ClientTypeImport, $request->file('archivo'));
+    
+        return response()->json([
+            'message' => 'Importación de tipos de cliente realizado correctamente.'
+        ]);
+    }
+
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
+use App\Imports\UserImport;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -127,5 +128,18 @@ class UserController extends Controller
     public function exportExcel()
     {
         return Excel::download(new UsersExport, 'usuarios.xlsx');
+    }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new UserImport, $request->file('archivo'));
+        return response()->json([
+            'message' => 'Importación de usuarios realizado correctamente.'
+        ]);
     }
 }

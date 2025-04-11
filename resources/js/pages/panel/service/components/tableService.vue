@@ -1,67 +1,82 @@
 <template>
-    <div class="container mx-auto px-0 py-6">
-        <LoadingTable v-if="loading" :headers="6" :row-count="15" />
-        <Table v-else class="my-3 w-full overflow-clip rounded-lg border border-gray-100">
-            <TableCaption>{{ servicePaginate.current_page }} de {{ servicePaginate.total }}</TableCaption>
-            <TableHeader>
-                <TableRow>
-                    <TableHead class="text-center">ID</TableHead>
-                    <TableHead class="w-[250px]">Nombre</TableHead>
-                    <TableHead>Costo</TableHead>
-                    <TableHead>Fecha de Inicio</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead class="text-center">Acciones</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody class="cursor-pointer">
-                <TableRow v-for="service in serviceList" :key="service.id">
-                    <td class="text-center font-bold">{{ service.id }}</td>
-                    <td>{{ service.name }}</td>
-                    <td>{{ service.cost.toLocaleString('es-Pe', { style: 'currency', currency: 'PEN' }) }}</td>
-                    <td>{{ formatDate(service.ini_date) }}</td>
-                    <td class="px-4 py-3 text-center">
-                        <span
-                            v-if="typeof service.state === 'boolean' ? service.state : service.state === 'activo'"
-                            class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-200"
-                        >
-                            <span class="mr-1 h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
-                            Activo
-                        </span>
-                        <span
-                            v-else
-                            class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800 dark:bg-red-900/30 dark:text-red-200"
-                        >
-                            <span class="mr-1 h-2 w-2 rounded-full bg-red-500 dark:bg-red-400"></span>
-                            Inactivo
-                        </span>
-                    </td>
-                    <td class="mt-2 flex justify-center gap-3">
-                        <Button
-                            variant="outline"
-                            class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300"
-                            @click="openModal(service.id)"
-                        >
-                            <UserPen class="h-5 w-5" />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
-                            @click="openModalDelete(service.id)"
-                        >
-                            <Trash class="h-5 w-5" />
-                        </Button>
-                    </td>
-                </TableRow>
-            </TableBody>
-        </Table>
-        <PaginationService :meta="servicePaginate" @page-change="$emit('page-change', $event)" />
+    <div class="container mx-auto px-4 py-2">
+        <LoadingTable v-if="loading" :headers="6" :row-count="10" />
+        <div v-else class="space-y-4">         
+           <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-700 dark:shadow-none">
+            <Table class="w-full"> 
+                <TableHeader class="bg-gray-50 dark:bg-gray-800/50">
+                    <TableRow class="hover:bg-transparent">
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ID</TableHead>
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">NOMBRE</TableHead>
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">COSTO</TableHead>
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">FECHA DE INICIO</TableHead>
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ESTADO</TableHead>
+                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <TableRow 
+                        v-for="service in serviceList" 
+                        :key="service.id"  
+                        class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                    >
+                        <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ service.id }}</TableCell>
+                        <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ service.name }}</TableCell>
+                        <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ service.cost.toLocaleString('es-PE', { style: 'currency', currency: 'PEN' }) }}</TableCell>
+                        <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ formatDate(service.ini_date) }}</TableCell>
+                        <TableCell class="px-4 py-3">
+                            <span
+                                v-if="typeof service.state === 'boolean' ? service.state : service.state === 'activo'"
+                                class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-200"
+                            >
+                                <span class="mr-1 h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                                Activo
+                            </span>
+                            <span
+                                v-else
+                                class="inline-flex items-center rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800 dark:bg-red-900/30 dark:text-red-200"
+                            >
+                                <span class="mr-1 h-2 w-2 rounded-full bg-red-500 dark:bg-red-400"></span>
+                                Inactivo
+                            </span>
+                        </TableCell>
+                        <TableCell class="px-4 py-3">
+                            <div class="flex justify-start pl-4 space-x-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300"
+                                    @click="openModal(service.id)"
+                                    title="Editar cliente"
+                                >
+                                    <UserPen class="h-4 w-4" />
+                                    <span class="sr-only">Editar cliente</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
+                                    @click="openModalDelete(service.id)"
+                                    title="Eliminar cliente"
+                                >
+                                    <Trash class="h-4 w-4" />
+                                    <span class="sr-only">Eliminar cliente</span>
+                                </Button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+           </div>
+           <PaginationService :meta="servicePaginate" @page-change="$emit('page-change', $event)" />
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import LoadingTable from '@/components/loadingTable.vue';
 import Button from '@/components/ui/button/Button.vue';
-import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/interface/paginacion';
 import { SharedData } from '@/types';
@@ -113,7 +128,6 @@ const formatDate = (dateString: string) => {
         year: 'numeric',
     });
 };
-
 </script>
 
 <style scoped lang="css"></style>

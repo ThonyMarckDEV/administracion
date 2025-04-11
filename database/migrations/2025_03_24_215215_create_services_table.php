@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name'); // Nombre del servicio
             $table->decimal('cost', 10, 2)->default(0);
             $table->date('ini_date'); // Fecha de inicio del servicio
-            $table->enum('state', ['activo', 'inactivo', 'pendiente'])->default('activo'); // Estado del servicio
+            $table->enum('state', ['activo', 'inactivo'])->default('activo'); // Estado del servicio
             $table->timestamps(); // created_at y updated_at
         });
     }

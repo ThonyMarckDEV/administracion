@@ -32,7 +32,7 @@ class CustomerController extends Controller
             $name = $request->get('name');
             $customers = Customer::when($name, function ($query, $name) {
                 return $query->whereLike('name', "%$name%");
-            })->orderBy('id','asc')->paginate(10);
+            })->orderBy('id','asc')->paginate(12);
             return response()->json([
                 'customers' => CustomerResource::collection($customers),
                 'pagination' => [
@@ -100,7 +100,7 @@ class CustomerController extends Controller
         $customer->update($validated);
         return response()->json([
             'status' => true,  
-            'message' => 'Cliente actualizado correctamente',
+            'message' => 'Cliente actualizado correctamente desde backend',
             'customer' => new CustomerResource($customer)
         ]);
     }

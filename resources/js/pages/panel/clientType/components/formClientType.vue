@@ -15,7 +15,7 @@
                             <FormItem>
                                 <FormLabel>Tipo de Cliente</FormLabel>
                                 <FormControl>
-                                    <Input type="text" placeholder="nombre" v-bind="componentField"/>
+                                    <Input type="text" placeholder="Cliente eficiente" v-bind="componentField"/>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -32,7 +32,7 @@ class ClientTypeController extends Controller
             $name = $request->get('name');
             $clientTypes = ClientType::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->orderBy('id','asc')->paginate(15);
+            })->orderBy('id','asc')->paginate(12);
 
             return response()->json([
                 'clientTypes' => ClientTypeResource::collection($clientTypes),
@@ -47,7 +47,7 @@ class ClientTypeController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Error al listar los servicios',
+                'message' => 'Error al listar los tipos de cliente',
                 'error' => $th->getMessage()
             ], 500);
         }

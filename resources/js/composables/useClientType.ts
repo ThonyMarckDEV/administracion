@@ -36,6 +36,7 @@ export const useClientType = () => {
         clientTypeData: {
             id: 0,
             name: '',
+            created_at: '',
             state: true,
         },
     });
@@ -45,6 +46,7 @@ export const useClientType = () => {
         principal.clientTypeData = {
             id: 0,
             name: '',
+            created_at: '',
             state: true,
         }
     }
@@ -81,6 +83,7 @@ export const useClientType = () => {
                 principal.clientTypeData = {
                     id: 0,
                     name: '',
+                    created_at: '',
                     state: true,
                 };
                 return;

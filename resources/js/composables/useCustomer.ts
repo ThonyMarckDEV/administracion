@@ -118,7 +118,7 @@ export const useCustomer = () => {
         try {
             const response = await CustomerServices.update(id, data);
             if (response.status) {
-                showSuccessMessage('Cliente actualizado', 'El cliente se actualizó correctamente');
+                showSuccessMessage('Cliente actualizado', response.message);
                 principal.statusModal.update = false;
                 loadingCustomers(principal.paginacion.current_page, principal.filter);
             }

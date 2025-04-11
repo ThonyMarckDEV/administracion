@@ -11,7 +11,9 @@ use App\Http\Controllers\Reportes\ServicePDFController;
 use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
+use App\Http\Controllers\Inputs\AutoCompleteController;
 use App\Http\Controllers\Inputs\SelectController;
+use App\Http\Controllers\Panel\AmountController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
 use App\Http\Controllers\Panel\CustomerController;
 use App\Http\Controllers\Reportes\CustomerPDFController;
@@ -26,42 +28,43 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
+# list prueba suppliers 
 
 # route group for panel
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('panel')->name('panel.')->group(function () {
         # module users
-            Route::resource('users', UserController::class);
+        Route::resource('users', UserController::class);
         # list users
-            Route::get('listar-users',[UserController::class,'listarUsers'])->name('users.listar');
+        Route::get('listar-users',[UserController::class,'listarUsers'])->name('users.listar');
         # module suppliers
-            Route::resource('suppliers', SupplierController::class);
+        Route::resource('suppliers', SupplierController::class);
         # list suppliers
-            Route::get('listar-suppliers',[SupplierController::class,'listarProveedor'])->name('suppliers.listar');    
+        Route::get('listar-suppliers',[SupplierController::class,'listarProveedor'])->name('suppliers.listar');    
         # module Services
-            Route::resource('services', ServiceController::class);
+        Route::resource('services', ServiceController::class);
         # list Services
-            Route::get('listar-services',[ServiceController::class,'listarServices'])->name('services.listar');
+        Route::get('listar-services',[ServiceController::class,'listarServices'])->name('services.listar');
         # module Client Types
-            Route::resource('clientTypes', ClientTypeController::class);
+        Route::resource('clientTypes', ClientTypeController::class);
         # list Client Types
-            Route::get('listar-clientTypes',[ClientTypeController::class,'listarClientTypes'])->name('clientTypes.listar');
+        Route::get('listar-clientTypes',[ClientTypeController::class,'listarClientTypes'])->name('clientTypes.listar');
         # module Discount
-            Route::resource('discounts', DiscountController::class);
+        Route::resource('discounts', DiscountController::class);
         # list Discount
-            Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');  
-            
+        Route::get('listar-discounts',[DiscountController::class,'listarDiscounts'])->name('discounts.listar');        
         # module Categories
         Route::resource('categories', CategoryController::class);
         # list Categories
         Route::get('listar-categories',[CategoryController::class,'listarCategories'])->name('categories.listar');
-      
         # module Customers
-            Route::resource('customers', CustomerController::class); 
+        Route::resource('customers', CustomerController::class); 
         # list Customers
-            Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
-      
+        Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
+        # module Amount
+        Route::resource('amounts', AmountController::class);
+        # list Amount
+        Route::get('listar-amounts',[AmountController::class,'listAmount'])->name('amounts.listar');
 
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -93,6 +96,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('inputs')->name('inputs.')->group(function(){
             # get client_type list
             Route::get('client_type_list',[SelectController::class,'getClientTypeList'])->name('client_type_list');
+            Route::get('categories_list',[SelectController::class,'getCategoriesList'])->name('categories_list');
+            Route::get('suppliers_list',[AutoCompleteController::class,'getSuppliersList'])->name('suppliers_list');
         });
     });
 });

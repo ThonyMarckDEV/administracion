@@ -30,7 +30,7 @@ class ServiceController extends Controller
             $name = $request->get('name');
             $services = Service::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->orderBy('id')->paginate(15);
+            })->orderBy('id')->paginate(12);
 
             return response()->json([
                 'services' => ServiceResource::collection($services),

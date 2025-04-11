@@ -19,9 +19,9 @@
                     <td>{{ service.name }}</td>
                     <td>{{ service.cost.toLocaleString('es-Pe', { style: 'currency', currency: 'PEN' }) }}</td>
                     <td>{{ formatDate(service.ini_date) }}</td>
-                    <td class="text-center px-4 py-3">
+                    <td class="px-4 py-3 text-center">
                         <span
-                            v-if="typeof service.state === 'boolean' ? service.state : service.state.toLowerCase() === 'activo'"
+                            v-if="typeof service.state === 'boolean' ? service.state : service.state === 'activo'"
                             class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-200"
                         >
                             <span class="mr-1 h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>
@@ -35,11 +35,19 @@
                             Inactivo
                         </span>
                     </td>
-                    <td class="flex justify-center gap-3 mt-2">
-                        <Button variant="outline" class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300" @click="openModal(service.id)">
+                    <td class="mt-2 flex justify-center gap-3">
+                        <Button
+                            variant="outline"
+                            class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300"
+                            @click="openModal(service.id)"
+                        >
                             <UserPen class="h-5 w-5" />
                         </Button>
-                        <Button variant="outline" class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300" @click="openModalDelete(service.id)">
+                        <Button
+                            variant="outline"
+                            class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300"
+                            @click="openModalDelete(service.id)"
+                        >
                             <Trash class="h-5 w-5" />
                         </Button>
                     </td>
@@ -60,8 +68,8 @@ import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
-import { ServiceResource } from '../interface/Service';
 import PaginationService from '../../../../components/pagination.vue';
+import { ServiceResource } from '../interface/Service';
 
 const { toast } = useToast();
 

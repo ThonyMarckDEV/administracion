@@ -29,7 +29,7 @@ class PeriodController extends Controller
             $name = $request->get('name');
             $periods = Period::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->orderBy('id','asc')->paginate(15);
+            })->orderBy('id','asc')->paginate(12);
 
             return response()->json([
                 'periods' => PeriodResource::collection($periods),

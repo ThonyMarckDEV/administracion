@@ -106,14 +106,6 @@ const formatDate = (dateString: string) => {
     });
 };
 
-const getStateDisplay = (state: boolean | string): { text: string; color: string } => {
-    const stateString = typeof state === 'boolean' ? (state ? 'Activo' : 'Inactivo') : state.toLowerCase() === 'activo' ? 'Activo' : 'Inactivo';
-
-    return {
-        text: stateString,
-        color: stateString === 'Activo' ? 'bg-green-400' : 'bg-red-400',
-    };
-};
 </script>
 
 <style scoped lang="css"></style>

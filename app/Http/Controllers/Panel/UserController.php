@@ -33,7 +33,7 @@ class UserController extends Controller
             $name = $request->get('name');
             $users = User::when($name, function ($query, $name) {
                 return $query->whereLike('name', "%$name%");
-            })->orderBy('id','asc')->paginate(15);
+            })->orderBy('id','asc')->paginate(12);
             return response()->json([
                 'users' => UserResource::collection($users),
                 'pagination' => [

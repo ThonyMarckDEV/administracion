@@ -28,13 +28,13 @@
                             </TableCell>
                             <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ clientType.created_at }}</TableCell>
                             <TableCell class="flex justify-start space-x-2 px-4 py-3">
-                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300" @click="openModal(clientType.id)" title="Editar cliente">
+                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300" @click="openModal(clientType.id)" title="Editar tipo de cliente">
                                     <UserPen class="h-4 w-4" />
-                                    <span class="sr-only">Editar cliente</span>
+                                    <span class="sr-only">Editar tipo de cliente</span>
                                 </Button>
-                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300" @click="openModalDelete(clientType.id)" title="Eliminar cliente">
+                                <Button variant="ghost" size="sm" class="h-8 w-8 p-0 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-300" @click="openModalDelete(clientType.id)" title="Eliminar tipo de cliente">
                                     <Trash class="h-4 w-4" />
-                                    <span class="sr-only">Eliminar cliente</span>
+                                    <span class="sr-only">Eliminar tipo de cliente</span>
                                 </Button>
                             </TableCell>
                         </TableRow>
@@ -47,17 +47,17 @@
 </template>
 <script setup lang="ts">
 import { Pagination } from '@/interface/paginacion';
-import { ClientTypeResource } from '../interface/ClientType';
 import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Button from '@/components/ui/button/Button.vue';
 import { usePage } from '@inertiajs/vue3';
 import { SharedData } from '@/types';
 import { onMounted, ref } from 'vue';
 import { useToast } from '@/components/ui/toast';
-import PaginationClientType from '../../../../components/pagination.vue';
 import { Trash, UserPen } from 'lucide-vue-next';
 import LoadingTable from '@/components/loadingTable.vue';
 import TableCell from '@/components/ui/table/TableCell.vue';
+import PaginationClientType from '../../../../components/pagination.vue';
+import { ClientTypeResource } from '../interface/ClientType';
 
 const { toast } = useToast();
 

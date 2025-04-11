@@ -38,11 +38,21 @@ const mainNavItems: NavItem[] = [
         title: 'Categorías',
         href: '/panel/categories',
         icon: List,
-     },
-     {
+    },
+    {
         title: 'Clientes',
         href: '/panel/customers',
         icon: Car,
+    },
+    {
+        title: 'Periodo',
+        href: '/panel/periods',
+        icon: Tag,
+    },
+    {
+        title: 'Egresos',
+        href: '/panel/amounts',
+        icon: Tag,
     },
 ];
 

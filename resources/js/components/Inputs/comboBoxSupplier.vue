@@ -84,6 +84,7 @@ const debounceSearch = debounce(async () => {
         await loadingSuppliers(texto.value);
         error.value = false;
     } catch (e) {
+        console.error(e);
         error.value = true;
     } finally {
         isSearching.value = false;
@@ -98,6 +99,7 @@ onMounted(async () => {
         await loadingSuppliers('');
     } catch (e) {
         error.value = true;
+        console.error(e);
     }
 });
 </script>

@@ -24,7 +24,7 @@
                 <DeleteClientType
                     :modal="principal.stateModal.delete"
                     :itemId="principal.idClientType"
-                    title="Eliminar Servicio"
+                    title="Eliminar Tipo de Cliente"
                     description="¿Está seguro de que desea eliminar este tipo de cliente?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeleteClientType"

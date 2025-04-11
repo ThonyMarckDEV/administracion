@@ -16,6 +16,7 @@ use App\Http\Controllers\Inputs\SelectController;
 use App\Http\Controllers\Panel\AmountController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
 use App\Http\Controllers\Panel\CustomerController;
+use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\Reportes\CustomerPDFController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -60,7 +61,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         # module Customers
         Route::resource('customers', CustomerController::class); 
         # list Customers
-        Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
+         Route::get('listar-customers',[CustomerController::class,'listarCustomers'])->name('customers.listar');
+        # module Periods
+        Route::resource('periods', PeriodController::class);
+        # list Periods
+        Route::get('listar-periods',[PeriodController::class,'listarPeriods'])->name('periods.listar');
         # module Amount
         Route::resource('amounts', AmountController::class);
         # list Amount
@@ -75,6 +80,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-excel-clientTypes',[ClientTypeController::class,'exportExcel'])->name('clientTypes.excel');
             Route::get('/export-excel-categories',[CategoryController::class,'exportExcel'])->name('categories.excel');
             Route::get('/export-excel-customers',[CustomerController::class,'exportExcel'])->name('customers.excel');
+            Route::get('/export-excel-periods',[PeriodController::class,'exportExcel'])->name('periods.excel');
 
             # Exports to PDF
             Route::get('/export-pdf-users', [UserPDFController::class, 'exportPDF']);
@@ -83,6 +89,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-pdf-clientTypes', [ClientTypePDFController::class, 'exportPDF']);
             Route::get('/export-pdf-categories', [CategoryPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-customers', [CustomerPDFController::class, 'exportPDF']);
+            Route::get('/export-pdf-periods', [PeriodController::class, 'exportPDF']);
 
             #Excel imports
             Route::post('/import-excel-clientTypes', [ClientTypeController::class, 'importExcel'])->name('reports.clientTypes.import');
@@ -90,6 +97,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/import-excel-users', [UserController::class, 'importExcel'])->name('reports.users.import');
             Route::post('/import-excel-suppliers', [SupplierController::class, 'importExcel'])->name('reports.suppliers.import');
             Route::post('/import-excel-services', [ServiceController::class, 'importExcel'])->name('reports.services.import');
+            Route::post('/import-excel-periods', [PeriodController::class, 'importExcel'])->name('reports.periods.import');
         });
 
         # Route group for inputs, selects and autocomplete

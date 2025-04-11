@@ -47,7 +47,7 @@ class ClientTypeController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Error al listar los servicios',
+                'message' => 'Error al listar los tipos de cliente',
                 'error' => $th->getMessage()
             ], 500);
         }

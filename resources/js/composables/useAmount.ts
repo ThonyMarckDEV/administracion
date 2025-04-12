@@ -1,6 +1,6 @@
 import { InputCategory, InputSupplier } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
-import { AmountRequestCreate, AmountResource, AmountResponseShow } from '@/pages/panel/amount/interface/Amount';
+import { AmountRequestCreate, AmountResource, AmountResponseShow, AmountUpdatePayload } from '@/pages/panel/amount/interface/Amount';
 import { AmountServices } from '@/services/amountServices';
 import { showSuccessMessage } from '@/utils/message';
 import { reactive, ref } from 'vue';
@@ -44,7 +44,9 @@ export const useAmount = () => {
         },
         amountData: {
             category_id: 0,
+            category_name: '',
             supplier_id: 0,
+            supplier_name: '',
             description: '',
             amount: 0,
             date_init: '',
@@ -125,7 +127,7 @@ export const useAmount = () => {
         }
     };
     // update amount
-    const updateAmount = async (id: number, data: AmountResponseShow) => {
+    const updateAmount = async (id: number, data: AmountUpdatePayload) => {
         try {
             const response = await AmountServices.update(id, data);
             if (response.status) {
@@ -138,6 +140,17 @@ export const useAmount = () => {
             principal.statusModal.update = false;
         }
     };
+
+    // get supplier by id
+    const getSupplierById = async (id: number) => {
+        try {
+            const response = await AmountServices.getSupplierById(id);
+            return response.supplier;
+        } catch (error) {
+            console.error('Error getting supplier by id:', error);
+        }
+    };
+
     return {
         principal,
         suppliers,
@@ -149,5 +162,6 @@ export const useAmount = () => {
         createAmount,
         deleteAmount,
         updateAmount,
+        getSupplierById,
     };
 };

@@ -75,6 +75,8 @@ const heandleSearchInput = (value: string) => {
 
 const onSelect = (supplier: InputSupplier) => {
     selectedSupplier.value = supplier;
+    console.log('supplier', supplier);
+    texto.value = supplier.name;
     emit('select', supplier.id);
 };
 
@@ -91,9 +93,15 @@ const debounceSearch = debounce(async () => {
     }
 }, 400);
 
-watch(texto, () => {
-    debounceSearch();
-});
+watch(
+    texto,
+    (newValue) => {
+        console.log('texto', newValue);
+        // Asegúrate de que se llame incluso con cadena vacía
+        debounceSearch();
+    },
+    { immediate: true },
+); // Añade immediate: true para que se ejecute al montar
 onMounted(async () => {
     try {
         await loadingSuppliers('');

@@ -11,7 +11,9 @@ export interface AmountResource {
 }
 export interface AmountResponseShow {
     category_id: number;
+    category_name: string;
     supplier_id: number;
+    supplier_name: string;
     description: string;
     amount: number;
     date_init: string;
@@ -44,3 +46,10 @@ export type AmountResponseUpdate = {
     status: boolean;
     amount: AmountResponseShow;
 };
+export interface AmountUpdatePayload {
+    category_id: number;
+    supplier_id: number;
+    description: string;
+    amount: number;
+    date_init: string;
+}

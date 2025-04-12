@@ -51,7 +51,7 @@
                             <FormItem>
                                 <FormLabel>Proveedor</FormLabel>
                                 <FormControl>
-                                    <ComboBoxSupplier @select="(id) => setFieldValue('supplier_id', id)" />
+                                    <ComboBoxSupplier @select="selectSupplier" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -123,6 +123,10 @@ const formSchema = toTypedSchema(
 const { handleSubmit, setFieldValue } = useForm({
     validationSchema: formSchema,
 });
+
+const selectSupplier = (supplier_id: number) => {
+    setFieldValue('supplier_id', supplier_id);
+};
 
 const onSubmit = handleSubmit((values: AmountRequestCreate) => {
     console.log(values);

@@ -28,34 +28,50 @@
                 </FormField>
                 <FormField name="category_id">
                     <FormItem>
-                        <FormLabel>Categoría</FormLabel>
-                        <FormControl>
-                            <ComboboxAmount @select="(id) => setFieldValue('category_id', id)" />
-                        </FormControl>
+                        <div class="flex items-center justify-between">
+                            <div class="flex-grow space-y-2">
+                                <FormLabel>Categoría</FormLabel>
+                                <FormControl>
+                                    <ComboboxAmount @select="(id) => setFieldValue('category_id', id)" />
+                                </FormControl>
+                            </div>
+                            <span
+                                class="ml-4 self-end rounded-md bg-primary/10 px-2 py-2 text-sm font-medium text-primary dark:bg-primary dark:text-primary-foreground"
+                            >
+                                {{ amountData.category_name }}
+                            </span>
+                        </div>
                         <FormMessage />
                     </FormItem>
                 </FormField>
                 <FormField name="supplier_id">
                     <FormItem>
-                        <FormLabel>Proveedor</FormLabel>
-                        <FormControl>
-                            <ComboBoxSupplier @select="(id) => setFieldValue('supplier_id', id)" />
-                        </FormControl>
-                        <FormMessage />
+                        <div class="flex items-center justify-between">
+                            <div class="flex-grow space-y-2">
+                                <FormLabel>Proveedor</FormLabel>
+                                <FormControl>
+                                    <ComboBoxSupplier @select="selectSupplier" />
+                                </FormControl>
+                                <FormMessage />
+                            </div>
+                            <span
+                                class="ml-4 self-end rounded-md bg-primary/10 px-2 py-2 text-sm font-medium text-primary dark:bg-primary dark:text-primary-foreground"
+                            >
+                                {{ amountData.supplier_name }}
+                            </span>
+                        </div>
                     </FormItem>
                 </FormField>
                 <FormField v-slot="{ componentField }" name="date_init">
                     <FormItem>
                         <FormLabel>Fecha</FormLabel>
                         <FormControl>
-                            <Input id="date_init" type="datetime-local" v-bind="componentField" />
+                            <Input id="date_init" type="date" v-bind="componentField" />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 </FormField>
                 <Button type="submit">Guardar Cambios</Button>
-                {{ props.amount_id }}
-                {{ props.amountData }}
             </form>
         </DialogContent>
     </Dialog>
@@ -125,9 +141,21 @@ watch(
     { deep: true, immediate: true },
 );
 
+const selectSupplier = (supplier_id: number) => {
+    setFieldValue('supplier_id', supplier_id);
+    console.log('supplier_id', supplier_id);
+};
+
 const onSubmit = handleSubmit((values) => {
-    console.log(values);
-    emit('update-amount', values, props.amount_id);
+    const updatedAmount: AmountResponseShow = {
+        ...props.amountData,
+        description: values.description,
+        amount: values.amount,
+        category_id: values.category_id,
+        supplier_id: values.supplier_id,
+        date_init: values.date_init,
+    };
+    emit('update-amount', updatedAmount, props.amount_id);
 });
 </script>
 <style scoped></style>

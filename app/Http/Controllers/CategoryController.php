@@ -35,7 +35,7 @@ class CategoryController extends Controller
             $name = $request->get('name');
             $categories = Category::when($name, function ($query, $name) {
                 return $query->whereLike('name', "%$name%");
-            })->orderBy('id','asc')->paginate(15);
+            })->orderBy('id','asc')->paginate(10);
             return response()->json([
                 'categories'=> CategoryResource::collection($categories),
                 'pagination' => [

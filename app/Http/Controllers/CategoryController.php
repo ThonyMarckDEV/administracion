@@ -6,6 +6,8 @@ use App\Exports\CategoriesExport;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Imports\CategoryImport;
+use App\Imports\ClientTypeImport;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -128,5 +130,19 @@ class CategoryController extends Controller
     public function exportExcel()
     {
         return Excel::download(new CategoriesExport, 'categorías.xlsx');
+    }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+    
+        Excel::import(new CategoryImport, $request->file('archivo'));
+    
+        return response()->json([
+            'message' => 'Importación de las categorias realizado correctamente.'
+        ]);
     }
 }

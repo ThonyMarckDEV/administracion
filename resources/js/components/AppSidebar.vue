@@ -54,6 +54,11 @@ const mainNavItems: NavItem[] = [
         href: '/panel/amounts',
         icon: Tag,
     },
+    {
+        title: 'Periodo',
+        href: '/panel/periods',
+        icon: Tag,
+    }
 ];
 
 const mainNavItems2: NavItem[] = [

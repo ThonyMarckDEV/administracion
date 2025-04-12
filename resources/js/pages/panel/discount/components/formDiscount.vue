@@ -9,13 +9,12 @@
                 </CardHeader>
                 <CardContent>
                     <form @submit="onSubmit" class="flex flex-col gap-6">
-
                         <!-- Campo para ingresar la descripcion del descuento -->
                         <FormField v-slot="{ componentField }" name="description">
                             <FormItem>
                                 <FormLabel>Descripción</FormLabel>
                                 <FormControl>
-                                    <Input type="text" placeholder="Descripcion" v-bind="componentField" />
+                                    <Input type="text" placeholder="Escribir descripcion" v-bind="componentField" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -53,12 +52,9 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        
-                        <!--BOTONES PARA ENVIAR Y BORRAR-->
-                        <div class="container flex justify-end gap-4">
-                            <Button type="submit" variant="default"> Enviar </Button>
-                            <Button type="reset" variant="outline"> Borrar </Button>
-                        </div>
+
+                        <!-- Campo de boton crear descuento -->
+                        <Button type="submit"> Crear Descuento </Button>
                     </form>
                 </CardContent>
             </Card>
@@ -66,8 +62,6 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
-
-
 import Button from '@/components/ui/button/Button.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -125,7 +119,7 @@ const onSubmit = handleSubmit((values) => {
     const discountData = {
         description: values.description,
         percentage: Number(values.percentage),
-        state: values.state === 'activo' // ✅ convierte string a boolean
+        state: values.state === 'activo', // ✅ convierte string a boolean
     };
 
     createDiscount(discountData);

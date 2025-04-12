@@ -3,7 +3,9 @@
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
-                <FilterDiscount @search="searchDiscount" />
+                <div class="mb-4 mt-4 flex items-center justify-between px-6">
+                    <FilterDiscount @search="searchDiscount" />
+                </div>
                 <TableDiscount
                     :discount-list="principal.discountList"
                     :discount-paginate="principal.paginacion"
@@ -21,8 +23,8 @@
                 <DeleteDiscount
                     :modal="principal.stateModal.delete"
                     :itemId="principal.idDiscount"
-                    title="Eliminar Servicio"
-                    description="¿Está seguro de que desea eliminar este servicio?"
+                    title="Eliminar Descuento"
+                    description="¿Está seguro de que desea eliminar este descuento?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeleteDiscount"
                 />
@@ -31,25 +33,21 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
+import { useDiscount } from '@/composables/useDiscount';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import DeleteDiscount from '../../../components/delete.vue';
+import FilterDiscount from '../../../components/filter.vue';
+import EditDiscount from './components/editDiscount.vue';
 import TableDiscount from './components/tableDiscount.vue';
 import { DiscountUpdateRequest } from './interface/Discount';
-import DeleteDiscount from '../../../components/delete.vue';
-import EditDiscount from './components/editDiscount.vue';
-import FilterDiscount from '../../../components/filter.vue';
-import { useDiscount } from '@/composables/useDiscount';
-import { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
-{
-        title: 'Crear descuento',
-        href: '/panel/discounts/create',
-    },
     {
-        title: 'Exportar',
-        href: '/panel/discounts/export',
+        title: 'Crear Descuento',
+        href: '/panel/discounts/create',
     },
     {
         title: 'Descuentos',
@@ -61,7 +59,7 @@ onMounted(() => {
     loadingDiscounts();
 });
 
-const {principal,loadingDiscounts, getDiscountById, updateDiscount, deleteDiscount} = useDiscount();
+const { principal, loadingDiscounts, getDiscountById, updateDiscount, deleteDiscount } = useDiscount();
 
 // get pagination
 const handlePageChange = (page: number) => {

@@ -47,11 +47,11 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField name="supplier_id">
+                        <FormField name="supplier_id" v-slot="{ field }">
                             <FormItem>
                                 <FormLabel>Proveedor</FormLabel>
                                 <FormControl>
-                                    <ComboBoxSupplier @select="selectSupplier" />
+                                    <ComboBoxSupplier v-model="field.value" @select="selectSupplier" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -58,8 +58,13 @@ import debounce from 'debounce';
 import { Check, Search } from 'lucide-vue-next';
 import { onMounted, ref, watch } from 'vue';
 
+const props = defineProps<{
+    modelValue?: number;
+}>();
+
 const emit = defineEmits<{
     (e: 'select', supplier_id: number): void;
+    (e: 'update:modelValue', value: number): void;
 }>();
 
 // composable and state
@@ -70,14 +75,15 @@ const isSearching = ref<boolean>(false);
 const selectedSupplier = ref<InputSupplier | null>(null);
 
 const heandleSearchInput = (value: string) => {
+    console.log('value', value);
     texto.value = value.toLowerCase();
 };
 
 const onSelect = (supplier: InputSupplier) => {
     selectedSupplier.value = supplier;
-    console.log('supplier', supplier);
     texto.value = supplier.name;
     emit('select', supplier.id);
+    emit('update:modelValue', supplier.id);
 };
 
 const debounceSearch = debounce(async () => {
@@ -97,17 +103,43 @@ watch(
     texto,
     (newValue) => {
         console.log('texto', newValue);
-        // Asegúrate de que se llame incluso con cadena vacía
         debounceSearch();
     },
     { immediate: true },
 ); // Añade immediate: true para que se ejecute al montar
-onMounted(async () => {
+
+const loadInitialSupplier = async (supplierId: number) => {
     try {
-        await loadingSuppliers('');
+        isSearching.value = true;
+        await loadingSuppliers(''); // Carga inicial con búsqueda vacía
+        const supplier = suppliers.value.find((s) => s.id === supplierId);
+        if (supplier) {
+            selectedSupplier.value = supplier;
+            texto.value = supplier.name;
+        }
     } catch (e) {
-        error.value = true;
         console.error(e);
+        error.value = true;
+    } finally {
+        isSearching.value = false;
+    }
+};
+
+// Reemplazar el watch del modelValue
+watch(
+    () => props.modelValue,
+    async (newValue) => {
+        if (newValue && !selectedSupplier.value) {
+            await loadInitialSupplier(newValue);
+        }
+    },
+    { immediate: true },
+);
+
+// Modificar el onMounted para evitar carga innecesaria
+onMounted(async () => {
+    if (!props.modelValue) {
+        debounceSearch();
     }
 });
 </script>

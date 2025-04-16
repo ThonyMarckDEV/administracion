@@ -56,12 +56,14 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField v-slot="{ componentField }" name="date_init">
+                        <FormField name="date_init">
                             <FormItem>
-                                <FormLabel>Fecha</FormLabel>
-                                <FormControl>
-                                    <Input type="date" v-bind="componentField" />
-                                </FormControl>
+                                <div class="flex w-full flex-col space-y-2">
+                                    <FormLabel>Fecha</FormLabel>
+                                    <FormControl>
+                                        <DatePicker :disabled="false" @update-date="getDate" />
+                                    </FormControl>
+                                </div>
                                 <FormMessage />
                             </FormItem>
                         </FormField>
@@ -73,6 +75,7 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
+import DatePicker from '@/components/DatePicker.vue';
 import ComboboxAmount from '@/components/Inputs/comboboxAmount.vue';
 import ComboBoxSupplier from '@/components/Inputs/comboBoxSupplier.vue';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -126,6 +129,11 @@ const { handleSubmit, setFieldValue } = useForm({
 
 const selectSupplier = (supplier_id: number) => {
     setFieldValue('supplier_id', supplier_id);
+};
+
+const getDate = (date: string) => {
+    console.log('date', date);
+    setFieldValue('date_init', date);
 };
 
 const onSubmit = handleSubmit((values: AmountRequestCreate) => {

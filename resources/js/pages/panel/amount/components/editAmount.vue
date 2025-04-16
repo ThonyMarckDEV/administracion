@@ -44,13 +44,13 @@
                         <FormMessage />
                     </FormItem>
                 </FormField>
-                <FormField name="supplier_id" v-slot="{ field }">
+                <FormField name="supplier_id">
                     <FormItem>
                         <div class="flex items-center justify-between">
-                            <div class="flex-grow cursor-pointer space-y-2">
+                            <div class="flex-grow space-y-2">
                                 <FormLabel>Proveedor</FormLabel>
                                 <FormControl>
-                                    <ComboBoxSupplier v-model="field.value" @select="selectSupplier" />
+                                    <ComboBoxSupplier @select="selectSupplier" />
                                 </FormControl>
                                 <FormMessage />
                             </div>
@@ -142,8 +142,8 @@ watch(
 );
 
 const selectSupplier = (supplier_id: number) => {
-    console.log('supplier_id', supplier_id);
     setFieldValue('supplier_id', supplier_id);
+    console.log('supplier_id', supplier_id);
 };
 
 const onSubmit = handleSubmit((values) => {

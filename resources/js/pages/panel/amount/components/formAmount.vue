@@ -47,11 +47,11 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField name="supplier_id" v-slot="{ field }">
+                        <FormField name="supplier_id">
                             <FormItem>
                                 <FormLabel>Proveedor</FormLabel>
                                 <FormControl>
-                                    <ComboBoxSupplier v-model="field.value" @select="selectSupplier" />
+                                    <ComboBoxSupplier @select="selectSupplier" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -130,7 +130,6 @@ const selectSupplier = (supplier_id: number) => {
 
 const onSubmit = handleSubmit((values: AmountRequestCreate) => {
     console.log(values);
-    // Send data to backend
     createAmount(values);
 });
 </script>

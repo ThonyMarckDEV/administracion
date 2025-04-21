@@ -99,16 +99,15 @@ class AmountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAmountRequest $request, Supplier $supplier)
+    public function update(UpdateAmountRequest $request, Amount $amount)
     {
-        Gate::authorize('update', $supplier);
+        Gate::authorize('update', $amount);
         $validated = $request->validated();
-        $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
-        $supplier->update($validated);
+        $amount->update($validated);
         return response()->json([
             'status' => true,
             'message' => 'egreso actualizado correctamente',
-            'amount' => new AmountResource($supplier)
+            'amount' => new AmountResource($amount)
         ]);
     }
 

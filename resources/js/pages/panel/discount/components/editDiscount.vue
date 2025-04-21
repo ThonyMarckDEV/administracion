@@ -1,12 +1,13 @@
 <template>
     <Dialog :open="modal" @update:open="clouseModal">
-        <DialogContent class="sm:max-w-[425px]">
+        <DialogContent>
             <DialogHeader>
-                <DialogTitle>Editando el descuento</DialogTitle>
-                <DialogDescription>Los datos están validados, llenar con precaución.</DialogDescription>
+                <DialogTitle>Editar descuento</DialogTitle>
+                <DialogDescription>
+                    <p class="text-sm text-muted-foreground">Edita los datos del descuento.</p>
+                </DialogDescription>
             </DialogHeader>
             <form @submit="onSubmit" class="flex flex-col gap-4 py-4">
-
                 <!-- Campo para editar la descripcion del descuento -->
                 <FormField v-slot="{ componentField }" name="description">
                     <FormItem>
@@ -50,7 +51,7 @@
                         <FormMessage />
                     </FormItem>
                 </FormField>
-                <DialogFooter>
+                <DialogFooter class="flex justify-end gap-2">
                     <Button type="submit">Guardar cambios</Button>
                     <Button type="button" variant="outline" @click="clouseModal">Cancelar</Button>
                 </DialogFooter>
@@ -83,9 +84,14 @@ const clouseModal = () => emit('emit-close', false);
 // Schema de validación
 const formSchema = toTypedSchema(
     z.object({
-        description: z.string().min(2, 'La descripción es requerida').max(255, 'La descripción no puede tener más de 255 caracteres'),
+        description: z
+            .string({ message: 'campo obligatorio' })
+            .min(2, 'La descripción es requerida')
+            .max(255, 'La descripción no puede tener más de 255 caracteres'),
         percentage: z.number().min(0, 'El porcentaje no puede ser negativo').max(100, 'El porcentaje no puede ser mayor a 100'),
-        state: z.enum(['activo', 'inactivo']),
+        state: z.enum(['activo', 'inactivo'], {
+            errorMap: () => ({ message: 'campo obligatorio' }),
+        }),
     }),
 );
 
@@ -116,7 +122,7 @@ const onSubmit = handleSubmit((values) => {
     const updatedDiscount: DiscountUpdateRequest = {
         description: values.description,
         percentage: values.percentage,
-        state: values.state === 'activo' // ← ✅ Conversión a boolean
+        state: values.state === 'activo', // ← ✅ Conversión a boolean
     };
 
     emit('update-discount', updatedDiscount, props.discountData.id);

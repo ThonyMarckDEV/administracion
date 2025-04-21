@@ -74,16 +74,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/panel/categories',
     },
     {
-        title: 'Exportar a Excel',
-        href: '/panel/reports/export-excel-categories',
-        download: true,
-    },
-    {
-        title: 'Exportar a PDF',
-        href: '/panel/reports/export-pdf-categories',
-        download: true,
-    },
-    {
         title: 'Crear categoría',
         href: '/panel/categories/create',
     },

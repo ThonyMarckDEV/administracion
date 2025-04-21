@@ -98,6 +98,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/import-excel-suppliers', [SupplierController::class, 'importExcel'])->name('reports.suppliers.import');
             Route::post('/import-excel-services', [ServiceController::class, 'importExcel'])->name('reports.services.import');
             Route::post('/import-excel-periods', [PeriodController::class, 'importExcel'])->name('reports.periods.import');
+            Route::post('/import-excel-categories', [CategoryController::class, 'importExcel'])->name('reports.categories.import');
         });
 
         # Route group for inputs, selects and autocomplete

@@ -11,7 +11,7 @@ class UpdateAmountRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -26,6 +26,7 @@ class UpdateAmountRequest extends FormRequest
             'amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'supplier_id' => 'required|exists:suppliers,id',
+            'date_init' => 'required|date',
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,10 +17,12 @@ class AmountShowResource extends JsonResource
     {
         return [
             'category_id' => $this->category_id,
+            'category_name' => $this->categories->name,
             'supplier_id' => $this->supplier_id,
+            'supplier_name' => $this->suppliers->name,
             'description' => $this->description,
             'amount' => $this->amount,
-            'date_init' => $this->date_init,
+            'date_init' => Carbon::parse($this->date_init)->toDateString(),
         ];
     }
 }

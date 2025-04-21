@@ -47,12 +47,17 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Periodo',
         href: '/panel/periods',
-        icon: Tag,
+        icon: LayoutGrid,
     },
     {
         title: 'Egresos',
         href: '/panel/amounts',
         icon: Tag,
+    },
+    {
+        title: 'Usuarios',
+        href: '/panel/users',
+        icon: UserSquare,
     },
 ];
 

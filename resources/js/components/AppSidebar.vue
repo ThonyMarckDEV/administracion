@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Car, Folder, LayoutGrid, List, Map, PackageCheck, Percent, Settings2, Shield, Tag, Truck, UserSquare } from 'lucide-vue-next';
+import { BookOpen, CalendarDays, Folder, LayoutGrid, List, Map, PackageCheck, Percent, Settings2, Shield, Tag, Truck, UserSquare, Car, BanknoteIcon } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -14,21 +14,13 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
+];
+const mainNavItems3: NavItem[] = [
     {
         title: 'Servicios',
         href: '/panel/services',
         icon: PackageCheck,
-    },
-    {
-        title: 'Proveedores',
-        href: '/panel/suppliers',
-        icon: Truck,
-    },
-    {
-        title: 'Tipos de cliente',
-        href: '/panel/clientTypes',
-        icon: UserSquare,
-    },
+    },    
     {
         title: 'Descuentos',
         href: '/panel/discounts',
@@ -39,27 +31,45 @@ const mainNavItems: NavItem[] = [
         href: '/panel/categories',
         icon: List,
     },
+    ];
+    const mainNavItems4: NavItem[] = [
     {
         title: 'Clientes',
+        href: '#',
+        icon: UserSquare,
+        items: [
+        {
+        title: 'Clientes',
         href: '/panel/customers',
-        icon: Car,
+        },
+        {
+        title: 'Tipos de cliente',
+        href: '/panel/clientTypes',
+        },
+        ],
+    }, 
+    ];
+    const mainNavItems5: NavItem[] = [
+    {
+        title: 'Proveedores',
+        href: '/panel/suppliers',
+        icon: Truck,
     },
+ ];
+ const mainNavItems6: NavItem[] = [
     {
         title: 'Periodo',
         href: '/panel/periods',
-        icon: LayoutGrid,
+        icon: CalendarDays,
     },
     {
         title: 'Egresos',
         href: '/panel/amounts',
-        icon: Tag,
-    },
-    {
-        title: 'Usuarios',
-        href: '/panel/users',
-        icon: UserSquare,
+        icon: BanknoteIcon,
     },
 ];
+
+
 
 const mainNavItems2: NavItem[] = [
     {
@@ -177,7 +187,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" :items2="mainNavItems2" />
+            <NavMain :items="mainNavItems" :items2="mainNavItems2" :items3="mainNavItems3" :items4="mainNavItems4" :items5="mainNavItems5" :items6="mainNavItems6"/>
         </SidebarContent>
 
         <SidebarFooter>

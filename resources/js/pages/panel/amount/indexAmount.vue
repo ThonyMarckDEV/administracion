@@ -4,8 +4,8 @@
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
                 <div class="mb-4 mt-4 flex items-center justify-between px-6">
-                    <!-- <ToolsCustomer @import-success="loadingCustomers" />
-                    <FilterCustomer @search="searchCustomer" /> -->
+                    <ToolsAmount @import-success="loadingAmounts" />
+                    <!--<FilterCustomer @search="searchCustomer" /> -->
                 </div>
                 <TableAmount
                     :amounts-list="principal.amountList"
@@ -44,6 +44,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import EditAmount from './components/editAmount.vue';
 import TableAmount from './components/tableAmount.vue';
+import ToolsAmount from './components/toolsAmount.vue';
 import { AmountResponseShow, AmountUpdatePayload } from './interface/Amount';
 
 const { principal, loadingAmounts, deleteAmount, updateAmount, loadingShowAmount } = useAmount();

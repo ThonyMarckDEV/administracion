@@ -8,6 +8,7 @@ use App\Http\Controllers\Panel\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\Reportes\ServicePDFController;
+use App\Http\Controllers\Reportes\AmountPDFController;
 use App\Http\Controllers\Reportes\SupplierPDFController;
 use App\Http\Controllers\Reportes\UserPDFController;
 use App\Http\Controllers\DiscountController;
@@ -81,6 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-excel-categories',[CategoryController::class,'exportExcel'])->name('categories.excel');
             Route::get('/export-excel-customers',[CustomerController::class,'exportExcel'])->name('customers.excel');
             Route::get('/export-excel-periods',[PeriodController::class,'exportExcel'])->name('periods.excel');
+            Route::get('/export-excel-amounts', [AmountController::class, 'exportExcel'])->name('amounts.excel');
 
             # Exports to PDF
             Route::get('/export-pdf-users', [UserPDFController::class, 'exportPDF']);
@@ -90,6 +92,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-pdf-categories', [CategoryPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-customers', [CustomerPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-periods', [PeriodController::class, 'exportPDF']);
+            Route::get('/export-pdf-amounts', [AmountPDFController::class, 'exportPDF']);
 
             #Excel imports
             Route::post('/import-excel-clientTypes', [ClientTypeController::class, 'importExcel'])->name('reports.clientTypes.import');
@@ -98,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/import-excel-suppliers', [SupplierController::class, 'importExcel'])->name('reports.suppliers.import');
             Route::post('/import-excel-services', [ServiceController::class, 'importExcel'])->name('reports.services.import');
             Route::post('/import-excel-periods', [PeriodController::class, 'importExcel'])->name('reports.periods.import');
+            Route::post('/import-excel-amounts', [AmountController::class, 'importExcel'])->name('reports.amounts.import');
             Route::post('/import-excel-categories', [CategoryController::class, 'importExcel'])->name('reports.categories.import');
         });
 

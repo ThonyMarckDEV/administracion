@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, CalendarDays, Folder, LayoutGrid, List, Map, PackageCheck, Percent, Settings2, Shield, Tag, Truck, UserSquare, Car, BanknoteIcon } from 'lucide-vue-next';
+import { BookOpen, Car, CreditCard, CalendarDays, Folder, LayoutGrid, List, Map, PackageCheck, Percent, Settings2, Shield, Tag, Truck, UserSquare, BanknoteIcon } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -61,6 +61,11 @@ const mainNavItems3: NavItem[] = [
         title: 'Periodo',
         href: '/panel/periods',
         icon: CalendarDays,
+    },
+    {
+        title: 'Plan de pagos',
+        href: '/panel/paymentPlans',
+        icon: CreditCard,
     },
     {
         title: 'Egresos',

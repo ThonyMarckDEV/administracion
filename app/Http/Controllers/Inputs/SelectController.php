@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Inputs;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClientType;
+use App\Models\Period;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class SelectController extends Controller
@@ -17,6 +19,7 @@ class SelectController extends Controller
             ->get();
         return response()->json($clientTypes);
     }
+
     // get category list
     public function getCategoriesList(Request $request){
         $name = $request->get('texto');
@@ -30,5 +33,24 @@ class SelectController extends Controller
             ->get();
         return response()->json($categories);
     }
+
+    // get service list
+    public function getServiceList(){
+        $services = Service::select('id', 'name')
+            ->where('state', 1)
+            ->orderBy('id')
+            ->get();
+        return response()->json($services);
+    }
+
+    // get period list
+    public function getPeriodList(){
+        $periods = Period::select('id', 'name')
+            ->where('state', 1)
+            ->orderBy('id')
+            ->get();
+        return response()->json($periods);
+    }
+
 
 }

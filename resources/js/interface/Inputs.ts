@@ -14,6 +14,16 @@ export interface InputSupplier {
     ruc: string;
 }
 
+export interface InputService {
+    id: number;
+    name: string;
+}
+
+export interface InputPeriod {
+    id: number;
+    name: string;
+}
+
 export interface InputSupplierResponse {
     data: InputSupplier[];
 }
@@ -24,4 +34,12 @@ export interface InputCategoryResponse {
 
 export interface InputClientTypeResponse {
     data: InputClientType[];
+}
+
+export interface InputServiceResponse {
+    data: InputService[];
+}
+
+export interface InputPeriodResponse {
+    data: InputPeriod[];
 }

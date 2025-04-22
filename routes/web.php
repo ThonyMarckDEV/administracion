@@ -1,4 +1,3 @@
-
 <?php
 
 use App\Http\Controllers\CategoryController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\Inputs\SelectController;
 use App\Http\Controllers\Panel\AmountController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
 use App\Http\Controllers\Panel\CustomerController;
+use App\Http\Controllers\PaymentPlanController;
 use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\Reportes\CustomerPDFController;
 use Illuminate\Support\Facades\Route;
@@ -70,6 +70,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('amounts', AmountController::class);
         # list Amount
         Route::get('listar-amounts',[AmountController::class,'listAmount'])->name('amounts.listar');
+        # module Payment Plan
+        Route::resource('paymentPlans', PaymentPlanController::class);
+        # list Payment Plans
+        Route::get('listar-paymentPlans', [PaymentPlanController::class,'listarPaymentPlans'])->name('paymentPlans.listar');
 
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {
@@ -107,6 +111,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('client_type_list',[SelectController::class,'getClientTypeList'])->name('client_type_list');
             Route::get('categories_list',[SelectController::class,'getCategoriesList'])->name('categories_list');
             Route::get('suppliers_list',[AutoCompleteController::class,'getSuppliersList'])->name('suppliers_list');
+            Route::get('service_list', [SelectController::class, 'getServiceList'])->name('service_list');
+            Route::get('period_list', [SelectController::class, 'getPeriodList'])->name('period_list');
         });
     });
 });

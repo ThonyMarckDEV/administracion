@@ -17,7 +17,7 @@ class PeriodFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->unique()->firstName(),
             'description' => $this->faker->sentence(),
             'state' => $this->faker->boolean(),
         ];

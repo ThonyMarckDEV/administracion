@@ -16,6 +16,7 @@ use App\Http\Controllers\Inputs\SelectController;
 use App\Http\Controllers\Panel\AmountController;
 use App\Http\Controllers\Reportes\CategoryPDFController;
 use App\Http\Controllers\Panel\CustomerController;
+use App\Http\Controllers\Panel\PaymentController;
 use App\Http\Controllers\PaymentPlanController;
 use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\Reportes\CustomerPDFController;
@@ -75,7 +76,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('paymentPlans', PaymentPlanController::class);
         # list Payment Plans
         Route::get('listar-paymentPlans', [PaymentPlanController::class,'listarPaymentPlans'])->name('paymentPlans.listar');
-
+        # module Payment 
+        Route::resource('payments', PaymentController::class);
+        # list Payments
+        Route::get('listar-payments',[PaymentController::class,'listPayments'])->name('payments.listar');
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {
             # Exports to Excel

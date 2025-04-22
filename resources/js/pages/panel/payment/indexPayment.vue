@@ -11,6 +11,14 @@
                     :payment-paginate="principal.paginacion"
                     :loading="principal.loading"
                     @page-change="handlePageChange"
+                    @open-modal-create="getIdUpdate"
+                />
+                {{ statusModalUpdate }}
+                <EditPayment
+                    :id-payment="showPaymentId?.id"
+                    :payment-data="showPaymentId"
+                    :status-modal="showPayment"
+                    @close-modal="clouseModalUpdate"
                 />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
@@ -47,9 +55,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
 
-const { loadingPayments, principal } = usePayment();
+const { loadingPayments, showPaymnet, principal, showPaymentId, statusModalUpdate, showPayment } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -68,6 +77,15 @@ const handlePageChange = (page: number) => {
 
 const searchPayment = (text: string) => {
     loadingPayments(1, text);
+};
+
+const getIdUpdate = (id: number) => {
+    showPaymnet(id);
+};
+
+const clouseModalUpdate = () => {
+    console.log('cerrando modal');
+    statusModalUpdate.value = false;
 };
 
 onMounted(() => {

@@ -68,5 +68,11 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'editar amounts']);
         Permission::create(['name' => 'eliminar amounts']);
         Permission::create(['name' => 'ver amounts']);
+
+        // nidek payment_plans
+        Permission::create(['name' => 'crear plan_pago']);
+        Permission::create(['name' => 'editar plan_pago']);
+        Permission::create(['name' => 'eliminar plan_pago']);
+        Permission::create(['name' => 'ver plan_pago']);
     }
 }

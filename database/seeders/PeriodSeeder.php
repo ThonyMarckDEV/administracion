@@ -13,6 +13,6 @@ class PeriodSeeder extends Seeder
      */
     public function run(): void
     {
-        Period::factory()->count(50)->create();
+        Period::factory()->count(10)->create();
     }
 }

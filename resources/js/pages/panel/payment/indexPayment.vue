@@ -11,6 +11,15 @@
                     :payment-paginate="principal.paginacion"
                     :loading="principal.loading"
                     @page-change="handlePageChange"
+                    @open-modal-create="getIdUpdate"
+                    @open-modal-delete="getIdDelete"
+                />
+
+                <EditPayment
+                    v-if="showPaymentData"
+                    :payment-data="showPaymentData"
+                    :status-modal="principal.statusModalUpdate"
+                    @close-modal="closeModalUpdate"
                 />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
@@ -47,9 +56,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
 
-const { loadingPayments, principal } = usePayment();
+const { loadingPayments, showPayment, principal, showPaymentData } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -62,10 +72,24 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// emit events in component TablePayment
 const handlePageChange = (page: number) => {
     loadingPayments(page);
 };
 
+const getIdUpdate = (id: number) => {
+    showPayment(id);
+    console.log(id);
+};
+
+const getIdDelete = (id: number) => {
+    console.log(id);
+};
+
+// emit events in component EditPayment
+const closeModalUpdate = () => {
+    principal.statusModalUpdate = false;
+};
 const searchPayment = (text: string) => {
     loadingPayments(1, text);
 };

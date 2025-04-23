@@ -18,13 +18,13 @@ export interface PaymentTable {
     pagination: Pagination;
 }
 
-export interface PaymentShowResponse {
+export interface showPayment {
     status: boolean;
     message: string;
     payment: PaymentResource;
 }
 
-export interface PaymentUpdateRequest {
+export interface updatePayment {
     customer_id: number;
     payment_plan_id: number;
     discount_id: number;

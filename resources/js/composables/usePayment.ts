@@ -8,6 +8,8 @@ export const usePayment = () => {
         paymentList: PaymentResource[];
         paginacion: Pagination;
         loading: boolean;
+        statusModalUpdate: boolean;
+        statusModalDelete: boolean;
     }>({
         paymentList: [],
         paginacion: {
@@ -19,11 +21,10 @@ export const usePayment = () => {
             to: 0,
         },
         loading: false,
+        statusModalUpdate: false,
+        statusModalDelete: false,
     });
-
-    const showPaymentId = ref<PaymentResource | null>(null);
-    const showPayment = ref<boolean>(false);
-    const statusModalUpdate = ref<boolean>(false);
+    const showPaymentData = ref<PaymentResource | null>(null);
     const loadingPayments = async (page: number = 1, customer: string = '') => {
         try {
             principal.loading = true;
@@ -36,26 +37,23 @@ export const usePayment = () => {
             principal.loading = false;
         }
     };
-    const showPaymnet = async (id: number) => {
-        showPaymentId.value = null;
+    const showPayment = async (id: number) => {
         try {
-            statusModalUpdate.value = true;
-            showPayment.value = true;
-            const response = await PaymentServices.showPayment(id);
-            if (response.status) {
-                showPaymentId.value = response.payment;
+            const response = await PaymentServices.show(id);
+            if (!response.status) {
+                showPaymentData.value = null;
+                return;
             }
+            principal.statusModalUpdate = true;
+            showPaymentData.value = response.payment;
         } catch (error) {
-            console.error('Error showing payment:', error);
-            return null;
+            console.error('Error loading payment:', error);
         }
     };
     return {
         principal,
-        showPaymentId,
-        statusModalUpdate,
-        showPayment,
+        showPaymentData,
         loadingPayments,
-        showPaymnet,
+        showPayment,
     };
 };

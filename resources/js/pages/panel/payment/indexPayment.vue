@@ -12,13 +12,14 @@
                     :loading="principal.loading"
                     @page-change="handlePageChange"
                     @open-modal-create="getIdUpdate"
+                    @open-modal-delete="getIdDelete"
                 />
-                {{ statusModalUpdate }}
+
                 <EditPayment
-                    :id-payment="showPaymentId?.id"
-                    :payment-data="showPaymentId"
-                    :status-modal="showPayment"
-                    @close-modal="clouseModalUpdate"
+                    v-if="showPaymentData"
+                    :payment-data="showPaymentData"
+                    :status-modal="principal.statusModalUpdate"
+                    @close-modal="closeModalUpdate"
                 />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
@@ -58,7 +59,7 @@ import { onMounted } from 'vue';
 import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
 
-const { loadingPayments, showPaymnet, principal, showPaymentId, statusModalUpdate, showPayment } = usePayment();
+const { loadingPayments, showPayment, principal, showPaymentData } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -71,21 +72,30 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// emit events in component TablePayment
 const handlePageChange = (page: number) => {
     loadingPayments(page);
 };
 
+// emit events in component EditPayment
+const closeModalUpdate = () => {
+    principal.statusModalUpdate = false;
+};
 const searchPayment = (text: string) => {
     loadingPayments(1, text);
 };
 
 const getIdUpdate = (id: number) => {
-    showPaymnet(id);
+    showPayment(id);
+};
+
+const getIdDelete = (id: number) => {
+    // showPayment(id);
 };
 
 const clouseModalUpdate = () => {
     console.log('cerrando modal');
-    statusModalUpdate.value = false;
+    principal.statusModalUpdate = false;
 };
 
 onMounted(() => {

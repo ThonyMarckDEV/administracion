@@ -1,4 +1,4 @@
-import { PaymentShowResponse, PaymentTable } from '@/pages/panel/payment/interface/Payment';
+import { PaymentTable, showPayment } from '@/pages/panel/payment/interface/Payment';
 import axios from 'axios';
 
 export const PaymentServices = {
@@ -6,7 +6,7 @@ export const PaymentServices = {
         const response = await axios.get(`/panel/listar-payments?page=${page}&customer=${encodeURIComponent(customer)}`);
         return response.data;
     },
-    async showPayment(id: number): Promise<PaymentShowResponse> {
+    async show(id: number): Promise<showPayment> {
         const response = await axios.get(`/panel/payments/${id}`);
         return response.data;
     },

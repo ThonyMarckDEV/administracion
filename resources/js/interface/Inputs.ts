@@ -23,6 +23,17 @@ export interface InputPeriod {
     id: number;
     name: string;
 }
+// export for autocomplete
+
+export interface InputCustomer {
+    id: number;
+    name: string;
+    ruc: string;
+}
+
+export interface InputCustomerResponse {
+    data: InputCustomer[];
+}
 
 export interface InputSupplierResponse {
     data: InputSupplier[];

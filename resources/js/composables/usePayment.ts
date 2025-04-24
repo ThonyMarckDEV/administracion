@@ -1,3 +1,4 @@
+import { InputCustomer, InputService } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
 import { PaymentResource } from '@/pages/panel/payment/interface/Payment';
 import { PaymentServices } from '@/services/paymentServices';
@@ -25,6 +26,28 @@ export const usePayment = () => {
         statusModalDelete: false,
     });
     const showPaymentData = ref<PaymentResource | null>(null);
+    // automcomplete
+    const customers = ref<InputCustomer[]>([]);
+    const services = ref<InputService[]>([]);
+
+    const getCustomers = async (texto: string = '') => {
+        try {
+            const response = await PaymentServices.getCustomers(texto);
+            customers.value = response.data;
+        } catch (error) {
+            console.error('Error loading customers:', error);
+        }
+    };
+
+    const getServices = async (texto: string = '') => {
+        try {
+            const response = await PaymentServices.getServices(texto);
+            services.value = response.data;
+        } catch (error) {
+            console.error('Error loading services:', error);
+        }
+    };
+
     const loadingPayments = async (page: number = 1, customer: string = '') => {
         try {
             principal.loading = true;
@@ -53,6 +76,10 @@ export const usePayment = () => {
     return {
         principal,
         showPaymentData,
+        customers,
+        services,
+        getCustomers,
+        getServices,
         loadingPayments,
         showPayment,
     };

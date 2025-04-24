@@ -11,6 +11,7 @@ export const usePayment = () => {
         loading: boolean;
         statusModalUpdate: boolean;
         statusModalDelete: boolean;
+        payment_id_delete: number;
     }>({
         paymentList: [],
         paginacion: {
@@ -24,6 +25,7 @@ export const usePayment = () => {
         loading: false,
         statusModalUpdate: false,
         statusModalDelete: false,
+        payment_id_delete: 0,
     });
     const showPaymentData = ref<PaymentResource | null>(null);
     // automcomplete
@@ -85,6 +87,18 @@ export const usePayment = () => {
             console.error('Error updating payment:', error);
         }
     };
+
+    const deletePayment = async (id: number) => {
+        try {
+            const response = await PaymentServices.delete(id);
+            if (response.status) {
+                principal.statusModalDelete = false;
+                await loadingPayments(principal.paginacion.current_page);
+            }
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+        }
+    };
     return {
         principal,
         showPaymentData,
@@ -95,5 +109,6 @@ export const usePayment = () => {
         loadingPayments,
         showPayment,
         updatePaymentF,
+        deletePayment,
     };
 };

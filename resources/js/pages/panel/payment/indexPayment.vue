@@ -22,6 +22,14 @@
                     @close-modal="closeModalUpdate"
                     @update-payment="dataUpdatePayment"
                 />
+                <Delete
+                    :modal="principal.statusModalDelete"
+                    :itemId="principal.payment_id_delete"
+                    title="Eliminar ingreso"
+                    description="¿Está seguro de que desea eliminar este ingreso?"
+                    @close-modal="clouseModalDelete"
+                    @delete-item="emitDeletePayment"
+                />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
                     :amounts-paginate="principal.paginacion"
@@ -51,6 +59,7 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
+import Delete from '@/components/delete.vue';
 import FilterPayments from '@/components/filter.vue';
 import { usePayment } from '@/composables/usePayment';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -61,7 +70,7 @@ import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
 import { updatePayment } from './interface/Payment';
 
-const { loadingPayments, showPayment, principal, showPaymentData, updatePaymentF } = usePayment();
+const { loadingPayments, showPayment, principal, showPaymentData, updatePaymentF, deletePayment } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -92,12 +101,17 @@ const getIdUpdate = (id: number) => {
 };
 
 const getIdDelete = (id: number) => {
-    // showPayment(id);
+    principal.statusModalDelete = true;
+    principal.payment_id_delete = id;
+    console.log('eliminar' + id);
 };
-
-const clouseModalUpdate = () => {
-    console.log('cerrando modal');
-    principal.statusModalUpdate = false;
+const emitDeletePayment = (id: number | string) => {
+    principal.statusModalDelete = false;
+    console.log('emitDeletePayment', id);
+    deletePayment(Number(id));
+};
+const clouseModalDelete = () => {
+    principal.statusModalDelete = false;
 };
 
 // get data from editPayment

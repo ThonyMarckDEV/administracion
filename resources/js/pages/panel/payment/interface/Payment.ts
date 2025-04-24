@@ -41,3 +41,8 @@ export interface updatePaymentResponse {
     message: string;
     payment: PaymentResource;
 }
+
+export interface deletePaymentResponse {
+    status: boolean;
+    message: string;
+}

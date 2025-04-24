@@ -1,6 +1,6 @@
 import { InputCustomer, InputService } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
-import { PaymentResource } from '@/pages/panel/payment/interface/Payment';
+import { PaymentResource, updatePayment } from '@/pages/panel/payment/interface/Payment';
 import { PaymentServices } from '@/services/paymentServices';
 import { reactive, ref } from 'vue';
 
@@ -73,6 +73,18 @@ export const usePayment = () => {
             console.error('Error loading payment:', error);
         }
     };
+    const updatePaymentF = async (data: updatePayment, id: number) => {
+        try {
+            const response = await PaymentServices.update(data, id);
+            if (response.status) {
+                principal.statusModalUpdate = false;
+                showPaymentData.value = null;
+                await loadingPayments(principal.paginacion.current_page);
+            }
+        } catch (error) {
+            console.error('Error updating payment:', error);
+        }
+    };
     return {
         principal,
         showPaymentData,
@@ -82,5 +94,6 @@ export const usePayment = () => {
         getServices,
         loadingPayments,
         showPayment,
+        updatePaymentF,
     };
 };

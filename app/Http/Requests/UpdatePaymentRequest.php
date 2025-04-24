@@ -22,12 +22,13 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => 'required|exists:customers,id',
-            'payment_plan_id' => 'required|exists:payment_plans,id',
+            'customer_id' => 'nullable|exists:customers,id',
+            'payment_plan_id' => 'nullable|exists:payment_plans,id',
+            'service_id' => 'nullable|exists:services,id',
             'discount_id' => 'nullable|exists:discounts,id',
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
-            'payment_method' => 'required|string|in:efectivo,transferencia', 
+            'payment_method' => 'required|string|in:efectivo,transferencia',
             'reference' => 'nullable|string|max:255',
             'status' => 'required|string|in:pendiente,pagado,vencido',
         ];

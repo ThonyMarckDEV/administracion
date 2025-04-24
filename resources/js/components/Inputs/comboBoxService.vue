@@ -6,7 +6,7 @@
                     class="pl-9"
                     :display-value="(val) => val?.name ?? ''"
                     :model-value="texto"
-                    placeholder="Seleccionar proveedor..."
+                    placeholder="Seleccionar servicio..."
                     @update:model-value="handleSearchInput"
                 />
                 <span class="absolute inset-y-0 start-0 flex items-center justify-center px-3">

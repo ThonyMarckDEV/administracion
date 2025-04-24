@@ -12,7 +12,7 @@
                     <FormItem>
                         <div class="flex items-center justify-between">
                             <div class="flex-grow space-y-2">
-                                <FormLabel>Servicio</FormLabel>
+                                <FormLabel>Cliente</FormLabel>
                                 <FormControl>
                                     <ComboBoxCustomer @select="(id) => setFieldValue('customer_id', id)" />
                                 </FormControl>
@@ -32,7 +32,7 @@
                             <div class="flex-grow space-y-2">
                                 <FormLabel>Servicio</FormLabel>
                                 <FormControl>
-                                    <ComboBoxService @select="(id) => setFieldValue('service_id', id)" />
+                                    <ComboBoxService @select="(id) => setFieldValue('service_id', id || null)" />
                                 </FormControl>
                             </div>
                             <span
@@ -169,7 +169,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     (e: 'close-modal', open: boolean): void;
-    (e: 'update-payment', payment: updatePayment): void;
+    (e: 'update-payment', payment: updatePayment, payment_id: number): void;
 }>();
 // closeModal
 const closeModal = () => {
@@ -184,8 +184,9 @@ const formShema = toTypedSchema(
         payment_method: z.string({ message: 'Campo obligatorio' }),
         reference: z.string({ message: 'Campo obligatorio' }),
         status: z.string({ message: 'Campo obligatorio' }),
-        service_id: z.number().optional().default(0),
-        customer_id: z.number().optional().default(0),
+        service_id: z.number().nullable().default(null),
+        customer_id: z.number().nullable().default(null),
+        payment_id: z.number().nullable().default(null),
     }),
 );
 
@@ -197,6 +198,9 @@ const { handleSubmit, setValues, setFieldValue } = useForm({
         payment_method: props.paymentData.payment_method,
         reference: props.paymentData.reference,
         status: props.paymentData.status,
+        service_id: null, // Si no hay ID, usa `null`
+        customer_id: null,
+        payment_id: null,
     },
 });
 
@@ -218,6 +222,20 @@ watch(
 
 const opSubmit = handleSubmit((values) => {
     console.log('values', values);
+    const paymentData: updatePayment = {
+        customer_id: Number(values.customer_id) || null,
+        service_id: Number(values.service_id) || null,
+        // add payment_id
+        payment_plan_id: null,
+        // add discount_id
+        discount_id: null,
+        amount: Number(values.amount),
+        payment_date: values.payment_date,
+        payment_method: values.payment_method,
+        reference: values.reference,
+        status: values.status,
+    };
+    emit('update-payment', paymentData, props.paymentData.id);
     closeModal();
 });
 </script>

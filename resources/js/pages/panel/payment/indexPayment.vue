@@ -20,6 +20,7 @@
                     :payment-data="showPaymentData"
                     :status-modal="principal.statusModalUpdate"
                     @close-modal="closeModalUpdate"
+                    @update-payment="dataUpdatePayment"
                 />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
@@ -58,8 +59,9 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
+import { updatePayment } from './interface/Payment';
 
-const { loadingPayments, showPayment, principal, showPaymentData } = usePayment();
+const { loadingPayments, showPayment, principal, showPaymentData, updatePaymentF } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -96,6 +98,13 @@ const getIdDelete = (id: number) => {
 const clouseModalUpdate = () => {
     console.log('cerrando modal');
     principal.statusModalUpdate = false;
+};
+
+// get data from editPayment
+const dataUpdatePayment = (data: updatePayment, id: number) => {
+    console.log('dataUpdatePayment', data);
+    updatePaymentF(data, id);
+    console.log('id', id);
 };
 
 onMounted(() => {

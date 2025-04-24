@@ -1,5 +1,5 @@
 import { InputCustomerResponse, InputServiceResponse } from '@/interface/Inputs';
-import { PaymentTable, showPayment } from '@/pages/panel/payment/interface/Payment';
+import { PaymentTable, showPayment, updatePayment, updatePaymentResponse } from '@/pages/panel/payment/interface/Payment';
 import axios from 'axios';
 
 export const PaymentServices = {
@@ -16,6 +16,10 @@ export const PaymentServices = {
     },
     async show(id: number): Promise<showPayment> {
         const response = await axios.get(`/panel/payments/${id}`);
+        return response.data;
+    },
+    async update(data: updatePayment, id: number): Promise<updatePaymentResponse> {
+        const response = await axios.put(`/panel/payments/${id}`, data);
         return response.data;
     },
 };

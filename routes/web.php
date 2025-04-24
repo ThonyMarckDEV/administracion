@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('categories_list', [SelectController::class, 'getCategoriesList'])->name('categories_list');
             Route::get('service_list', [SelectController::class, 'getServiceList'])->name('service_list');
             Route::get('period_list', [SelectController::class, 'getPeriodList'])->name('period_list');
+            Route::get('discount_list', [SelectController::class, 'getDiscountList'])->name('discount_list');
             // automplete
             Route::get('suppliers_list', [AutoCompleteController::class, 'getSuppliersList'])->name('suppliers_list');
             Route::get('customers_list', [AutoCompleteController::class, 'getCustomerList'])->name('customers_list');

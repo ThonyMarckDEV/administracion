@@ -1,5 +1,6 @@
+import { InputCustomer, InputService } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
-import { PaymentResource } from '@/pages/panel/payment/interface/Payment';
+import { PaymentResource, updatePayment } from '@/pages/panel/payment/interface/Payment';
 import { PaymentServices } from '@/services/paymentServices';
 import { reactive, ref } from 'vue';
 
@@ -10,6 +11,7 @@ export const usePayment = () => {
         loading: boolean;
         statusModalUpdate: boolean;
         statusModalDelete: boolean;
+        payment_id_delete: number;
     }>({
         paymentList: [],
         paginacion: {
@@ -23,8 +25,31 @@ export const usePayment = () => {
         loading: false,
         statusModalUpdate: false,
         statusModalDelete: false,
+        payment_id_delete: 0,
     });
     const showPaymentData = ref<PaymentResource | null>(null);
+    // automcomplete
+    const customers = ref<InputCustomer[]>([]);
+    const services = ref<InputService[]>([]);
+
+    const getCustomers = async (texto: string = '') => {
+        try {
+            const response = await PaymentServices.getCustomers(texto);
+            customers.value = response.data;
+        } catch (error) {
+            console.error('Error loading customers:', error);
+        }
+    };
+
+    const getServices = async (texto: string = '') => {
+        try {
+            const response = await PaymentServices.getServices(texto);
+            services.value = response.data;
+        } catch (error) {
+            console.error('Error loading services:', error);
+        }
+    };
+
     const loadingPayments = async (page: number = 1, customer: string = '') => {
         try {
             principal.loading = true;
@@ -50,10 +75,40 @@ export const usePayment = () => {
             console.error('Error loading payment:', error);
         }
     };
+    const updatePaymentF = async (data: updatePayment, id: number) => {
+        try {
+            const response = await PaymentServices.update(data, id);
+            if (response.status) {
+                principal.statusModalUpdate = false;
+                showPaymentData.value = null;
+                await loadingPayments(principal.paginacion.current_page);
+            }
+        } catch (error) {
+            console.error('Error updating payment:', error);
+        }
+    };
+
+    const deletePayment = async (id: number) => {
+        try {
+            const response = await PaymentServices.delete(id);
+            if (response.status) {
+                principal.statusModalDelete = false;
+                await loadingPayments(principal.paginacion.current_page);
+            }
+        } catch (error) {
+            console.error('Error deleting payment:', error);
+        }
+    };
     return {
         principal,
         showPaymentData,
+        customers,
+        services,
+        getCustomers,
+        getServices,
         loadingPayments,
         showPayment,
+        updatePaymentF,
+        deletePayment,
     };
 };

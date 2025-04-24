@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Inputs;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\ClientType;
+use App\Models\Discount;
 use App\Models\Period;
 use App\Models\Service;
 use Illuminate\Http\Request;
@@ -12,7 +13,8 @@ use Illuminate\Http\Request;
 class SelectController extends Controller
 {
     // get client_type list
-    public function getClientTypeList(){
+    public function getClientTypeList()
+    {
         $clientTypes = ClientType::select('id', 'name')
             ->where('state', 1)
             ->orderBy('id')
@@ -21,7 +23,8 @@ class SelectController extends Controller
     }
 
     // get category list
-    public function getCategoriesList(Request $request){
+    public function getCategoriesList(Request $request)
+    {
         $name = $request->get('texto');
         $categories = Category::select('id', 'name')
             ->where('status', true)
@@ -35,7 +38,8 @@ class SelectController extends Controller
     }
 
     // get service list
-    public function getServiceList(){
+    public function getServiceList()
+    {
         $services = Service::select('id', 'name')
             ->where('state', 1)
             ->orderBy('id')
@@ -44,7 +48,8 @@ class SelectController extends Controller
     }
 
     // get period list
-    public function getPeriodList(){
+    public function getPeriodList()
+    {
         $periods = Period::select('id', 'name')
             ->where('state', 1)
             ->orderBy('id')
@@ -52,5 +57,12 @@ class SelectController extends Controller
         return response()->json($periods);
     }
 
-
+    public function getDiscountList()
+    {
+        $discounts = Discount::select('id', 'description', 'percentage')
+            ->where('state', 1)
+            ->orderBy('id')
+            ->get();
+        return response()->json($discounts);
+    }
 }

@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\PaymentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -25,17 +26,18 @@ class PaymentController extends Controller
     }
 
 
-    public function listPayments(Request $request){
+    public function listPayments(Request $request)
+    {
         Gate::authorize('viewAny', Payment::class);
         try {
             $customer = $request->get('customer');
-            $payments = Payment::with(['customer', 'paymentPlan','discount'])
+            $payments = Payment::with(['customer', 'paymentPlan', 'discount'])
                 ->when($customer, function ($query, $customer) {
                     return $query->whereHas('customer', function ($query) use ($customer) {
                         $query->where('name', 'like', "%$customer%");
                     });
                 })
-                ->orderBy('id','asc')
+                ->orderBy('id', 'asc')
                 ->paginate(12);
             return response()->json([
                 'payments' => PaymentResource::collection($payments),
@@ -63,7 +65,7 @@ class PaymentController extends Controller
      */
     public function create()
     {
-        $payments_plan = PaymentPlan::select('id','name')
+        $payments_plan = PaymentPlan::select('id', 'name')
             ->where('state', 1)
             ->get();
         $discounts = Discount::select('id', 'description')->where('state', 1)
@@ -72,7 +74,6 @@ class PaymentController extends Controller
             'payments_plan' => $payments_plan,
             'discounts' => $discounts,
         ]);
-        
     }
 
     /**
@@ -97,6 +98,7 @@ class PaymentController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Pago encontrado',
+
             'payment' => new PaymentResource($payment),
         ]);
     }
@@ -106,7 +108,25 @@ class PaymentController extends Controller
      */
     public function update(UpdatePaymentRequest $request, Payment $payment)
     {
-        //
+        Gate::authorize('update', $payment);
+        $data = $request->validated();
+        $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
+        foreach ($originalFields as $field) {
+            if (($data[$field] ?? null) === null) {
+                $data[$field] = $payment->{$field};
+            }
+        }
+        $payment->update($data);
+        if (($data['service_id'] ?? null) !== null && $payment->paymentPlan) {
+            Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
+            $payment->paymentPlan->update(['service_id' => $data['service_id']]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Pago actualizado correctamente',
+            'payment' => new PaymentResource($payment),
+        ]);
     }
 
     /**

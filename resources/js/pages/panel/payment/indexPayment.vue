@@ -20,6 +20,15 @@
                     :payment-data="showPaymentData"
                     :status-modal="principal.statusModalUpdate"
                     @close-modal="closeModalUpdate"
+                    @update-payment="dataUpdatePayment"
+                />
+                <Delete
+                    :modal="principal.statusModalDelete"
+                    :itemId="principal.payment_id_delete"
+                    title="Eliminar ingreso"
+                    description="¿Está seguro de que desea eliminar este ingreso?"
+                    @close-modal="clouseModalDelete"
+                    @delete-item="emitDeletePayment"
                 />
                 <!-- <TableAmount
                     :amounts-list="principal.amountList"
@@ -50,6 +59,7 @@
     </AppLayout>
 </template>
 <script setup lang="ts">
+import Delete from '@/components/delete.vue';
 import FilterPayments from '@/components/filter.vue';
 import { usePayment } from '@/composables/usePayment';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -58,8 +68,9 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import EditPayment from './components/editPayment.vue';
 import TablePayment from './components/tablePayment.vue';
+import { updatePayment } from './interface/Payment';
 
-const { loadingPayments, showPayment, principal, showPaymentData } = usePayment();
+const { loadingPayments, showPayment, principal, showPaymentData, updatePaymentF, deletePayment } = usePayment();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -77,21 +88,37 @@ const handlePageChange = (page: number) => {
     loadingPayments(page);
 };
 
-const getIdUpdate = (id: number) => {
-    showPayment(id);
-    console.log(id);
-};
-
-const getIdDelete = (id: number) => {
-    console.log(id);
-};
-
 // emit events in component EditPayment
 const closeModalUpdate = () => {
     principal.statusModalUpdate = false;
 };
 const searchPayment = (text: string) => {
     loadingPayments(1, text);
+};
+
+const getIdUpdate = (id: number) => {
+    showPayment(id);
+};
+
+const getIdDelete = (id: number) => {
+    principal.statusModalDelete = true;
+    principal.payment_id_delete = id;
+    console.log('eliminar' + id);
+};
+const emitDeletePayment = (id: number | string) => {
+    principal.statusModalDelete = false;
+    console.log('emitDeletePayment', id);
+    deletePayment(Number(id));
+};
+const clouseModalDelete = () => {
+    principal.statusModalDelete = false;
+};
+
+// get data from editPayment
+const dataUpdatePayment = (data: updatePayment, id: number) => {
+    console.log('dataUpdatePayment', data);
+    updatePaymentF(data, id);
+    console.log('id', id);
 };
 
 onMounted(() => {

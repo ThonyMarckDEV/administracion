@@ -158,11 +158,5 @@ const onSubmit = handleSubmit((values) => {
     };
     emit('update-amount', updatedAmount, props.amount_id);
 });
-
-const getDate = (date: string) => {
-    setFieldValue('date_init', date);
-    console.log('date_init', date);
-    console.log('date', date);
-};
 </script>
 <style scoped></style>

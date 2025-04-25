@@ -19,7 +19,7 @@ class CustomerFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'codigo' => $this->faker->unique()->numerify('CUST-#####'),
-            'client_type_id' => $this->faker->numberBetween(1, 5),
+            'client_type_id' => $this->faker->numberBetween(1, 2),
             'state' => $this->faker->boolean(),
         ];
     }

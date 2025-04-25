@@ -89,7 +89,7 @@ const mainNavItems6: NavItem[] = [
         icon: BanknoteIcon,
     },
     {
-        title: 'PAGOS',
+        title: 'Pagos',
         href: '/panel/payments',
         icon: HandCoins,
     },

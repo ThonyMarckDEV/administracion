@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Period;
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Testing\Fakes\Fake;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\PaymentPlan>
@@ -18,13 +19,14 @@ class PaymentPlanFactory extends Factory
      */
     public function definition(): array
     {
+        $paymentType = $this->faker->boolean();
         return [
-            'service_id' => Service::factory(),
-            'period_id' => Period::factory(),
-            'payment_type' => $this->faker->boolean(),
+            'service_id' => $this->faker->randomElement(Service::pluck('id')),
+            'period_id' => $this->faker->randomElement(Period::pluck('id')),
+            'payment_type' => $paymentType,
             'amount' => $this->faker->randomFloat(2, 50, 500),
-            'duration' => $this->faker->numberBetween(1, 24),
-            'state' => $this->faker->boolean(),
+            'duration' => $paymentType ? 1 : 3,
+            'state' => true,
         ];
     }
 }

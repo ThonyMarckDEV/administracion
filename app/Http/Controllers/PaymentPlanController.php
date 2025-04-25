@@ -32,7 +32,7 @@ class PaymentPlanController extends Controller
                 return $query->whereHas('service', function ($q) use ($name) {
                     $q->where('name', 'LIKE', "%$name%");
                 });
-            })->orderBy('id', 'asc')->paginate(12);
+            })->orderBy('id', 'asc')->orderBy('service_id', 'asc')->paginate(12);
             return response()->json([
                 'paymentPlans' => PaymentPlanResource::collection($paymentPlans),
                 'pagination' => [
@@ -83,7 +83,6 @@ class PaymentPlanController extends Controller
 
         // ✅ Convertir ANTES de guardar en la DB
         $validated['payment_type'] = $validated['payment_type'] === 'anual';
-        $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
 
         $paymentPlan = PaymentPlan::create($validated);
 

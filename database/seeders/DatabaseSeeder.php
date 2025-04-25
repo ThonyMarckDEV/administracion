@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             PeriodSeeder::class,
             categorySupplierSeeder::class,
             PaymentPlanSeeder::class,
-            PaymentSeeder::class,
+            // PaymentSeeder::class,
         ]);
     }
 }

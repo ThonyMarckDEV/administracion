@@ -18,6 +18,5 @@ class DiscountSeeder extends Seeder
             'percentage' => 0,
             'state' => 1,
         ]);
-        Discount::factory()->count(10)->create();
     }
 }

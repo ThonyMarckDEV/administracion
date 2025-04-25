@@ -38,7 +38,7 @@
                                 class="pointer-events-none absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-blue-400/10 blur-3xl filter dark:bg-blue-500/5"
                             ></div>
                             <img
-                                src="../../js/pages/img/system/dashboard.png"
+                                src="@public/images/landing/system/dashboard.png"
                                 alt="Dashboard T/J Technologies"
                                 class="relative z-10 w-full rounded-2xl border border-gray-100 shadow-2xl dark:border-gray-900"
                             />
@@ -218,14 +218,14 @@
 </template>
 
 <script lang="ts">
-import dockerLogoDark from '../../js/pages/img/logos/dark/dockerlogodark.png';
-import laravelCloudLogoDark from '../../js/pages/img/logos/dark/laravelcloudlogodark.png';
-import laravelLogoDark from '../../js/pages/img/logos/dark/laravellogodark.png';
-import vueLogoDark from '../../js/pages/img/logos/dark/vuelogodark.png';
-import dockerLogoLight from '../../js/pages/img/logos/light/dockerlogolight.png';
-import laravelCloudLogoLight from '../../js/pages/img/logos/light/laravelcloudlogolight.png';
-import laravelLogoLight from '../../js/pages/img/logos/light/laravellogolight.png';
-import vueLogoLight from '../../js/pages/img/logos/light/vuelogolight.png';
+import dockerLogoDark from '@public/images/landing/logos/dark/dockerlogodark.png';
+import laravelCloudLogoDark from '@public/images/landing/logos/dark/laravelcloudlogodark.png';
+import laravelLogoDark from '@public/images/landing/logos/dark/laravellogodark.png';
+import vueLogoDark from '@public/images/landing/logos/dark/vuelogodark.png';
+import dockerLogoLight from '@public/images/landing/logos/light/dockerlogolight.png';
+import laravelCloudLogoLight from '@public/images/landing/logos/light/laravelcloudlogolight.png';
+import laravelLogoLight from '@public/images/landing/logos/light/laravellogolight.png';
+import vueLogoLight from '@public/images/landing/logos/light/vuelogolight.png';
 
 export default {
     name: 'WelcomeView',

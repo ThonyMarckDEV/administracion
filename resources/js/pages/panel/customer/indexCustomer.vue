@@ -25,7 +25,7 @@
                 <DeleteCustomer
                     :modal="principal.statusModal.delete"
                     :itemId="principal.idCustomer"
-                    title="Eliminar Servicio"
+                    title="Eliminar cliente"
                     description="¿Está seguro de que desea eliminar este servicio?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeleteCustomer"

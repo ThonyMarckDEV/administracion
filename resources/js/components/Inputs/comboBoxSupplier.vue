@@ -1,15 +1,6 @@
 <template>
-    <!-- status loading -->
-    <div v-if="!suppliers.length && !error" class="flex items-center space-x-2 py-2">
-        <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-t-2 border-primary"></div>
-        <span class="text-sm text-muted-foreground">Cargando proveedores...</span>
-    </div>
-
-    <!-- Error message -->
-    <div v-else-if="error" class="py-2 text-sm text-red-500">Error al cargar proveedores. Intente nuevamente.</div>
-
     <!-- Combobox -->
-    <Combobox v-else by="id" v-model="selectedSupplier">
+    <Combobox by="id" v-model="selectedSupplier">
         <ComboboxAnchor>
             <div class="relative w-full max-w-sm items-center">
                 <ComboboxInput
@@ -65,7 +56,6 @@ const emit = defineEmits<{
 // composable and state
 const { suppliers, loadingSuppliers } = useAmount();
 const texto = ref<string>('');
-const error = ref<boolean>(false);
 const isSearching = ref<boolean>(false);
 const selectedSupplier = ref<InputSupplier | null>(null);
 
@@ -84,10 +74,8 @@ const debounceSearch = debounce(async () => {
     try {
         isSearching.value = true;
         await loadingSuppliers(texto.value);
-        error.value = false;
     } catch (e) {
         console.error(e);
-        error.value = true;
     } finally {
         isSearching.value = false;
     }
@@ -106,7 +94,6 @@ onMounted(async () => {
     try {
         await loadingSuppliers('');
     } catch (e) {
-        error.value = true;
         console.error(e);
     }
 });

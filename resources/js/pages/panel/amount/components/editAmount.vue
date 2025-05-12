@@ -73,6 +73,7 @@
                 </FormField>
                 <Button type="submit">Guardar Cambios</Button>
             </form>
+            <!-- {{ amountData }} -->
         </DialogContent>
     </Dialog>
 </template>
@@ -118,7 +119,7 @@ const { handleSubmit, setValues, setFieldValue } = useForm({
     validationSchema: formShema,
     initialValues: {
         description: props.amountData.description,
-        amount: props.amountData.amount,
+        amount: Number(props.amountData.amount),
         category_id: props.amountData.category_id,
         supplier_id: props.amountData.supplier_id,
         date_init: props.amountData.date_init,
@@ -133,7 +134,7 @@ watch(
                 category_id: newData.category_id,
                 supplier_id: newData.supplier_id,
                 description: newData.description,
-                amount: newData.amount,
+                amount: Number(newData.amount),
                 date_init: newData.date_init,
             });
         }

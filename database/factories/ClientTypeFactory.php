@@ -17,7 +17,7 @@ class ClientTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->text(20),
+            'name' => $this->faker->unique()->firstName(),
             'state' => $this->faker->boolean(),
         ];
     }

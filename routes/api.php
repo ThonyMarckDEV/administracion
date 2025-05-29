@@ -1,7 +1,7 @@
 <?php
 
 
-use App\Http\Controllers\Sunat\FacturationController;
+use App\Http\Controllers\Sunat\ComprobanteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,6 +10,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::post('/factura', [FacturationController::class, 'createFactura']);
+Route::post('/factura', [ComprobanteController::class, 'createFactura']);
 
-Route::post('/boleta', [FacturationController::class, 'createBoleta']);
+Route::post('/boleta', [ComprobanteController::class, 'createBoleta']);

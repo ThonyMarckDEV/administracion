@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Sunat;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreBoletaRequest;
+use App\Services\Sunat\GenerateComprobante;
 use App\Http\Requests\StoreFacturaRequest;
-use App\Services\Sunat\ComprobanteService;
+use App\Http\Requests\StoreBoletaRequest;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 
-class FacturationController extends Controller
+class ComprobanteController extends Controller
 {
     protected $comprobanteService;
 
-    public function __construct(ComprobanteService $comprobanteService)
+    public function __construct(GenerateComprobante $comprobanteService)
     {
         $this->comprobanteService = $comprobanteService;
     }
@@ -21,7 +21,7 @@ class FacturationController extends Controller
     {
         try {
             $validated = $request->validated();
-            $invoice = $this->comprobanteService->createFactura($validated);
+            $invoice = $this->comprobanteService->createComprobante($validated, 'factura');
             $result = $this->comprobanteService->sendComprobante($invoice, $validated['id_pago']);
 
             return response()->json([
@@ -41,7 +41,7 @@ class FacturationController extends Controller
     {
         try {
             $validated = $request->validated();
-            $boleta = $this->comprobanteService->createBoleta($validated);
+            $boleta = $this->comprobanteService->createComprobante($validated, 'boleta');
             $result = $this->comprobanteService->sendComprobante($boleta, $validated['id_pago']);
 
             return response()->json([

@@ -19,6 +19,9 @@ class CustomerFactory extends Factory
         return [
             'name' => $this->faker->name(),
             'codigo' => $this->faker->unique()->numerify('CUST-#####'),
+            'email' => $this->faker->unique()->safeEmail(),
+            'dni' => $this->faker->optional()->numerify('#########'),
+            'ruc' => $this->faker->optional()->numerify('1##########'),
             'client_type_id' => $this->faker->numberBetween(1, 2),
             'state' => $this->faker->boolean(),
         ];

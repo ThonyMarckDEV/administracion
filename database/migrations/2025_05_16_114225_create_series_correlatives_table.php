@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('suppliers', function (Blueprint $table) {
+        Schema::create('series_correlatives', function (Blueprint $table) {
             $table->id();
-            $table->string('name',50)->unique();
-            $table->char('ruc', 11)->unique();
-            $table->string('email')->nullable();
-            $table->string('address', 255)->nullable();
-            $table->boolean('state')->default(true)->comment('true: activo, false: inactivo');
+            $table->enum('document_type', ['B', 'F'])->comment('B: Boleta, F: Factura');
+            $table->string('serie', 10);
+            $table->unsignedBigInteger('correlative');
             $table->timestamps();
+            $table->unique(['document_type', 'serie']);
         });
     }
 
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('suppliers');
+        Schema::dropIfExists('series_correlatives');
     }
 };

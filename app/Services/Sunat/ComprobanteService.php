@@ -178,46 +178,6 @@ class ComprobanteService
         return $invoice;
     }
 
-    // public function sendComprobante(Invoice $invoice, int $idPago): array
-    // {
-    //     // Define base paths
-    //     $basePath = config('greenter.storage_path');
-    //     $facturasPath = 'facturas';
-    //     $pagoPath = "{$facturasPath}/{$idPago}";
-    //     $xmlPath = "{$pagoPath}/xml/{$invoice->getName()}.xml";
-    //     $cdrPath = "{$pagoPath}/cdr/R-{$invoice->getName()}.zip";
-
-    //     // Create directories if they don't exist
-    //     Storage::makeDirectory($facturasPath);
-    //     Storage::makeDirectory("{$pagoPath}/xml");
-    //     Storage::makeDirectory("{$pagoPath}/cdr");
-
-    //     // Send to SUNAT
-    //     $result = $this->see->send($invoice);
-
-    //     // Save XML
-    //     Storage::put($xmlPath, $this->see->getFactory()->getLastXml());
-
-    //     if (!$result->isSuccess()) {
-    //         throw new \Exception(
-    //             'SUNAT Error: Code ' . ($result->getError()->getCode() ?? 'N/A') . ' - ' . ($result->getError()->getMessage() ?? 'No message')
-    //         );
-    //     }
-
-    //     // Save CDR
-    //     Storage::put($cdrPath, $result->getCdrZip());
-
-    //     // Process CDR
-    //     $cdr = $result->getCdrResponse();
-    //     $status = $this->processCdr($cdr);
-
-    //     return [
-    //         'success' => $result->isSuccess(),
-    //         'xml_path' => Storage::path($xmlPath),
-    //         'cdr_path' => Storage::path($cdrPath),
-    //         'cdr_status' => $status,
-    //     ];
-    // }
     public function sendComprobante(Invoice $invoice, int $idPago): array
     {
         // Determine directory based on document type

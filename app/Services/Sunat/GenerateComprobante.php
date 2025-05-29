@@ -10,16 +10,15 @@ use Greenter\Model\Sale\Invoice;
 use Greenter\Model\Sale\Legend;
 use Greenter\Model\Sale\SaleDetail;
 use Greenter\See;
-use Greenter\Report\Pdf\Report; // Added for PDF generation
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
 class GenerateComprobante
 {
     protected $see;
-    protected $pdfReport;
+    protected $pdfService;
 
-    public function __construct()
+    public function __construct(GeneratePdf $pdfService)
     {
         $certificatePath = config('greenter.certificate_path');
         if (!file_exists($certificatePath)) {
@@ -35,8 +34,7 @@ class GenerateComprobante
             config('greenter.password')
         );
 
-        // Initialize PDF report
-        $this->pdfReport = new Report();
+        $this->pdfService = $pdfService;
     }
 
     /**
@@ -84,7 +82,6 @@ class GenerateComprobante
     public function sendComprobante(Invoice $invoice, int $idPago): array
     {
         $docType = $invoice->getTipoDoc() === '01' ? 'facturas' : 'boletas';
-        $basePath = config('greenter.storage_path');
         $pagoPath = "{$docType}/{$idPago}";
         $xmlPath = "{$pagoPath}/xml/{$invoice->getName()}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$invoice->getName()}.zip";
@@ -109,14 +106,13 @@ class GenerateComprobante
         Storage::put($cdrPath, $result->getCdrZip());
 
         // Generate and save PDF
-        $pdfContent = $this->pdfReport->render($invoice);
-        Storage::put($pdfPath, $pdfContent);
+        $pdfAbsolutePath = $this->pdfService->generate($invoice, $pdfPath);
 
         return [
             'success' => $result->isSuccess(),
             'xml_path' => Storage::path($xmlPath),
             'cdr_path' => Storage::path($cdrPath),
-            'pdf_path' => Storage::path($pdfPath),
+            'pdf_path' => $pdfAbsolutePath,
             'cdr_status' => $this->processCdr($result->getCdrResponse()),
         ];
     }

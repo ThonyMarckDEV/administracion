@@ -37,62 +37,59 @@ export const useSupplier = () => {
             id: 0,
             name: '',
             ruc: '',
-            address: '',
+            email: '',
+            address: null,
             state: true,
         },
     });
-        //reset supplier data
-        const resetSupplierData = () => {
-            principal.supplierData = {
-                id: 0,
-                name: '',
-                ruc: '',
-                address: '',
-                state: true,
-            };
-        };
 
-    // loading suppliers
-    const loadingSuppliers = async (page: number = 1, name: string = '', state: boolean = true) => {
-        if (state) {
-            principal.loading = true;
-            try {
-                const response = await SupplierServices.index(page, name);
-                principal.supplierList = response.suppliers;
-                principal.paginacion = response.pagination;
-                console.log(response);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                principal.loading = false;
-            }
+    // Reset supplier data
+    const resetSupplierData = () => {
+        principal.supplierData = {
+            id: 0,
+            name: '',
+            ruc: '',
+            email: '',
+            address: null,
+            state: true,
+        };
+    };
+
+    // Loading suppliers
+    const loadingSuppliers = async (page: number = 1, name: string = '') => {
+        principal.loading = true;
+        try {
+            const response = await SupplierServices.index(page, name);
+            principal.supplierList = response.suppliers;
+            principal.paginacion = response.pagination;
+        } catch (error) {
+            console.error(error);
+        } finally {
+            principal.loading = false;
         }
     };
-            // creating suppliers
-            const createSupplier = async (data: SupplierRequest) => {
-                try {
-                    await SupplierServices.store(data);
-                } catch (error) {
-                    console.error(error);
-                }
-            };
-        // get Supplier by id
-        const getSupplierById = async (id: number) => {
-            try {
-                if (id === 0) {
-                    principal.supplierData = {
-                        id: 0,
-                        name: '',
-                        ruc: '',
-                        address: '',
-                        state: true,
-                    };
-                    return;
-                }
+
+    // Creating supplier
+    const createSupplier = async (data: SupplierRequest) => {
+        try {
+            await SupplierServices.store(data);
+            showSuccessMessage('Proveedor creado', 'El proveedor se creó correctamente');
+            loadingSuppliers(principal.paginacion.current_page, principal.filter);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    // Get supplier by id
+    const getSupplierById = async (id: number) => {
+        try {
+            if (id === 0) {
+                resetSupplierData();
+                return;
+            }
             const response = await SupplierServices.show(id);
             if (response.state) {
                 principal.supplierData = response.supplier;
-                console.log(principal.supplierData.name);
                 principal.idSupplier = response.supplier.id;
                 principal.stateModal.update = true;
             }
@@ -100,12 +97,13 @@ export const useSupplier = () => {
             console.error(error);
         }
     };
-    // update supplier
+
+    // Update supplier
     const updateSupplier = async (id: number, data: SupplierUpdateRequest) => {
         try {
             const response = await SupplierServices.update(id, data);
             if (response.state) {
-                showSuccessMessage('Proveedor actualizado', 'El proveedor se actualizo correctamente');
+                showSuccessMessage('Proveedor actualizado', 'El proveedor se actualizó correctamente');
                 principal.stateModal.update = false;
                 loadingSuppliers(principal.paginacion.current_page, principal.filter);
             }
@@ -113,13 +111,13 @@ export const useSupplier = () => {
             console.error(error);
         }
     };
-    // delete supplier
+
+    // Delete supplier
     const deleteSupplier = async (id: number) => {
         try {
             const response = await SupplierServices.destroy(id);
-            console.log(response.state);
             if (response.state) {
-                showSuccessMessage('Proveedor eliminado', 'El Proveedor se elimino correctamente');
+                showSuccessMessage('Proveedor eliminado', 'El proveedor se eliminó correctamente');
                 principal.stateModal.delete = false;
                 loadingSuppliers(principal.paginacion.current_page, principal.filter);
             }
@@ -129,6 +127,7 @@ export const useSupplier = () => {
             principal.stateModal.delete = false;
         }
     };
+
     return {
         principal,
         loadingSuppliers,

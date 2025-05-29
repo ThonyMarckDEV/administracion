@@ -1,9 +1,9 @@
-import { InputClientType } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
 import { CustomerRequest, CustomerRequestUpdate, CustomerResource } from '@/pages/panel/customer/interface/Customer';
 import { CustomerServices } from '@/services/customerService';
 import { showSuccessMessage } from '@/utils/message';
 import { reactive } from 'vue';
+import { InputClientType } from '@/interface/Inputs';
 
 export const useCustomer = () => {
     const principal = reactive<{
@@ -39,6 +39,9 @@ export const useCustomer = () => {
             id: 0,
             name: '',
             codigo: '',
+            email: '',
+            dni: null,
+            ruc: null,
             client_type_id: 0,
             client_type: '',
             state: true,
@@ -47,12 +50,15 @@ export const useCustomer = () => {
         clientTypeList: [],
     });
 
-    // reset customer data
+    // Reset customer data
     const resetCustomerData = () => {
         principal.customerData = {
             id: 0,
             name: '',
             codigo: '',
+            email: '',
+            dni: null,
+            ruc: null,
             client_type_id: 0,
             client_type: '',
             state: true,
@@ -60,18 +66,16 @@ export const useCustomer = () => {
         };
     };
 
-    // loading customers
+    // Loading customers
     const loadingCustomers = async (page: number = 1, name: string = '') => {
         principal.loading = true;
         try {
             const response = await CustomerServices.index(page, name);
             principal.customerList = response.customers;
             principal.paginacion = response.pagination;
-            console.log(response);
             if (principal.clientTypeList.length === 0 && principal.paginacion.current_page === 1) {
                 const clientTypeResponse = await CustomerServices.getClientType();
                 principal.clientTypeList = clientTypeResponse.data;
-                console.log('envie la peticion');
             }
         } catch (error) {
             console.error(error);
@@ -80,16 +84,18 @@ export const useCustomer = () => {
         }
     };
 
-    // creating customer
+    // Creating customer
     const createCustomer = async (data: CustomerRequest) => {
         try {
             await CustomerServices.store(data);
+            showSuccessMessage('Cliente creado', 'El cliente se creó correctamente');
+            loadingCustomers(principal.paginacion.current_page, principal.filter);
         } catch (error) {
             console.error(error);
         }
     };
 
-    // get customer by id
+    // Get customer by id
     const getCustomerById = async (id: number) => {
         try {
             if (id === 0) {
@@ -99,12 +105,10 @@ export const useCustomer = () => {
             const response = await CustomerServices.show(id);
             if (response.status) {
                 principal.customerData = response.customer;
-                console.log(principal.customerData.name);
                 principal.idCustomer = response.customer.id;
                 if (principal.clientTypeList.length === 0) {
                     const clientTypeResponse = await CustomerServices.getClientType();
                     principal.clientTypeList = clientTypeResponse.data;
-                    console.log('envie la peticion');
                 }
                 principal.statusModal.update = true;
             }
@@ -113,7 +117,7 @@ export const useCustomer = () => {
         }
     };
 
-    // update customer
+    // Update customer
     const updateCustomer = async (id: number, data: CustomerRequestUpdate) => {
         try {
             const response = await CustomerServices.update(id, data);
@@ -129,7 +133,7 @@ export const useCustomer = () => {
         }
     };
 
-    // delete customer
+    // Delete customer
     const deleteCustomer = async (id: number) => {
         try {
             const response = await CustomerServices.destroy(id);

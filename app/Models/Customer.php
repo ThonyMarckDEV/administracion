@@ -16,6 +16,7 @@ class Customer extends Model
         'codigo',
         'email',
         'dni',
+        'ruc',
         'client_type_id',
         'state',
     ];

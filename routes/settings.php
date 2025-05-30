@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\CertificateController;
+use App\Http\Controllers\Settings\CompanyController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,9 @@ Route::middleware('auth')->group(function () {
  
     Route::get('settings/certificate', [CertificateController::class, 'edit'])->name('certificate.edit');
     Route::post('settings/certificate', [CertificateController::class, 'upload'])->name('certificate.upload');
+
+    Route::get('/settings/company', [CompanyController::class, 'edit'])->name('company.edit');
+    Route::post('/settings/company', [CompanyController::class, 'update'])->name('company.update');
 
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/Appearance');

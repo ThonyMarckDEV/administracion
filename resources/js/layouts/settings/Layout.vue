@@ -22,6 +22,10 @@ const sidebarNavItems: NavItem[] = [
         title: 'Documents',
         href: '/settings/certificate',
     },
+    {
+        title: 'My Company',
+        href: '/settings/company',
+    },
 ];
 
 const page = usePage();

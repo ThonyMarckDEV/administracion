@@ -22,9 +22,9 @@ class PaymentDocumentService
     {
         // Fetch related data
         $customer = $payment->customer;
-        $clientType = $customer->clientType;
+        $clientType = $customer ? $customer->clientType : null;
         $paymentPlan = $payment->paymentPlan;
-        $service = $paymentPlan->service;
+        $service = $paymentPlan ? $paymentPlan->service : null;
 
         // Validate related data
         if (!$customer) {
@@ -32,7 +32,7 @@ class PaymentDocumentService
             throw new \Exception('Customer not found for payment ID: ' . $payment->id);
         }
 
-        // Debug clientType relationship
+        // Debug clientType
         $rawClientType = ClientType::find($customer->client_type_id);
         Log::debug('Client type query', [
             'customer_id' => $customer->id,
@@ -48,7 +48,7 @@ class PaymentDocumentService
                 'client_type_id' => $customer->client_type_id,
                 'rawClientType' => $rawClientType ? $rawClientType->toArray() : null,
             ]);
-            $documentType = 'B'; // Fallback to boleta
+            $documentType = 'B'; // Default to boleta
             Log::warning('Using default document type (Boleta) due to missing client type', [
                 'customer_id' => $customer->id,
             ]);
@@ -80,11 +80,14 @@ class PaymentDocumentService
         $mtoOperGravadas = round($payment->amount / 1.18, 2);
         $mtoIgv = round($payment->amount - $mtoOperGravadas, 2);
         $mtoImpVenta = $payment->amount;
-        $mtoPrecioUnitario = round($mtoImpVenta / 1.18 * 1.18, 2);
+        $mtoPrecioUnitario = round($mtoImpVenta / 1.18, 2);
+
+        // Format series and correlative for SUNAT
+        $serie = $documentType === 'B' ? 'B' . $seriesCorrelative->serie : 'F' . $seriesCorrelative->serie;
+        $correlativo = (string) ($seriesCorrelative->correlative + 1); // No padding
 
         // Generate document number
-        $correlative = str_pad($seriesCorrelative->correlative, 6, '0', STR_PAD_LEFT);
-        $documentNumber = "{$seriesCorrelative->serie}-{$correlative}";
+        $documentNumber = "{$serie}-{$correlativo}";
 
         // Build the JSON structure
         $documentData = [
@@ -95,8 +98,9 @@ class PaymentDocumentService
                 'razon_social' => $customer->name,
             ],
             'tipo_operacion' => '0101',
-            'serie' => $seriesCorrelative->serie,
-            'correlativo' => $correlative,
+            'tipo_comprobante' => $documentType === 'B' ? '03' : '01',
+            'serie' => $serie,
+            'correlativo' => $correlativo,
             'fecha_emision' => Carbon::parse($payment->payment_date)->toIso8601String(),
             'tipo_moneda' => 'PEN',
             'mto_oper_gravadas' => $mtoOperGravadas,
@@ -109,12 +113,12 @@ class PaymentDocumentService
             'items' => [
                 [
                     'cod_producto' => 'P' . str_pad($service->id, 3, '0', STR_PAD_LEFT),
-                    'unidad' => 'NIU',
+                    'unidad' => 'NIU', // Adjust if needed
                     'cantidad' => 1,
                     'mto_valor_unitario' => $mtoOperGravadas,
                     'descripcion' => $service->name,
                     'mto_base_igv' => $mtoOperGravadas,
-                    'porcentaje_igv' => 18.00,
+                    'porcentaje_igv' => 18.0,
                     'igv' => $mtoIgv,
                     'tip_afe_igv' => '10',
                     'total_impuestos' => $mtoIgv,
@@ -126,7 +130,7 @@ class PaymentDocumentService
 
         // Process the comprobante
         try {
-            $type = $clientType && $clientType->name === 'Empresa' ? 'factura' : 'boleta';
+            $type = $documentType === 'F' ? 'factura' : 'boleta';
             Log::debug('Calling GenerateComprobante', [
                 'payment_id' => $payment->id,
                 'document_type' => $documentType,

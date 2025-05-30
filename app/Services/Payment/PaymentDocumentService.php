@@ -20,19 +20,19 @@ class PaymentDocumentService
 
     public function generateDocument(Payment $payment): array
     {
-        // Fetch related data
+
         $customer = $payment->customer;
         $clientType = $customer ? $customer->clienteType : null;
         $paymentPlan = $payment->paymentPlan;
         $service = $paymentPlan ? $paymentPlan->service : null;
 
-        // Validate related data
+
         if (!$customer) {
             Log::error('Customer not found for payment', ['payment_id' => $payment->id]);
             throw new \Exception('Customer not found for payment ID: ' . $payment->id);
         }
 
-        // Debug clientType
+
         $rawClientType = ClientType::find($customer->client_type_id);
         Log::debug('Client type query', [
             'customer_id' => $customer->id,
@@ -48,7 +48,7 @@ class PaymentDocumentService
                 'client_type_id' => $customer->client_type_id,
                 'rawClientType' => $rawClientType ? $rawClientType->toArray() : null,
             ]);
-            $documentType = 'B'; // Default to boleta
+            $documentType = 'B';
             Log::warning('Using default document type (Boleta) due to missing client type', [
                 'customer_id' => $customer->id,
             ]);
@@ -64,8 +64,8 @@ class PaymentDocumentService
             ]);
             throw new \Exception('Payment plan or service not found for payment ID: ' . $payment->id);
         }
-
-        // Fetch series and correlative
+        
+        // Obtener la serie y correlativo
         $seriesCorrelative = SeriesCorrelative::where('document_type', $documentType)->first();
 
         if (!$seriesCorrelative) {
@@ -76,17 +76,16 @@ class PaymentDocumentService
             throw new \Exception("No series found for document type: {$documentType}");
         }
 
-        // Calculate amounts (amount includes 18% IGV)
-        $mtoOperGravadas = round($payment->amount / 1.18, 2); // Base amount (152.54)
-        $mtoIgv = round($payment->amount - $mtoOperGravadas, 2); // IGV (27.46)
-        $mtoImpVenta = $payment->amount; // Total with IGV (180.00)
-        $mtoPrecioUnitario = $documentType === 'F' ? round($mtoOperGravadas * 1.18, 2) : $mtoOperGravadas; // IGV-inclusive for facturas
+        // Calcular montos
+        $mtoOperGravadas = round($payment->amount / 1.18, 2);
+        $mtoIgv = round($payment->amount - $mtoOperGravadas, 2);
+        $mtoImpVenta = $payment->amount;
+        $mtoPrecioUnitario = $documentType === 'F' ? round($mtoOperGravadas * 1.18, 2) : $mtoOperGravadas;
 
-        // Format series and correlative for SUNAT
+
         $serie = $documentType === 'B' ? 'B' . $seriesCorrelative->serie : 'F' . $seriesCorrelative->serie;
-        $correlativo = (string) ($seriesCorrelative->correlative + 1); // No padding
+        $correlativo = (string) ($seriesCorrelative->correlative + 1);
 
-        // Generate document number
         $documentNumber = "{$serie}-{$correlativo}";
 
         // Build the JSON structure
@@ -128,7 +127,7 @@ class PaymentDocumentService
             ],
         ];
 
-        // Process the comprobante
+
         try {
             $type = $documentType === 'F' ? 'factura' : 'boleta';
             Log::debug('Calling GenerateComprobante', [

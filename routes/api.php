@@ -10,6 +10,5 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::post('/factura', [ComprobanteController::class, 'createFactura']);
-
-Route::post('/boleta', [ComprobanteController::class, 'createBoleta']);
+Route::post('/factura', [ComprobanteController::class, 'createFactura'])->name('factura');
+Route::post('/boleta', [ComprobanteController::class, 'createBoleta'])->name('boleta');

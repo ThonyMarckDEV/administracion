@@ -25,7 +25,7 @@ class StoreFacturaRequest extends FormRequest
             'client.num_doc' => 'required|string',
             'client.razon_social' => 'required|string|max:255',
             'tipo_operacion' => 'required|string|size:4', // Ej: 0101
-            'serie' => 'required|string|size:4', // Ej: F001
+            'serie' => 'required|string', // Ej: F001
             'correlativo' => 'required|string|max:8',
             'fecha_emision' => 'required|date_format:Y-m-d\TH:i:sP', // ISO 8601
             'tipo_moneda' => 'required|string|in:PEN,USD',

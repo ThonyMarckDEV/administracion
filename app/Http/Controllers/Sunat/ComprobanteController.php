@@ -19,10 +19,16 @@ class ComprobanteController extends Controller
 
     public function createFactura(StoreFacturaRequest $request)
     {
+        $start = microtime(true);
         try {
             $validated = $request->validated();
             $invoice = $this->comprobanteService->createComprobante($validated, 'factura');
             $result = $this->comprobanteService->sendComprobante($invoice, $validated['id_pago']);
+
+            Log::info('Factura processed', [
+                'payment_id' => $validated['id_pago'],
+                'execution_time' => microtime(true) - $start,
+            ]);
 
             return response()->json([
                 'message' => 'Invoice processed successfully',
@@ -39,10 +45,16 @@ class ComprobanteController extends Controller
 
     public function createBoleta(StoreBoletaRequest $request)
     {
+        $start = microtime(true);
         try {
             $validated = $request->validated();
             $boleta = $this->comprobanteService->createComprobante($validated, 'boleta');
             $result = $this->comprobanteService->sendComprobante($boleta, $validated['id_pago']);
+            
+            Log::info('Boleta processed', [
+                'payment_id' => $validated['id_pago'],
+                'execution_time' => microtime(true) - $start,
+            ]);
 
             return response()->json([
                 'message' => 'Receipt processed successfully',

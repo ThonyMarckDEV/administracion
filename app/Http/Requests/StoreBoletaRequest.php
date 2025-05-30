@@ -19,7 +19,7 @@ class StoreBoletaRequest extends FormRequest
             'client.num_doc' => 'nullable|string',
             'client.razon_social' => 'nullable|string|max:255',
             'tipo_operacion' => 'required|string|size:4', // Ej: 0101
-            'serie' => 'required|string|regex:/^B[0-9]{3}$/', // Ej: B001
+            'serie' => 'required|string',
             'correlativo' => 'required|string|max:8',
             'fecha_emision' => 'required|date_format:Y-m-d\TH:i:sP', // ISO 8601
             'tipo_moneda' => 'required|string|in:PEN,USD',

@@ -37,4 +37,6 @@ class PaymentPlan extends Model
     public function payments(): HasMany{
         return $this->hasMany(Payment::class, 'payment_plan_id', 'id');
     }
+
+    
 }

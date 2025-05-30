@@ -9,6 +9,7 @@ use App\Http\Resources\PaymentResource;
 use App\Models\Discount;
 use App\Models\Payment;
 use App\Models\PaymentPlan;
+use App\Services\Payment\PaymentDocumentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -16,6 +17,13 @@ use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
+    protected $paymentDocumentService;
+
+    public function __construct(PaymentDocumentService $paymentDocumentService)
+    {
+        $this->paymentDocumentService = $paymentDocumentService;
+    }
+    
     /**
      * Display a listing of the resource.
      */
@@ -103,30 +111,79 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
+    // /**
+    //  * Update the specified resource in storage.
+    //  */
+    // public function update(UpdatePaymentRequest $request, Payment $payment)
+    // {
+    //     Gate::authorize('update', $payment);
+    //     $data = $request->validated();
+    //     $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
+    //     foreach ($originalFields as $field) {
+    //         if (($data[$field] ?? null) === null) {
+    //             $data[$field] = $payment->{$field};
+    //         }
+    //     }
+    //     $payment->update($data);
+    //     if (($data['service_id'] ?? null) !== null && $payment->paymentPlan) {
+    //         Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
+    //         $payment->paymentPlan->update(['service_id' => $data['service_id']]);
+    //     }
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Pago actualizado correctamente',
+    //         'payment' => new PaymentResource($payment),
+    //     ]);
+    // }
+    
+  /**
      * Update the specified resource in storage.
      */
     public function update(UpdatePaymentRequest $request, Payment $payment)
     {
-        Gate::authorize('update', $payment);
+       Gate::authorize('update', $payment);
+
         $data = $request->validated();
         $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
+
         foreach ($originalFields as $field) {
             if (($data[$field] ?? null) === null) {
                 $data[$field] = $payment->{$field};
             }
         }
+
+        $wasPendingOrVencido = in_array($payment->status, ['pendiente', 'vencido']);
+        $isNowPagado = $data['status'] === 'pagado';
+
         $payment->update($data);
+
         if (($data['service_id'] ?? null) !== null && $payment->paymentPlan) {
             Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
             $payment->paymentPlan->update(['service_id' => $data['service_id']]);
         }
 
-        return response()->json([
+        $responseData = [
             'status' => true,
             'message' => 'Pago actualizado correctamente',
             'payment' => new PaymentResource($payment),
-        ]);
+        ];
+
+        // Generate document if status changed to 'pagado'
+        if ($wasPendingOrVencido && $isNowPagado) {
+            try {
+                $documentData = $this->paymentDocumentService->generateDocument($payment);
+                $responseData['document'] = $documentData;
+            } catch (\Exception $e) {
+                Log::error('Failed to generate document', ['error' => $e->getMessage()]);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Error generating document: ' . $e->getMessage(),
+                ], 500);
+            }
+        }
+
+        return response()->json($responseData);
     }
 
     /**

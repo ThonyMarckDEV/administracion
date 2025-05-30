@@ -25,7 +25,7 @@ class Customer extends Model
         'state' => 'boolean',
     ];
 
-    public function clientType(): BelongsTo{
+    public function clienteType(): BelongsTo{
         return $this->belongsTo(ClientType::class,'client_type_id','id');
     }
 

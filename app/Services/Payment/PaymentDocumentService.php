@@ -22,7 +22,7 @@ class PaymentDocumentService
     {
         // Fetch related data
         $customer = $payment->customer;
-        $clientType = $customer ? $customer->clientType : null;
+        $clientType = $customer ? $customer->clienteType : null;
         $paymentPlan = $payment->paymentPlan;
         $service = $paymentPlan ? $paymentPlan->service : null;
 
@@ -77,10 +77,10 @@ class PaymentDocumentService
         }
 
         // Calculate amounts (amount includes 18% IGV)
-        $mtoOperGravadas = round($payment->amount / 1.18, 2);
-        $mtoIgv = round($payment->amount - $mtoOperGravadas, 2);
-        $mtoImpVenta = $payment->amount;
-        $mtoPrecioUnitario = round($mtoImpVenta / 1.18, 2);
+        $mtoOperGravadas = round($payment->amount / 1.18, 2); // Base amount (152.54)
+        $mtoIgv = round($payment->amount - $mtoOperGravadas, 2); // IGV (27.46)
+        $mtoImpVenta = $payment->amount; // Total with IGV (180.00)
+        $mtoPrecioUnitario = $documentType === 'F' ? round($mtoOperGravadas * 1.18, 2) : $mtoOperGravadas; // IGV-inclusive for facturas
 
         // Format series and correlative for SUNAT
         $serie = $documentType === 'B' ? 'B' . $seriesCorrelative->serie : 'F' . $seriesCorrelative->serie;
@@ -113,7 +113,7 @@ class PaymentDocumentService
             'items' => [
                 [
                     'cod_producto' => 'P' . str_pad($service->id, 3, '0', STR_PAD_LEFT),
-                    'unidad' => 'NIU', // Adjust if needed
+                    'unidad' => 'NIU',
                     'cantidad' => 1,
                     'mto_valor_unitario' => $mtoOperGravadas,
                     'descripcion' => $service->name,

@@ -6,6 +6,6 @@ return [
     'user' => env('SUNAT_USER', 'MODDATOS'),
     'password' => env('SUNAT_PASSWORD', 'moddatos'),
     'endpoint' => env('SUNAT_ENDPOINT', \Greenter\Ws\Services\SunatEndpoints::FE_BETA),
-    'certificate_path' => storage_path('app/public/certificates/certificate.pem'),
+    'certificate_path' => storage_path('app/public/certificates'),
     'storage_path' => storage_path('app/public/comprobantes'),
 ];

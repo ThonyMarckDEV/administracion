@@ -17,16 +17,32 @@ class GenerateComprobante
 {
     protected $see;
     protected $pdfService;
-
     public function __construct(GeneratePdf $pdfService)
     {
         $certificatePath = config('greenter.certificate_path');
-        if (!file_exists($certificatePath)) {
-            throw new InvalidArgumentException('Certificate not found at: ' . $certificatePath);
+
+        // Check if the directory exists
+        if (!file_exists($certificatePath) || !is_dir($certificatePath)) {
+            throw new InvalidArgumentException('Certificate directory not found at: ' . $certificatePath);
+        }
+
+        // Find .pem files in the directory
+        $pemFiles = glob($certificatePath . '/*.pem');
+        if (empty($pemFiles)) {
+            throw new \Exception('No .pem files found in ' . $certificatePath);
+        }
+
+        // Use the first .pem file
+        $certificateFile = $pemFiles[0];
+        $certificateContent = file_get_contents($certificateFile);
+
+        // Check if file_get_contents failed
+        if ($certificateContent === false) {
+            throw new \Exception('Failed to read certificate file: ' . $certificateFile);
         }
 
         $this->see = new See();
-        $this->see->setCertificate(file_get_contents($certificatePath));
+        $this->see->setCertificate($certificateContent);
         $this->see->setService(config('greenter.endpoint'));
         $this->see->setClaveSOL(
             config('greenter.ruc'),
@@ -36,7 +52,7 @@ class GenerateComprobante
 
         $this->pdfService = $pdfService;
     }
-
+    
     /**
      * Generate a comprobante (Factura or Boleta) based on the provided data.
      *

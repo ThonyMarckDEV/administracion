@@ -58,7 +58,7 @@ const page = usePage();
 form.ruc = page.props.company.ruc;
 form.razon_social = page.props.company.razon_social;
 form.nombre_comercial = page.props.company.nombre_comercial;
-form.ubigeo = page.props.company.address.ubigueo;
+form.ubigueo = page.props.company.address.ubigueo;
 form.departamento = page.props.company.address.departamento;
 form.provincia = page.props.company.address.provincia;
 form.distrito = page.props.company.address.distrito;
@@ -159,7 +159,7 @@ const submit = () => {
                                 <Label for="ubigeo">Ubigeo</Label>
                                 <Input
                                     id="ubigeo"
-                                    v-model="form.ubigeo"
+                                    v-model="form.ubigueo"
                                     type="text"
                                     class="mt-1 block w-full"
                                     placeholder="150101"

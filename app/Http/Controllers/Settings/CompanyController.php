@@ -12,11 +12,10 @@ class CompanyController extends Controller
 {
     public function edit()
     {
-        // Fetch the company data (assuming a single record)
         $company = MyCompany::first();
 
         if (!$company) {
-            // Create a default record if none exists
+
             $company = MyCompany::create([
                 'ruc' => '20123456789',
                 'razon_social' => 'GREEN SAC',

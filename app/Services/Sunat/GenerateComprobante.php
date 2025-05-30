@@ -2,6 +2,7 @@
 
 namespace App\Services\Sunat;
 
+use App\Models\MyCompany;
 use Greenter\Model\Client\Client;
 use Greenter\Model\Company\Address;
 use Greenter\Model\Company\Company;
@@ -44,8 +45,15 @@ class GenerateComprobante
         $this->see = new See();
         $this->see->setCertificate($certificateContent);
         $this->see->setService(config('greenter.endpoint'));
+
+        // Fetch company RUC from MyCompany table
+        $company = MyCompany::first();
+        if (!$company) {
+            throw new \Exception('No company record found in mycompany table.');
+        }
+
         $this->see->setClaveSOL(
-            config('greenter.ruc'),
+            $company->ruc,
             config('greenter.user'),
             config('greenter.password')
         );
@@ -70,8 +78,8 @@ class GenerateComprobante
         // Client setup
         $client = $this->buildClient($data['client'], $type);
 
-        // Company setup
-        $company = $this->buildCompany($data['company']);
+        // Company setup from MyCompany table
+        $company = $this->buildCompany();
 
         // Invoice setup
         $invoice = $this->buildInvoice($data, $type, $client, $company);
@@ -158,26 +166,32 @@ class GenerateComprobante
     }
 
     /**
-     * Build the Company object.
+     * Build the Company object from MyCompany table.
      *
-     * @param array $companyData
      * @return Company
+     * @throws \Exception
      */
-    protected function buildCompany(array $companyData): Company
+    protected function buildCompany(): Company
     {
+        $companyData = MyCompany::first();
+
+        if (!$companyData) {
+            throw new \Exception('No company record found in mycompany table.');
+        }
+
         $address = (new Address())
-            ->setUbigueo($companyData['address']['ubigueo'])
-            ->setDepartamento($companyData['address']['departamento'])
-            ->setProvincia($companyData['address']['provincia'])
-            ->setDistrito($companyData['address']['distrito'])
-            ->setUrbanizacion($companyData['address']['urbanizacion'])
-            ->setDireccion($companyData['address']['direccion'])
-            ->setCodLocal($companyData['address']['cod_local']);
+            ->setUbigueo($companyData->ubigeo)
+            ->setDepartamento($companyData->departamento)
+            ->setProvincia($companyData->provincia)
+            ->setDistrito($companyData->distrito)
+            ->setUrbanizacion($companyData->urbanizacion)
+            ->setDireccion($companyData->direccion)
+            ->setCodLocal($companyData->cod_local);
 
         return (new Company())
-            ->setRuc($companyData['ruc'])
-            ->setRazonSocial($companyData['razon_social'])
-            ->setNombreComercial($companyData['nombre_comercial'])
+            ->setRuc($companyData->ruc)
+            ->setRazonSocial($companyData->razon_social)
+            ->setNombreComercial($companyData->nombre_comercial)
             ->setAddress($address);
     }
 

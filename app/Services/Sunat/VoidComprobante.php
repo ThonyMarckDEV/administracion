@@ -4,6 +4,7 @@ namespace App\Services\Sunat;
 
 use App\Models\MyCompany;
 use App\Models\Invoice;
+use App\Models\VoidedDocument;
 use Greenter\Model\Voided\Voided;
 use Greenter\Model\Voided\VoidedDetail;
 use Greenter\Model\Company\Company;
@@ -112,16 +113,19 @@ class VoidComprobante
 
         $voided->setDetails($details);
 
-        $pagoPath = "voided/{$voided->getName()}";
-        $xmlPath = "{$pagoPath}/xml/{$voided->getName()}.xml";
-        $cdrPath = "{$pagoPath}/cdr/R-{$voided->getName()}.zip";
+        // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
+        $ruc = $company->getRuc();
+        $filename = "{$ruc}-RA-{$fec_comunicacion}-{$correlativo_baja}";
+        $pagoPath = "voided/{$filename}";
+        $xmlPath = "{$pagoPath}/xml/{$filename}.xml";
+        $cdrPath = "{$pagoPath}/cdr/R-{$filename}.zip";
 
         Storage::makeDirectory("{$pagoPath}/xml");
         Storage::makeDirectory("{$pagoPath}/cdr");
 
         // Send to SUNAT
         Log::debug('Sending voided document to SUNAT', [
-            'name' => $voided->getName(),
+            'name' => $filename,
             'invoice_id' => $data['invoice_id'],
             'tipo_doc' => $tipo_doc,
             'correlativo_baja' => $correlativo_baja,
@@ -164,6 +168,19 @@ class VoidComprobante
         Log::debug('SUNAT Status Success', ['ticket' => $ticket, 'cdr_response' => $statusResult->getCdrResponse()->getDescription()]);
         Storage::put($cdrPath, $statusResult->getCdrZip());
 
+        // Save voided document to database
+        VoidedDocument::create([
+            'invoice_id' => $invoice->id,
+            'correlativo_baja' => "RA-{$fec_comunicacion}-{$correlativo_baja}",
+            'fec_generacion' => $fec_generacion,
+            'fec_comunicacion' => $fec_comunicacion,
+            'motivo' => $data['motivo'],
+            'xml_path' => $xmlPath,
+            'cdr_path' => $cdrPath,
+            'ticket' => $ticket,
+            'status' => $statusResult->isSuccess() ? 'accepted' : 'rejected',
+        ]);
+
         // Update invoice status
         $this->updateVoidedInvoice($invoice, $statusResult->getCdrResponse());
 
@@ -205,9 +222,17 @@ class VoidComprobante
      */
     protected function generateCorrelativoBaja(): string
     {
-        // Simple implementation: use a fixed value or increment
-        // You can enhance this with a database counter or unique logic
-        return '1'; // Adjust based on your requirements
+        $date = \Carbon\Carbon::today()->format('Ymd'); // Formato YYYYMMDD
+        $prefix = "RA-{$date}-";
+        
+        $lastVoided = VoidedDocument::where('correlativo_baja', 'like', "{$prefix}%")
+            ->orderBy('correlativo_baja', 'desc')
+            ->first();
+
+        $lastNumber = $lastVoided ? (int) substr($lastVoided->correlativo_baja, -3) : 0;
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        return $newNumber; // Ejemplo: 001
     }
 
     protected function buildCompany(): Company

@@ -97,71 +97,79 @@ class InvoiceController extends Controller
             'message' => 'Comprobante anulado correctamente',
         ]);
     }
-
+    
     /**
-     * Serve PDF for viewing.
+     * Servir PDF para visualización.
      */
     public function viewPdf(Invoice $invoice): StreamedResponse
     {
         Gate::authorize('view', $invoice);
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "private/{$docType}/{$invoice->payment_id}/pdf";
+        $folderPath = "public/{$docType}/{$invoice->payment_id}/pdf";
 
-        $files = Storage::disk('private')->files($folderPath);
+        // Obtener archivos en la carpeta
+        $files = Storage::disk('public')->files($folderPath);
         $pdfFile = array_filter($files, fn($file) => str_ends_with($file, '.pdf'));
 
         if (empty($pdfFile)) {
             abort(404, 'PDF no encontrado');
         }
 
-        $pdfPath = reset($pdfFile); // Get the first PDF file
+        $pdfPath = reset($pdfFile); // Obtener el primer archivo PDF
 
-        return Storage::disk('private')->response($pdfPath, null, [
+        return Storage::disk('public')->response($pdfPath, null, [
             'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
         ]);
     }
 
     /**
-     * Download XML file.
+     * Descargar archivo XML.
      */
     public function downloadXml(Invoice $invoice): StreamedResponse
     {
         Gate::authorize('view', $invoice);
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "private/{$docType}/{$invoice->payment_id}/xml";
+        $folderPath = "public/{$docType}/{$invoice->payment_id}/xml";
 
-        $files = Storage::disk('private')->files($folderPath);
+        // Obtener archivos en la carpeta
+        $files = Storage::disk('public')->files($folderPath);
         $xmlFile = array_filter($files, fn($file) => str_ends_with($file, '.xml'));
 
         if (empty($xmlFile)) {
             abort(404, 'XML no encontrado');
         }
 
-        $xmlPath = reset($xmlFile); // Get the first XML file
+        $xmlPath = reset($xmlFile); // Obtener el primer archivo XML
         $fileName = basename($xmlPath);
 
-        return Storage::disk('private')->download($xmlPath, $fileName);
+        return Storage::disk('public')->download($xmlPath, $fileName, [
+            'Content-Type' => 'application/xml',
+        ]);
     }
 
     /**
-     * Download CDR file.
+     * Descargar archivo CDR (ZIP).
      */
     public function downloadCdr(Invoice $invoice): StreamedResponse
     {
         Gate::authorize('view', $invoice);
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "private/{$docType}/{$invoice->payment_id}/cdr";
+        $folderPath = "public/{$docType}/{$invoice->payment_id}/cdr";
 
-        $files = Storage::disk('private')->files($folderPath);
+        // Obtener archivos en la carpeta
+        $files = Storage::disk('public')->files($folderPath);
         $zipFile = array_filter($files, fn($file) => str_ends_with($file, '.zip'));
 
         if (empty($zipFile)) {
             abort(404, 'CDR no encontrado');
         }
 
-        $cdrPath = reset($zipFile); // Get the first ZIP file
+        $cdrPath = reset($zipFile); // Obtener el primer archivo ZIP
         $fileName = basename($cdrPath);
 
-        return Storage::disk('private')->download($cdrPath, $fileName);
+        return Storage::disk('public')->download($cdrPath, $fileName, [
+            'Content-Type' => 'application/zip',
+        ]);
     }
 }

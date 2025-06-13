@@ -16,4 +16,25 @@ export const InvoiceServices = {
         const response = await axios.post(`/panel/invoices/${id}/annul`);
         return response.data;
     },
+
+    async viewPdf(paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${paymentId}/pdf`, {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
+
+    async downloadXml(paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${paymentId}/xml`, {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
+
+    async downloadCdr(paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${paymentId}/cdr`, {
+            responseType: 'blob',
+        });
+        return response.data;
+    },
 };

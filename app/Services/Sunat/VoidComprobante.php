@@ -195,7 +195,7 @@ class VoidComprobante
         }
 
         Log::debug('SUNAT Status Success', ['ticket' => $ticket, 'cdr_response' => $statusResult->getCdrResponse()->getDescription()]);
-        Storage::put($cdrPath, $statusResult->getCdrZip());
+        Storage::disk('public')->put($cdrPath, $statusResult->getCdrZip());
 
         // Save voided document to database
         VoidedDocument::create([
@@ -216,8 +216,8 @@ class VoidComprobante
         return [
             'success' => $statusResult->isSuccess(),
             'ticket' => $ticket,
-            'xml_path' => Storage::path($xmlPath),
-            'cdr_path' => Storage::path($cdrPath),
+            'xml_path' => Storage::disk('public')->path($xmlPath),
+            'cdr_path' => Storage::disk('public')->path($cdrPath),
             'cdr_status' => $this->processCdr($statusResult->getCdrResponse()),
         ];
     }

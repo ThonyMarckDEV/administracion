@@ -156,7 +156,7 @@ class VoidComprobante
         // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
         $ruc = $company->getRuc();
         $filename = "{$ruc}-RA-{$fec_comunicacion}-{$correlativo_baja}";
-        $pagoPath = "{$docType}/{$invoice->payment_id}/voided/{$filename}";
+        $pagoPath = "{$docType}/{$invoice->payment_id}/voided";
         $xmlPath = "{$pagoPath}/xml/{$filename}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$filename}.zip";
 

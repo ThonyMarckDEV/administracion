@@ -3,6 +3,7 @@
 namespace App\Services\Sunat;
 
 use App\Models\MyCompany;
+use App\Models\Invoice as InvoiceModel;
 use Greenter\Model\Client\Client;
 use Greenter\Model\Company\Address;
 use Greenter\Model\Company\Company;
@@ -18,26 +19,23 @@ class GenerateComprobante
 {
     protected $see;
     protected $pdfService;
+
     public function __construct(GeneratePdf $pdfService)
     {
         $certificatePath = config('greenter.certificate_path');
 
-        // Check if the directory exists
         if (!file_exists($certificatePath) || !is_dir($certificatePath)) {
             throw new InvalidArgumentException('Certificate directory not found at: ' . $certificatePath);
         }
 
-        // Find .pem files in the directory
         $pemFiles = glob($certificatePath . '/*.pem');
         if (empty($pemFiles)) {
             throw new \Exception('No .pem files found in ' . $certificatePath);
         }
 
-        // Use the first .pem file
         $certificateFile = $pemFiles[0];
         $certificateContent = file_get_contents($certificateFile);
 
-        // Check if file_get_contents failed
         if ($certificateContent === false) {
             throw new \Exception('Failed to read certificate file: ' . $certificateFile);
         }
@@ -46,7 +44,6 @@ class GenerateComprobante
         $this->see->setCertificate($certificateContent);
         $this->see->setService(config('greenter.endpoint'));
 
-        // Fetch company RUC from MyCompany table
         $company = MyCompany::first();
         if (!$company) {
             throw new \Exception('No company record found in mycompany table.');
@@ -60,34 +57,17 @@ class GenerateComprobante
 
         $this->pdfService = $pdfService;
     }
-    
-    /**
-     * Generate a comprobante (Factura or Boleta) based on the provided data.
-     *
-     * @param array $data Validated request data
-     * @param string $type Comprobante type ('factura' or 'boleta')
-     * @return Invoice
-     * @throws InvalidArgumentException
-     */
+
     public function createComprobante(array $data, string $type): Invoice
     {
         if (!in_array($type, ['factura', 'boleta'])) {
             throw new InvalidArgumentException('Invalid comprobante type. Use "factura" or "boleta".');
         }
 
-        // Client setup
         $client = $this->buildClient($data['client'], $type);
-
-        // Company setup from MyCompany table
         $company = $this->buildCompany();
-
-        // Invoice setup
         $invoice = $this->buildInvoice($data, $type, $client, $company);
-
-        // Items setup
         $details = $this->buildSaleDetails($data['items']);
-
-        // Legend setup
         $legend = (new Legend())
             ->setCode('1000')
             ->setValue($data['legend_value']);
@@ -95,14 +75,6 @@ class GenerateComprobante
         return $invoice->setDetails($details)->setLegends([$legend]);
     }
 
-    /**
-     * Send the comprobante to SUNAT, store XML, CDR, and generate PDF.
-     *
-     * @param Invoice $invoice
-     * @param int $idPago
-     * @return array
-     * @throws \Exception
-     */
     public function sendComprobante(Invoice $invoice, int $idPago): array
     {
         $docType = $invoice->getTipoDoc() === '01' ? 'facturas' : 'boletas';
@@ -111,12 +83,10 @@ class GenerateComprobante
         $cdrPath = "{$pagoPath}/cdr/R-{$invoice->getName()}.zip";
         $pdfPath = "{$pagoPath}/pdf/{$invoice->getName()}.pdf";
 
-        // Create directories
         Storage::makeDirectory("{$pagoPath}/xml");
         Storage::makeDirectory("{$pagoPath}/cdr");
         Storage::makeDirectory("{$pagoPath}/pdf");
 
-        // Send to SUNAT
         $result = $this->see->send($invoice);
         Storage::put($xmlPath, $this->see->getFactory()->getLastXml());
 
@@ -126,11 +96,9 @@ class GenerateComprobante
             );
         }
 
-        // Save CDR
         Storage::put($cdrPath, $result->getCdrZip());
-
-        // Generate and save PDF
         $pdfAbsolutePath = $this->pdfService->generate($invoice, $pdfPath);
+        $this->storeInvoice($invoice, $idPago, $result);
 
         return [
             'success' => $result->isSuccess(),
@@ -141,13 +109,20 @@ class GenerateComprobante
         ];
     }
 
-    /**
-     * Build the Client object.
-     *
-     * @param array $clientData
-     * @param string $type
-     * @return Client
-     */
+    protected function storeInvoice(Invoice $invoice, int $idPago, $result): void
+    {
+        $cdrStatus = $this->processCdr($result->getCdrResponse());
+        $documentType = $invoice->getTipoDoc() === '01' ? 'F' : 'B'; // 'F' for factura, 'B' for boleta
+
+        InvoiceModel::create([
+            'payment_id' => $idPago,
+            'document_type' => $documentType,
+            'serie_assigned' => $invoice->getSerie(),
+            'correlative_assigned' => $invoice->getCorrelativo(),
+            'sunat' => $cdrStatus['estado'] === 'ACCEPTED' ? 'enviado' : 'anulado',
+        ]);
+    }
+
     protected function buildClient(array $clientData, string $type): Client
     {
         $client = new Client();
@@ -165,12 +140,6 @@ class GenerateComprobante
             ->setRznSocial($clientData['razon_social']);
     }
 
-    /**
-     * Build the Company object from MyCompany table.
-     *
-     * @return Company
-     * @throws \Exception
-     */
     protected function buildCompany(): Company
     {
         $companyData = MyCompany::first();
@@ -195,15 +164,6 @@ class GenerateComprobante
             ->setAddress($address);
     }
 
-    /**
-     * Build the Invoice object.
-     *
-     * @param array $data
-     * @param string $type
-     * @param Client $client
-     * @param Company $company
-     * @return Invoice
-     */
     protected function buildInvoice(array $data, string $type, Client $client, Company $company): Invoice
     {
         return (new Invoice())
@@ -225,12 +185,6 @@ class GenerateComprobante
             ->setMtoImpVenta($data['mto_imp_venta']);
     }
 
-    /**
-     * Build SaleDetail objects from items data.
-     *
-     * @param array $items
-     * @return array
-     */
     protected function buildSaleDetails(array $items): array
     {
         return array_map(function ($itemData) {
@@ -250,12 +204,6 @@ class GenerateComprobante
         }, $items);
     }
 
-    /**
-     * Process the CDR response from SUNAT.
-     *
-     * @param mixed $cdr
-     * @return array
-     */
     protected function processCdr($cdr): array
     {
         $code = (int) $cdr->getCode();

@@ -18,8 +18,6 @@ return new class extends Migration
             $table->date('fec_generacion')->comment('Fecha de generación del comprobante');
             $table->date('fec_comunicacion')->comment('Fecha de comunicación a SUNAT');
             $table->string('motivo')->comment('Motivo de la anulación');
-            $table->string('xml_path')->nullable()->comment('Ruta del archivo XML generado');
-            $table->string('cdr_path')->nullable()->comment('Ruta del archivo CDR (respuesta de SUNAT)');
             $table->string('ticket')->nullable()->comment('Ticket de SUNAT para el comunicado de baja');
             $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending')->comment('Estado del comunicado ante SUNAT');
             $table->timestamps();

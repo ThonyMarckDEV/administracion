@@ -28,8 +28,6 @@ class VoidedDocument extends Model
         'fec_generacion',
         'fec_comunicacion',
         'motivo',
-        'xml_path',
-        'cdr_path',
         'ticket',
         'status',
     ];

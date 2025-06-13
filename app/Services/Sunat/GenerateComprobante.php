@@ -12,6 +12,7 @@ use Greenter\Model\Sale\Invoice;
 use Greenter\Model\Sale\Legend;
 use Greenter\Model\Sale\SaleDetail;
 use Greenter\See;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
@@ -145,7 +146,7 @@ class GenerateComprobante
         }
 
         $address = (new Address())
-            ->setUbigueo($companyData->ubigeo)
+            ->setUbigueo($companyData->ubigueo)
             ->setDepartamento($companyData->departamento)
             ->setProvincia($companyData->provincia)
             ->setDistrito($companyData->distrito)
@@ -160,43 +161,99 @@ class GenerateComprobante
             ->setAddress($address);
     }
 
+
     protected function buildInvoice(array $data, string $type, Client $client, Company $company): Invoice
     {
+        // Validar datos monetarios
+        $mto_oper_gravadas = (float) ($data['mto_oper_gravadas'] ?? 0);
+        $mto_igv = (float) ($data['mto_igv'] ?? 0);
+        $total_impuestos = (float) ($data['total_impuestos'] ?? 0);
+        $valor_venta = (float) ($data['valor_venta'] ?? 0);
+        $sub_total = (float) ($data['sub_total'] ?? 0);
+        $mto_imp_venta = (float) ($data['mto_imp_venta'] ?? 0);
+
+        // Validar consistencia
+        if (abs($mto_oper_gravadas + $mto_igv - $mto_imp_venta) > 0.01) {
+            Log::error('Inconsistencia en los totales del comprobante', [
+                'mto_oper_gravadas' => $mto_oper_gravadas,
+                'mto_igv' => $mto_igv,
+                'mto_imp_venta' => $mto_imp_venta,
+            ]);
+            throw new \Exception('Los totales del comprobante no son consistentes');
+        }
+
         return (new Invoice())
             ->setUblVersion('2.1')
-            ->setTipoOperacion($data['tipo_operacion'])
+            ->setTipoOperacion($data['tipo_operacion'] ?? '0101') // Venta interna por defecto
             ->setTipoDoc($type === 'factura' ? '01' : '03')
             ->setSerie($data['serie'])
             ->setCorrelativo($data['correlativo'])
             ->setFechaEmision(new \DateTime($data['fecha_emision']))
             ->setFormaPago(new FormaPagoContado())
-            ->setTipoMoneda($data['tipo_moneda'])
+            ->setTipoMoneda($data['tipo_moneda'] ?? 'PEN')
             ->setCompany($company)
             ->setClient($client)
-            ->setMtoOperGravadas($data['mto_oper_gravadas'])
-            ->setMtoIGV($data['mto_igv'])
-            ->setTotalImpuestos($data['total_impuestos'])
-            ->setValorVenta($data['valor_venta'])
-            ->setSubTotal($data['sub_total'])
-            ->setMtoImpVenta($data['mto_imp_venta']);
+            ->setMtoOperGravadas($mto_oper_gravadas)
+            ->setMtoIGV($mto_igv)
+            ->setTotalImpuestos($total_impuestos)
+            ->setValorVenta($valor_venta)
+            ->setSubTotal($sub_total)
+            ->setMtoImpVenta($mto_imp_venta);
     }
+
 
     protected function buildSaleDetails(array $items): array
     {
         return array_map(function ($itemData) {
+            // Validar datos requeridos
+            if (!isset($itemData['cantidad'], $itemData['mto_valor_unitario'], $itemData['porcentaje_igv'])) {
+                throw new \Exception('Faltan datos requeridos en el ítem: cantidad, mto_valor_unitario o porcentaje_igv');
+            }
+
+            $cantidad = (float) $itemData['cantidad'];
+            $mto_valor_unitario = (float) $itemData['mto_valor_unitario'];
+            $porcentaje_igv = (float) ($itemData['porcentaje_igv'] ?? 18); // IGV por defecto 18%
+
+            // Calcular mto_precio_unitario (incluye IGV)
+            $mto_precio_unitario = round($mto_valor_unitario * (1 + $porcentaje_igv / 100), 2);
+
+            // Calcular mto_base_igv
+            $mto_base_igv = round($mto_valor_unitario * $cantidad, 2);
+
+            // Calcular IGV
+            $igv = round($mto_base_igv * ($porcentaje_igv / 100), 2);
+
+            // Calcular total_impuestos
+            $total_impuestos = $igv;
+
+            // Calcular mto_valor_venta
+            $mto_valor_venta = $mto_base_igv;
+
+            // Log para depuración
+            Log::debug('Cálculos del ítem', [
+                'cod_producto' => $itemData['cod_producto'] ?? 'N/A',
+                'cantidad' => $cantidad,
+                'mto_valor_unitario' => $mto_valor_unitario,
+                'mto_precio_unitario' => $mto_precio_unitario,
+                'mto_base_igv' => $mto_base_igv,
+                'igv' => $igv,
+                'total_impuestos' => $total_impuestos,
+                'mto_valor_venta' => $mto_valor_venta,
+            ]);
+
             return (new SaleDetail())
-                ->setCodProducto($itemData['cod_producto'])
-                ->setUnidad($itemData['unidad'])
-                ->setCantidad($itemData['cantidad'])
-                ->setMtoValorUnitario($itemData['mto_valor_unitario'])
-                ->setDescripcion($itemData['descripcion'])
-                ->setMtoBaseIgv($itemData['mto_base_igv'])
-                ->setPorcentajeIgv($itemData['porcentaje_igv'])
-                ->setIgv($itemData['igv'])
-                ->setTipAfeIgv($itemData['tip_afe_igv'])
-                ->setTotalImpuestos($itemData['total_impuestos'])
-                ->setMtoValorVenta($itemData['mto_valor_venta'])
-                ->setMtoPrecioUnitario($itemData['mto_precio_unitario']);
+                ->setCodProducto($itemData['cod_producto'] ?? '-')
+                ->setUnidad($itemData['unidad'] ?? 'NIU')
+                ->setCantidad($cantidad)
+                ->setMtoValorUnitario($mto_valor_unitario)
+                ->setDescripcion($itemData['descripcion'] ?? 'Servicio')
+                ->setMtoBaseIgv($mto_base_igv)
+                ->setPorcentajeIgv($porcentaje_igv)
+                ->setIgv($igv)
+                ->setTipAfeIgv($itemData['tip_afe_igv'] ?? '10') // Gravado - Operación Onerosa
+                ->setTotalImpuestos($total_impuestos)
+                ->setMtoValorVenta($mto_valor_venta)
+                ->setMtoPrecioUnitario($mto_precio_unitario);
         }, $items);
     }
 

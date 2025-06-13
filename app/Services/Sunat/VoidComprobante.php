@@ -77,6 +77,26 @@ class VoidComprobante
             default => throw new \Exception('Invalid document type: ' . $invoice->document_type),
         };
 
+        // Validar formato de serie
+        if (!preg_match('/^[FB]\d{3}$/', $invoice->serie_assigned)) {
+            Log::error('Formato de serie inválido', [
+                'invoice_id' => $invoice->id,
+                'serie' => $invoice->serie_assigned,
+            ]);
+            throw new \Exception('La serie asignada no cumple con el formato esperado (F/B seguido de 3 dígitos)');
+        }
+
+        // Validar consistencia entre tipo_doc y serie
+        if (($tipo_doc === '01' && !str_starts_with($invoice->serie_assigned, 'F')) ||
+            ($tipo_doc === '03' && !str_starts_with($invoice->serie_assigned, 'B'))) {
+            Log::error('Inconsistencia entre tipo_doc y serie', [
+                'invoice_id' => $invoice->id,
+                'tipo_doc' => $tipo_doc,
+                'serie' => $invoice->serie_assigned,
+            ]);
+            throw new \Exception('El tipo de documento no coincide con la serie asignada');
+        }
+
         Log::debug('Preparing to void invoice', [
             'invoice_id' => $invoice->id,
             'document_type' => $invoice->document_type,
@@ -137,6 +157,7 @@ class VoidComprobante
         $xmlContent = $this->see->getFactory()->getLastXml();
         Storage::put($xmlPath, $xmlContent);
         Log::debug('Generated XML', ['xml' => $xmlContent]);
+
 
         if (!$result->isSuccess()) {
             Log::error('SUNAT Send Error', [
@@ -244,7 +265,7 @@ class VoidComprobante
         }
 
         $address = (new Address())
-            ->setUbigueo($companyData->ubigeo)
+            ->setUbigueo($companyData->ubigueo)
             ->setDepartamento($companyData->departamento)
             ->setProvincia($companyData->provincia)
             ->setDistrito($companyData->distrito)

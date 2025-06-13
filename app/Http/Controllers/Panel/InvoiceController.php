@@ -97,19 +97,26 @@ class InvoiceController extends Controller
             'message' => 'Comprobante anulado correctamente',
         ]);
     }
-    
-    /**
+
+
+/**
      * Servir PDF para visualización.
      */
-    public function viewPdf(Invoice $invoice): StreamedResponse
+    public function viewPdf(Invoice $invoice, $payment_id): StreamedResponse
     {
         Gate::authorize('view', $invoice);
+
+        // Validar que el payment_id coincide con el de la factura
+        if ($invoice->payment_id != $payment_id) {
+            abort(404, 'ID de pago no coincide con la factura');
+        }
+
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "public/{$docType}/{$invoice->payment_id}/pdf";
+        $folderPath = "{$docType}/{$payment_id}/pdf";
 
         // Obtener archivos en la carpeta
         $files = Storage::disk('public')->files($folderPath);
-        $pdfFile = array_filter($files, fn($file) => str_ends_with($file, '.pdf'));
+        $pdfFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.pdf'));
 
         if (empty($pdfFile)) {
             abort(404, 'PDF no encontrado');
@@ -126,15 +133,21 @@ class InvoiceController extends Controller
     /**
      * Descargar archivo XML.
      */
-    public function downloadXml(Invoice $invoice): StreamedResponse
+    public function downloadXml(Invoice $invoice, $payment_id): StreamedResponse
     {
         Gate::authorize('view', $invoice);
+
+        // Validar que el payment_id coincide con el de la factura
+        if ($invoice->payment_id != $payment_id) {
+            abort(404, 'ID de pago no coincide con la factura');
+        }
+
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "public/{$docType}/{$invoice->payment_id}/xml";
+        $folderPath = "{$docType}/{$payment_id}/xml";
 
         // Obtener archivos en la carpeta
         $files = Storage::disk('public')->files($folderPath);
-        $xmlFile = array_filter($files, fn($file) => str_ends_with($file, '.xml'));
+        $xmlFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.xml'));
 
         if (empty($xmlFile)) {
             abort(404, 'XML no encontrado');
@@ -151,15 +164,21 @@ class InvoiceController extends Controller
     /**
      * Descargar archivo CDR (ZIP).
      */
-    public function downloadCdr(Invoice $invoice): StreamedResponse
+    public function downloadCdr(Invoice $invoice, $payment_id): StreamedResponse
     {
         Gate::authorize('view', $invoice);
+
+        // Validar que el payment_id coincide con el de la factura
+        if ($invoice->payment_id != $payment_id) {
+            abort(404, 'ID de pago no coincide con la factura');
+        }
+
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "public/{$docType}/{$invoice->payment_id}/cdr";
+        $folderPath = "{$docType}/{$payment_id}/cdr";
 
         // Obtener archivos en la carpeta
         $files = Storage::disk('public')->files($folderPath);
-        $zipFile = array_filter($files, fn($file) => str_ends_with($file, '.zip'));
+        $zipFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.zip'));
 
         if (empty($zipFile)) {
             abort(404, 'CDR no encontrado');
@@ -172,4 +191,6 @@ class InvoiceController extends Controller
             'Content-Type' => 'application/zip',
         ]);
     }
+
+
 }

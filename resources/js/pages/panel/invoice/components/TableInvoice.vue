@@ -1,4 +1,3 @@
-```vue
 <template>
     <div class="container mx-auto px-4">
         <LoadingTable v-if="loading" :headers="12" :row-count="10" />
@@ -72,7 +71,7 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-                                    @click="openPdfModal(invoice.payment_id)"
+                                    @click="openPdfModal(invoice.id, invoice.payment_id)"
                                     title="Ver PDF"
                                 >
                                     <FileText class="h-[16px] w-[16px]" />
@@ -82,7 +81,7 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30"
-                                    @click="downloadXml(invoice.payment_id)"
+                                    @click="downloadXml(invoice.id, invoice.payment_id)"
                                     title="Descargar XML"
                                 >
                                     <FileCode class="h-[16px] w-[16px]" />
@@ -92,7 +91,7 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30"
-                                    @click="downloadCdr(invoice.payment_id)"
+                                    @click="downloadCdr(invoice.id, invoice.payment_id)"
                                     title="Descargar CDR"
                                 >
                                     <FileArchive class="h-[16px] w-[16px]" />
@@ -150,9 +149,9 @@ const emit = defineEmits<{
 const showPdfModal = ref(false);
 const pdfUrl = ref<string | null>(null);
 
-const openPdfModal = async (paymentId: number) => {
+const openPdfModal = async (invoiceId: number, paymentId: number) => {
     try {
-        const blob = await InvoiceServices.viewPdf(paymentId);
+        const blob = await InvoiceServices.viewPdf(invoiceId, paymentId);
         pdfUrl.value = URL.createObjectURL(blob);
         showPdfModal.value = true;
     } catch (error) {
@@ -169,9 +168,9 @@ const closePdfModal = () => {
     showPdfModal.value = false;
 };
 
-const downloadXml = async (paymentId: number) => {
+const downloadXml = async (invoiceId: number, paymentId: number) => {
     try {
-        const blob = await InvoiceServices.downloadXml(paymentId);
+        const blob = await InvoiceServices.downloadXml(invoiceId, paymentId);
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -186,9 +185,9 @@ const downloadXml = async (paymentId: number) => {
     }
 };
 
-const downloadCdr = async (paymentId: number) => {
+const downloadCdr = async (invoiceId: number, paymentId: number) => {
     try {
-        const blob = await InvoiceServices.downloadCdr(paymentId);
+        const blob = await InvoiceServices.downloadCdr(invoiceId, paymentId);
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -203,4 +202,3 @@ const downloadCdr = async (paymentId: number) => {
     }
 };
 </script>
-```

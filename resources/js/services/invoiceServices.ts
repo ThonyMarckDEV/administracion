@@ -17,22 +17,22 @@ export const InvoiceServices = {
         return response.data;
     },
 
-    async viewPdf(paymentId: number): Promise<Blob> {
-        const response = await axios.get(`/panel/invoices/${paymentId}/pdf`, {
+    async viewPdf(invoiceId: number, paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${invoiceId}/pdf/${paymentId}`, {
             responseType: 'blob',
         });
         return response.data;
     },
 
-    async downloadXml(paymentId: number): Promise<Blob> {
-        const response = await axios.get(`/panel/invoices/${paymentId}/xml`, {
+    async downloadXml(invoiceId: number, paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${invoiceId}/xml/${paymentId}`, {
             responseType: 'blob',
         });
         return response.data;
     },
 
-    async downloadCdr(paymentId: number): Promise<Blob> {
-        const response = await axios.get(`/panel/invoices/${paymentId}/cdr`, {
+    async downloadCdr(invoiceId: number, paymentId: number): Promise<Blob> {
+        const response = await axios.get(`/panel/invoices/${invoiceId}/cdr/${paymentId}`, {
             responseType: 'blob',
         });
         return response.data;

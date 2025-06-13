@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Carbon\Carbon;
+use Exception;
 
 class VoidComprobante
 {
@@ -30,23 +31,27 @@ class VoidComprobante
 
         $pemFiles = glob($certificatePath . '/*.pem');
         if (empty($pemFiles)) {
-            throw new \Exception('No .pem files found in ' . $certificatePath);
+            throw new Exception('No .pem files found in ' . $certificatePath);
         }
 
         $certificateFile = $pemFiles[0];
         $certificateContent = file_get_contents($certificateFile);
 
         if ($certificateContent === false) {
-            throw new \Exception('Failed to read certificate file: ' . $certificateFile);
+            throw new Exception('Failed to read certificate file: ' . $certificateFile);
         }
 
         $this->see = new See();
         $this->see->setCertificate($certificateContent);
-        $this->see->setService(config('greenter.endpoint'));
+        $endpoint = config('greenter.endpoint');
+        if (empty($endpoint)) {
+            throw new Exception('Greenter endpoint not configured');
+        }
+        $this->see->setService($endpoint);
 
         $company = MyCompany::first();
         if (!$company) {
-            throw new \Exception('No company record found in mycompany table.');
+            throw new Exception('No company record found in mycompany table.');
         }
 
         $this->see->setClaveSOL(
@@ -63,30 +68,30 @@ class VoidComprobante
             Log::error('Pago no encontrado para invoice_id: ' . $invoice->id, [
                 'payment_id' => $invoice->payment_id,
             ]);
-            throw new \Exception('La factura no tiene un pago asociado');
+            throw new Exception('La factura no tiene un pago asociado');
         }
 
         if ($invoice->sunat !== 'enviado') {
-            throw new \Exception('La factura no está en un estado anulable (estado sunat: ' . $invoice->sunat . ')');
+            throw new Exception('La factura no está en un estado anulable (estado sunat: ' . $invoice->sunat . ')');
         }
 
         if (!$invoice->payment_id) {
             Log::error('payment_id no definido para invoice_id: ' . $invoice->id);
-            throw new \Exception('La factura no tiene un payment_id asociado');
+            throw new Exception('La factura no tiene un payment_id asociado');
         }
 
         // Determinar docType
         $docType = match ($invoice->document_type) {
             'F' => 'facturas',
             'B' => 'boletas',
-            default => throw new \Exception('Invalid document type: ' . $invoice->document_type),
+            default => throw new Exception('Invalid document type: ' . $invoice->document_type),
         };
 
         // Validate document type
         $tipo_doc = match ($invoice->document_type) {
             'F' => '01', // Factura
             'B' => '03', // Boleta
-            default => throw new \Exception('Invalid document type: ' . $invoice->document_type),
+            default => throw new Exception('Invalid document type: ' . $invoice->document_type),
         };
 
         // Validar formato de serie
@@ -95,7 +100,7 @@ class VoidComprobante
                 'invoice_id' => $invoice->id,
                 'serie' => $invoice->serie_assigned,
             ]);
-            throw new \Exception('La serie asignada no cumple con el formato esperado (F/B seguido de 3 dígitos)');
+            throw new Exception('La serie asignada no cumple con el formato esperado (F/B seguido de 3 dígitos)');
         }
 
         // Validar consistencia entre tipo_doc y serie
@@ -106,7 +111,7 @@ class VoidComprobante
                 'tipo_doc' => $tipo_doc,
                 'serie' => $invoice->serie_assigned,
             ]);
-            throw new \Exception('El tipo de documento no coincide con la serie asignada');
+            throw new Exception('El tipo de documento no coincide con la serie asignada');
         }
 
         Log::debug('Datos completos para anulación', [
@@ -120,7 +125,6 @@ class VoidComprobante
             'doc_type' => $docType,
         ]);
 
-        $correlativo_baja = $this->generateCorrelativoBaja();
         $fec_generacion = $invoice->payment->created_at->format('Y-m-d');
         $fec_comunicacion = Carbon::today()->format('Y-m-d');
 
@@ -128,10 +132,11 @@ class VoidComprobante
         $generationDate = Carbon::parse($fec_generacion);
         $communicationDate = Carbon::parse($fec_comunicacion);
         if ($generationDate->diffInDays($communicationDate) > 7) {
-            throw new \Exception('Período de anulación excedido (más de 7 días desde la generación)');
+            throw new Exception('Período de anulación excedido (más de 7 días desde la generación)');
         }
 
         $company = $this->buildCompany();
+        $correlativo_baja = $this->generateCorrelativoBaja(false); // No incrementar aún
         $voided = new Voided();
         $voided->setCorrelativo($correlativo_baja)
             ->setFecGeneracion(new \DateTime($fec_generacion))
@@ -155,9 +160,6 @@ class VoidComprobante
         $xmlPath = "{$pagoPath}/xml/{$filename}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$filename}.zip";
 
-        Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
-        Storage::disk('public')->makeDirectory("{$pagoPath}/cdr");
-
         // Send to SUNAT
         Log::debug('Sending voided document to SUNAT', [
             'name' => $filename,
@@ -171,70 +173,90 @@ class VoidComprobante
             'cdr_path' => $cdrPath,
         ]);
 
-        $result = $this->see->send($voided);
-        $xmlContent = $this->see->getFactory()->getLastXml();
-        Storage::disk('public')->put($xmlPath, $xmlContent);
-        Log::debug('Generated XML for voided document', [
-            'invoice_id' => $data['invoice_id'],
-            'xml_content' => $xmlContent,
-            'xml_path' => $xmlPath,
-        ]);
+        try {
+            $result = $this->see->send($voided);
+            $xmlContent = $this->see->getFactory()->getLastXml();
 
-        if (!$result->isSuccess()) {
-            $errorCode = $result->getError()->getCode() ?? 'N/A';
-            $errorMessage = $result->getError()->getMessage() ?? 'No message';
-            Log::error('SUNAT Send Error', [
-                'code' => $errorCode,
-                'message' => $errorMessage,
-                'full_result' => (array) $result,
-                'invoice_id' => $data['invoice_id'],
-                'xml_content' => $xmlContent,
-            ]);
-            throw new \Exception("SUNAT Error: Code $errorCode - $errorMessage");
-        }
+            if (!$result->isSuccess()) {
+                $errorCode = $result->getError()->getCode() ?? 'N/A';
+                $errorMessage = $result->getError()->getMessage() ?? 'No message';
+                Log::error('SUNAT Send Error', [
+                    'code' => $errorCode,
+                    'message' => $errorMessage,
+                    'full_result' => (array) $result,
+                    'invoice_id' => $data['invoice_id'],
+                    'xml_content' => $xmlContent,
+                ]);
+                throw new Exception("SUNAT Send Error: Code $errorCode - $errorMessage");
+            }
 
-        $ticket = $result->getTicket();
-        Log::debug('SUNAT Send Success', ['ticket' => $ticket]);
+            $ticket = $result->getTicket();
+            Log::debug('SUNAT Send Success', ['ticket' => $ticket]);
 
-        // Check status
-        $statusResult = $this->see->getStatus($ticket);
-        if (!$statusResult->isSuccess()) {
-            Log::error('SUNAT Status Error', [
+            // Check status
+            $statusResult = $this->see->getStatus($ticket);
+            if (!$statusResult->isSuccess()) {
+                $errorCode = $statusResult->getError()->getCode() ?? 'N/A';
+                $errorMessage = $statusResult->getError()->getMessage() ?? 'No message';
+                if (stripos($errorMessage, 'Unauthorized') !== false) {
+                    Log::error('SUNAT Unauthorized Error', [
+                        'ticket' => $ticket,
+                        'ruc' => $company->getRuc(),
+                        'endpoint' => config('greenter.endpoint'),
+                        'user' => config('greenter.user'),
+                    ]);
+                    throw new Exception('SUNAT Status Error: HTTP Unauthorized - Verifique las credenciales Clave SOL o el certificado');
+                }
+                Log::error('SUNAT Status Error', [
+                    'ticket' => $ticket,
+                    'code' => $errorCode,
+                    'message' => $errorMessage,
+                ]);
+                throw new Exception("SUNAT Status Error: Code $errorCode - $errorMessage");
+            }
+
+            // Si todo es exitoso, incrementar el correlativo
+            $this->confirmCorrelativoBaja($correlativo_baja, $fec_comunicacion);
+
+            // Crear directorios y guardar archivos
+            Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
+            Storage::disk('public')->makeDirectory("{$pagoPath}/cdr");
+            Storage::disk('public')->put($xmlPath, $xmlContent);
+            Storage::disk('public')->put($cdrPath, $statusResult->getCdrZip());
+
+            Log::debug('SUNAT Status Success', ['ticket' => $ticket, 'cdr_response' => $statusResult->getCdrResponse()->getDescription()]);
+
+            // Save voided document to database
+            VoidedDocument::create([
+                'invoice_id' => $invoice->id,
+                'correlativo_baja' => "RA-{$fec_comunicacion}-{$correlativo_baja}",
+                'fec_generacion' => $fec_generacion,
+                'fec_comunicacion' => $fec_comunicacion,
+                'motivo' => $data['motivo'],
+                'xml_path' => $xmlPath,
+                'cdr_path' => $cdrPath,
                 'ticket' => $ticket,
-                'code' => $statusResult->getError()->getCode() ?? 'N/A',
-                'message' => $statusResult->getError()->getMessage() ?? 'No message',
+                'status' => $statusResult->isSuccess() ? 'accepted' : 'rejected',
             ]);
-            throw new \Exception(
-                'SUNAT Status Error: Code ' . ($statusResult->getError()->getCode() ?? 'N/A') . ' - ' . ($statusResult->getError()->getMessage() ?? 'No message')
-            );
+
+            // Update invoice status
+            $this->updateVoidedInvoice($invoice, $statusResult->getCdrResponse());
+
+            return [
+                'success' => $statusResult->isSuccess(),
+                'ticket' => $ticket,
+                'xml_path' => Storage::disk('public')->path($xmlPath),
+                'cdr_path' => Storage::disk('public')->path($cdrPath),
+                'cdr_status' => $this->processCdr($statusResult->getCdrResponse()),
+            ];
+        } catch (Exception $e) {
+            Log::error('Error voiding comprobante', [
+                'invoice_id' => $data['invoice_id'],
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
-
-        Log::debug('SUNAT Status Success', ['ticket' => $ticket, 'cdr_response' => $statusResult->getCdrResponse()->getDescription()]);
-        Storage::disk('public')->put($cdrPath, $statusResult->getCdrZip());
-
-        // Save voided document to database
-        VoidedDocument::create([
-            'invoice_id' => $invoice->id,
-            'correlativo_baja' => "RA-{$fec_comunicacion}-{$correlativo_baja}",
-            'fec_generacion' => $fec_generacion,
-            'fec_comunicacion' => $fec_comunicacion,
-            'motivo' => $data['motivo'],
-            'xml_path' => $xmlPath,
-            'cdr_path' => $cdrPath,
-            'ticket' => $ticket,
-            'status' => $statusResult->isSuccess() ? 'accepted' : 'rejected',
-        ]);
-
-        // Update invoice status
-        $this->updateVoidedInvoice($invoice, $statusResult->getCdrResponse());
-
-        return [
-            'success' => $statusResult->isSuccess(),
-            'ticket' => $ticket,
-            'xml_path' => Storage::disk('public')->path($xmlPath),
-            'cdr_path' => Storage::disk('public')->path($cdrPath),
-            'cdr_status' => $this->processCdr($statusResult->getCdrResponse()),
-        ];
     }
 
     protected function updateVoidedInvoice(Invoice $invoice, $cdrResponse): void
@@ -252,7 +274,7 @@ class VoidComprobante
         }
     }
 
-    protected function generateCorrelativoBaja(): string
+    protected function generateCorrelativoBaja(bool $increment = true): string
     {
         $date = Carbon::today()->format('Ymd'); // Formato YYYYMMDD
         $serie = "RA{$date}"; // Ejemplo: RA20250613
@@ -268,12 +290,35 @@ class VoidComprobante
             ]
         );
 
-        // Incrementar el correlativo
-        $seriesCorrelative->increment('correlative');
-        $newCorrelative = $seriesCorrelative->correlative;
+        // Obtener el correlativo actual o incrementarlo
+        $correlative = $increment ? $seriesCorrelative->correlative + 1 : $seriesCorrelative->correlative;
 
         // Formatear el correlativo con 3 dígitos (001, 002, etc.)
-        return str_pad($newCorrelative, 3, '0', STR_PAD_LEFT); // Ejemplo: 001
+        return str_pad($correlative, 3, '0', STR_PAD_LEFT); // Ejemplo: 001
+    }
+
+    protected function confirmCorrelativoBaja(string $correlativo_baja, string $fec_comunicacion): void
+    {
+        $serie = "RA" . Carbon::parse($fec_comunicacion)->format('Ymd');
+        $correlative = (int) ltrim($correlativo_baja, '0');
+
+        $seriesCorrelative = SeriesCorrelative::where('document_type', 'RA')
+            ->where('serie', $serie)
+            ->first();
+
+        if ($seriesCorrelative) {
+            $seriesCorrelative->update(['correlative' => $correlative]);
+            Log::debug('Correlativo de baja confirmado', [
+                'serie' => $serie,
+                'correlative' => $correlative,
+            ]);
+        } else {
+            Log::error('No se encontró el registro en series_correlatives para confirmar correlativo', [
+                'serie' => $serie,
+                'correlative' => $correlative,
+            ]);
+            throw new Exception('No se pudo confirmar el correlativo de baja');
+        }
     }
 
     protected function buildCompany(): Company
@@ -281,12 +326,12 @@ class VoidComprobante
         $companyData = MyCompany::first();
 
         if (!$companyData) {
-            throw new \Exception('No company record found in mycompany table.');
+            throw new Exception('No company record found in mycompany table.');
         }
 
         if (empty($companyData->ubigueo) || !preg_match('/^\d{6}$/', $companyData->ubigueo)) {
-            Log::error('Código UBIGEO inválido', ['ruc' => $companyData->ruc, 'ubigeo' => $companyData->ubigueo]);
-            throw new \Exception('El código UBIGEO del emisor no es válido');
+            Log::error('Código UBIGEO inválido', ['ruc' => $companyData->ruc, 'ubigueo' => $companyData->ubigueo]);
+            throw new Exception('El código UBIGEO del emisor no es válido');
         }
 
         $address = (new Address())

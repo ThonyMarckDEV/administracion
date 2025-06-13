@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payment_id')->constrained('payments')->onDelete('cascade');
-            $table->foreignId('series_correlative_id')->constrained()->onDelete('restrict');
+            $table->enum('document_type', ['B', 'F'])->comment('B: Boleta, F: Factura');
             $table->string('serie_assigned', 10);
             $table->string('correlative_assigned', 20);
             $table->enum('sunat', ['anulado', 'enviado'])->nullable()->comment('Estado del comprobante ante SUNAT');

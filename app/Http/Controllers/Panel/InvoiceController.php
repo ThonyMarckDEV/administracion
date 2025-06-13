@@ -7,6 +7,7 @@ use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -99,36 +100,185 @@ class InvoiceController extends Controller
     }
 
 
-/**
-     * Servir PDF para visualización.
-     */
-    public function viewPdf(Invoice $invoice, $payment_id): StreamedResponse
-    {
-        Gate::authorize('view', $invoice);
+// /**
+//      * Servir PDF para visualización.
+//      */
+//     public function viewPdf(Invoice $invoice, $payment_id): StreamedResponse
+//     {
+//         Gate::authorize('view', $invoice);
 
-        // Validar que el payment_id coincide con el de la factura
-        if ($invoice->payment_id != $payment_id) {
-            abort(404, 'ID de pago no coincide con la factura');
+//         // Validar que el payment_id coincide con el de la factura
+//         if ($invoice->payment_id != $payment_id) {
+//             abort(404, 'ID de pago no coincide con la factura');
+//         }
+
+//         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+//         $folderPath = "{$docType}/{$payment_id}/pdf";
+
+//         // Obtener archivos en la carpeta
+//         $files = Storage::disk('public')->files($folderPath);
+//         $pdfFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.pdf'));
+
+//         if (empty($pdfFile)) {
+//             abort(404, 'PDF no encontrado');
+//         }
+
+//         $pdfPath = reset($pdfFile); // Obtener el primer archivo PDF
+
+//         return Storage::disk('public')->response($pdfPath, null, [
+//             'Content-Type' => 'application/pdf',
+//             'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
+//         ]);
+//     }
+
+        /**
+         * Servir PDF para visualización.
+         */
+        public function viewPdf(Invoice $invoice, $payment_id): StreamedResponse
+        {
+            Gate::authorize('view', $invoice);
+
+            // Validar que el payment_id coincide con el de la factura
+            if ($invoice->payment_id != $payment_id) {
+                abort(404, 'ID de pago no coincide con la factura');
+            }
+
+            // Obtener datos necesarios para generar el comprobante
+            $payment = \App\Models\Payment::with(['customer', 'paymentPlan.service'])->findOrFail($payment_id);
+            $company = \App\Models\MyCompany::firstOrFail();
+
+            // Instanciar el servicio de generación de comprobantes
+            $pdfService = app(\App\Services\Sunat\GeneratePdf::class);
+            $generateComprobante = new \App\Services\Sunat\GenerateComprobante($pdfService);
+
+            // Construir datos para el comprobante
+            $data = $this->buildComprobanteData($invoice, $payment, $company);
+            $docType = $invoice->document_type === 'B' ? 'boleta' : 'factura';
+
+            // Generar el objeto Invoice
+            $greenterInvoice = $generateComprobante->createComprobante($data, $docType);
+
+            // Generar el PDF en memoria (sin almacenar)
+            $pdfContent = $pdfService->generate($greenterInvoice);
+
+            if (!$pdfContent) {
+                abort(404, 'No se pudo generar el PDF');
+            }
+
+            // Devolver el PDF como una respuesta streamed
+            return new StreamedResponse(
+                function () use ($pdfContent) {
+                    echo $pdfContent;
+                },
+                200,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $greenterInvoice->getName() . '.pdf"',
+                ]
+            );
         }
 
-        $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
-        $folderPath = "{$docType}/{$payment_id}/pdf";
+        /**
+         * Construir datos necesarios para el comprobante.
+         */
+        protected function buildComprobanteData(Invoice $invoice, $payment, $company): array
+        {
+            $customer = $payment->customer;
 
-        // Obtener archivos en la carpeta
-        $files = Storage::disk('public')->files($folderPath);
-        $pdfFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.pdf'));
+            // Verificar si payment_plan y service existen, usar valores por defecto si no
+            if (!$payment->payment_plan || !$payment->payment_plan->service) {
+                Log::error('Payment plan or service not found for payment_id: ' . $payment->id, [
+                    'payment_plan_id' => $payment->payment_plan_id,
+                    'payment_plan_exists' => $payment->payment_plan ? true : false,
+                    'service_exists' => $payment->payment_plan ? ($payment->payment_plan->service ? true : false) : false,
+                ]);
+                $service = (object)[
+                    'id' => 'N/A',
+                    'name' => 'Servicio no especificado',
+                ];
+            } else {
+                $service = $payment->payment_plan->service;
+            }
 
-        if (empty($pdfFile)) {
-            abort(404, 'PDF no encontrado');
+            // Determinar tipo de documento y datos del cliente
+            $clientData = [
+                'tipo_doc' => $invoice->document_type === 'B' ? '0' : ($customer->ruc ? '6' : '1'),
+                'num_doc' => $invoice->document_type === 'B' ? ($customer->dni ?? '-') : ($customer->ruc ?? $customer->dni ?? '-'),
+                'razon_social' => $customer->name ?? 'CLIENTE NO ESPECIFICADO',
+            ];
+
+            // Calcular valores para el comprobante
+            $amount = $payment->amount ?? 0.00;
+            $igvRate = 0.18; // 18% IGV
+            $mtoOperGravadas = round($amount / (1 + $igvRate), 2);
+            $mtoIgv = round($amount - $mtoOperGravadas, 2);
+
+            return [
+                'client' => $clientData,
+                'tipo_operacion' => '0101', // Venta interna
+                'serie' => $invoice->serie_assigned,
+                'correlativo' => $invoice->correlative_assigned,
+                'fecha_emision' => now()->format('Y-m-d'),
+                'tipo_moneda' => 'PEN',
+                'mto_oper_gravadas' => $mtoOperGravadas,
+                'mto_igv' => $mtoIgv,
+                'total_impuestos' => $mtoIgv,
+                'valor_venta' => $mtoOperGravadas,
+                'sub_total' => $amount,
+                'mto_imp_venta' => $amount,
+                'legend_value' => 'SON ' . $this->numberToWords($amount) . ' SOLES',
+                'items' => [
+                    [
+                        'cod_producto' => $service->id,
+                        'unidad' => 'NIU',
+                        'cantidad' => 1,
+                        'mto_valor_unitario' => $mtoOperGravadas,
+                        'descripcion' => $service->name,
+                        'mto_base_igv' => $mtoOperGravadas,
+                        'porcentaje_igv' => $igvRate * 100,
+                        'igv' => $mtoIgv,
+                        'tip_afe_igv' => '10', // Gravado - Operación Onerosa
+                        'total_impuestos' => $mtoIgv,
+                        'mto_valor_venta' => $mtoOperGravadas,
+                        'mto_precio_unitario' => $amount,
+                    ],
+                ],
+            ];
         }
 
-        $pdfPath = reset($pdfFile); // Obtener el primer archivo PDF
+        /**
+         * Convertir número a texto (implementación básica).
+         */
+        protected function numberToWords($amount): string
+        {
+            // Separar parte entera y decimal
+            $integerPart = floor($amount);
+            $decimalPart = round(($amount - $integerPart) * 100);
 
-        return Storage::disk('public')->response($pdfPath, null, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"',
-        ]);
-    }
+            // Arrays para conversión básica
+            $units = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+            $tens = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+            $teens = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+
+            $integerText = '';
+            if ($integerPart == 0) {
+                $integerText = 'CERO';
+            } elseif ($integerPart < 10) {
+                $integerText = $units[$integerPart];
+            } elseif ($integerPart < 20) {
+                $integerText = $teens[$integerPart - 10];
+            } elseif ($integerPart < 100) {
+                $ten = floor($integerPart / 10);
+                $unit = $integerPart % 10;
+                $integerText = $tens[$ten] . ($unit > 0 ? ' Y ' . $units[$unit] : '');
+            } else {
+                $integerText = number_format($integerPart, 0);
+            }
+
+            $decimalText = $decimalPart > 0 ? ' CON ' . ($decimalPart < 10 ? $units[$decimalPart] : $tens[floor($decimalPart / 10)] . ($decimalPart % 10 > 0 ? ' Y ' . $units[$decimalPart % 10] : '')) : '';
+
+            return strtoupper($integerText . $decimalText . ' SOLES');
+        }
 
     /**
      * Descargar archivo XML.

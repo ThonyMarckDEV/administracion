@@ -4,12 +4,11 @@ namespace App\Services\Sunat;
 
 use Greenter\Model\Sale\Invoice;
 use Dompdf\Dompdf;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
 
 class GeneratePdf
 {
-    public function generate(Invoice $invoice, string $path): string
+    public function generate(Invoice $invoice): string
     {
         $docType = $invoice->getTipoDoc() === '01' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA ELECTRÓNICA';
         $company = $invoice->getCompany();
@@ -193,7 +192,6 @@ HTML;
             throw new \Exception('Failed to generate PDF');
         }
 
-          Storage::disk('public')->put($path, $pdfContent);
-          return Storage::path($path);
+        return $pdfContent; // Return the PDF content as a string
     }
 }

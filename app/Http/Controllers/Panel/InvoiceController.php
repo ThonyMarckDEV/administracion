@@ -113,7 +113,12 @@ class InvoiceController extends Controller
         }
 
         // Obtener datos necesarios para generar el comprobante
-        $payment = \App\Models\Payment::with(['customer', 'paymentPlan.service'])->findOrFail($payment_id);
+       $payment = \App\Models\Payment::with(['customer', 'paymentPlan.service'])->findOrFail($payment_id);
+        Log::info('Payment data for payment_id: ' . $payment_id, [
+            'payment' => $payment->toArray(),
+            'payment_plan' => $payment->paymentPlan ? $payment->paymentPlan->toArray() : null,
+            'service' => $payment->paymentPlan && $payment->paymentPlan->service ? $payment->paymentPlan->service->toArray() : null,
+        ]);
         $company = \App\Models\MyCompany::firstOrFail();
 
         // Instanciar el servicio de generación de comprobantes
@@ -147,44 +152,68 @@ class InvoiceController extends Controller
         );
     }
 
-    /**
-     * Construir datos necesarios para el comprobante.
-     */
-    protected function buildComprobanteData(Invoice $invoice, $payment, $company): array
+     protected function buildComprobanteData(Invoice $invoice, $payment, $company): array
     {
         $customer = $payment->customer;
 
-        // Verificar si payment_plan y service existen, usar valores por defecto si no
-        if (!$payment->payment_plan || !$payment->payment_plan->service) {
-            Log::error('Payment plan or service not found for payment_id: ' . $payment->id, [
-                'payment_plan_id' => $payment->payment_plan_id,
-                'payment_plan_exists' => $payment->payment_plan ? true : false,
-                'service_exists' => $payment->payment_plan ? ($payment->payment_plan->service ? true : false) : false,
+        // Initialize service with fallback
+        $service = (object)[
+            'id' => 'N/A',
+            'name' => 'Servicio no especificado',
+        ];
+
+        // Check payment plan and service
+        if (!$payment->paymentPlan) {
+            Log::error('Payment plan not loaded for payment_id: ' . ($payment->id ?? 'N/A'), [
+                'payment_plan_id' => $payment->payment_plan_id ?? 'N/A',
             ]);
-            $service = (object)[
-                'id' => 'N/A',
-                'name' => 'Servicio no especificado',
-            ];
+        } elseif (!$payment->paymentPlan->service) {
+            Log::error('Service not loaded for payment_plan_id: ' . ($payment->payment_plan_id ?? 'N/A'), [
+                'service_id' => $payment->paymentPlan->service_id ?? 'N/A',
+            ]);
         } else {
-            $service = $payment->payment_plan->service;
+            $service = $payment->paymentPlan->service;
+            // Ensure valid service data
+            if (!$service->id || !$service->name) {
+                Log::warning('Invalid service data for payment_id: ' . $payment->id, [
+                    'service_id' => $service->id,
+                    'service_name' => $service->name,
+                ]);
+                $service->name = $service->name ?: 'Servicio sin nombre';
+                $service->id = $service->id ?: 'N/A';
+            }
         }
 
-        // Determinar tipo de documento y datos del cliente
+        // Log service data for debugging
+        Log::info('Service data used for payment_id: ' . $payment->id, [
+            'service_id' => $service->id,
+            'service_name' => $service->name,
+        ]);
+
+        // Rest of the method remains unchanged
         $clientData = [
-            'tipo_doc' => $invoice->document_type === 'B' ? '0' : ($customer->ruc ? '6' : '1'),
-            'num_doc' => $invoice->document_type === 'B' ? ($customer->dni ?? '-') : ($customer->ruc ?? $customer->dni ?? '-'),
+            'tipo_doc' => $invoice->document_type === 'B' ? ($customer->dni ? '1' : '0') : ($customer->ruc ? '6' : ($customer->dni ? '1' : '0')),
+            'num_doc' => $invoice->document_type === 'B' ? ($customer->dni ?? '-') : ($customer->ruc ?? ($customer->dni ?? '-')),
             'razon_social' => $customer->name ?? 'CLIENTE NO ESPECIFICADO',
         ];
 
-        // Calcular valores para el comprobante
+        if ($invoice->document_type === 'F' && $clientData['tipo_doc'] === '0') {
+            Log::warning('Factura requires RUC or DNI for payment_id: ' . ($payment->id ?? 'N/A'), [
+                'customer_id' => $customer->id ?? 'N/A',
+                'dni' => $customer->dni ?? 'N/A',
+                'ruc' => $customer->ruc ?? 'N/A',
+            ]);
+            $clientData['num_doc'] = '-';
+        }
+
         $amount = $payment->amount ?? 0.00;
-        $igvRate = 0.18; // 18% IGV
+        $igvRate = 0.18;
         $mtoOperGravadas = round($amount / (1 + $igvRate), 2);
         $mtoIgv = round($amount - $mtoOperGravadas, 2);
 
         return [
             'client' => $clientData,
-            'tipo_operacion' => '0101', // Venta interna
+            'tipo_operacion' => '0101',
             'serie' => $invoice->serie_assigned,
             'correlativo' => $invoice->correlative_assigned,
             'fecha_emision' => now()->format('Y-m-d'),
@@ -206,7 +235,7 @@ class InvoiceController extends Controller
                     'mto_base_igv' => $mtoOperGravadas,
                     'porcentaje_igv' => $igvRate * 100,
                     'igv' => $mtoIgv,
-                    'tip_afe_igv' => '10', // Gravado - Operación Onerosa
+                    'tip_afe_igv' => '10',
                     'total_impuestos' => $mtoIgv,
                     'mto_valor_venta' => $mtoOperGravadas,
                     'mto_precio_unitario' => $amount,

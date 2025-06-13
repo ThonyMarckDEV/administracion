@@ -21,6 +21,7 @@ import {
     Shield,
     Truck,
     UserSquare,
+    ListCheck
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -96,7 +97,7 @@ const mainNavItems6: NavItem[] = [
     {
         title: 'Lista de comprobantes',
         href: '/panel/invoices',
-        icon: HandCoins,
+        icon: ListCheck,
     }
 ];
 

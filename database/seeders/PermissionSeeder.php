@@ -80,5 +80,12 @@ class PermissionSeeder extends Seeder
         Permission::create(['name' => 'editar pagos']);
         Permission::create(['name' => 'eliminar pagos']);
         Permission::create(['name' => 'ver pagos']);
+        
+        // model invoices
+        Permission::create(['name' => 'crear invoices']);
+        Permission::create(['name' => 'editar invoices']);
+        Permission::create(['name' => 'eliminar invoices']);
+        Permission::create(['name' => 'ver invoices']);     
+        
     }
 }

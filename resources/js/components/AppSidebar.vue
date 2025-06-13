@@ -93,6 +93,11 @@ const mainNavItems6: NavItem[] = [
         href: '/panel/payments',
         icon: HandCoins,
     },
+    {
+        title: 'Lista de comprobantes',
+        href: '/panel/invoices',
+        icon: HandCoins,
+    }
 ];
 
 const mainNavItems2: NavItem[] = [

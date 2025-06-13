@@ -69,7 +69,7 @@ class VoidComprobante
             throw new \Exception('Invoice is not in a voidable state (sunat status: ' . $invoice->sunat . ')');
         }
 
-        // Validate and map document type
+        // Validate document type
         $tipo_doc = match ($invoice->document_type) {
             'F' => '01', // Factura
             'B' => '03', // Boleta
@@ -87,6 +87,13 @@ class VoidComprobante
         $correlativo_baja = $this->generateCorrelativoBaja();
         $fec_generacion = $invoice->payment->created_at->format('Y-m-d');
         $fec_comunicacion = Carbon::today()->format('Y-m-d');
+
+        // Validate voiding eligibility (e.g., within 7 days)
+        $generationDate = Carbon::parse($fec_generacion);
+        $communicationDate = Carbon::parse($fec_comunicacion);
+        if ($generationDate->diffInDays($communicationDate) > 7) {
+            throw new \Exception('Voiding period exceeded (more than 7 days since generation)');
+        }
 
         $company = $this->buildCompany();
         $voided = new Voided();
@@ -131,6 +138,7 @@ class VoidComprobante
             Log::error('SUNAT Send Error', [
                 'code' => $result->getError()->getCode() ?? 'N/A',
                 'message' => $result->getError()->getMessage() ?? 'No message',
+                'full_result' => $result,
             ]);
             throw new \Exception(
                 'SUNAT Error: Code ' . ($result->getError()->getCode() ?? 'N/A') . ' - ' . ($result->getError()->getMessage() ?? 'No message')

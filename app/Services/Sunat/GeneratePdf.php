@@ -193,7 +193,7 @@ HTML;
             throw new \Exception('Failed to generate PDF');
         }
 
-        Storage::put($path, $pdfContent);
-        return Storage::path($path);
+          Storage::disk('public')->put($path, $pdfContent);
+          return Storage::path($path);
     }
 }

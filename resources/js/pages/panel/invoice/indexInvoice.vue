@@ -14,12 +14,6 @@
                     @open-modal-show="getIdShow"
                     @open-modal-annul="getIdAnnul"
                 />
-                <ShowInvoice
-                    v-if="showInvoiceData"
-                    :invoice-data="showInvoiceData"
-                    :status-modal="principal.statusModalShow"
-                    @close-modal="closeModalShow"
-                />
                 <Delete
                     :modal="principal.statusModalAnnul"
                     :itemId="principal.invoiceIdAnnul"
@@ -41,7 +35,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
-import ShowInvoice from './components/ShowInvoice.vue';
 import TableInvoice from './components/TableInvoice.vue';
 
 const { loadInvoices, showInvoice, principal, showInvoiceData, annulInvoice } = useInvoice();
@@ -73,10 +66,6 @@ const getIdAnnul = (id: number) => {
 const emitAnnulInvoice = (id: number) => {
     principal.statusModalAnnul = false;
     annulInvoice(id);
-};
-
-const closeModalShow = () => {
-    principal.statusModalShow = false;
 };
 
 const closeModalAnnul = () => {

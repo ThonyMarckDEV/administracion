@@ -83,12 +83,12 @@ class GenerateComprobante
         $cdrPath = "{$pagoPath}/cdr/R-{$invoice->getName()}.zip";
         $pdfPath = "{$pagoPath}/pdf/{$invoice->getName()}.pdf";
 
-        Storage::makeDirectory("{$pagoPath}/xml");
-        Storage::makeDirectory("{$pagoPath}/cdr");
-        Storage::makeDirectory("{$pagoPath}/pdf");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/cdr");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/pdf");
 
         $result = $this->see->send($invoice);
-        Storage::put($xmlPath, $this->see->getFactory()->getLastXml());
+        Storage::disk('public')->put($xmlPath, $this->see->getFactory()->getLastXml());
 
         if (!$result->isSuccess()) {
             throw new \Exception(
@@ -96,15 +96,15 @@ class GenerateComprobante
             );
         }
 
-        Storage::put($cdrPath, $result->getCdrZip());
+        Storage::disk('public')->put($cdrPath, $result->getCdrZip());
         $pdfAbsolutePath = $this->pdfService->generate($invoice, $pdfPath);
         $this->storeInvoice($invoice, $idPago, $result);
 
         return [
             'success' => $result->isSuccess(),
-            'xml_path' => Storage::path($xmlPath),
-            'cdr_path' => Storage::path($cdrPath),
-            'pdf_path' => $pdfAbsolutePath,
+            'xml_path' => Storage::disk('public')->path($xmlPath),
+            'cdr_path' => Storage::disk('public')->path($cdrPath),
+            'pdf_path' => Storage::disk('public')->path($pdfAbsolutePath),
             'cdr_status' => $this->processCdr($result->getCdrResponse()),
         ];
     }

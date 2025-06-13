@@ -7,7 +7,9 @@ use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceController extends Controller
 {
@@ -94,5 +96,72 @@ class InvoiceController extends Controller
             'status' => true,
             'message' => 'Comprobante anulado correctamente',
         ]);
+    }
+
+    /**
+     * Serve PDF for viewing.
+     */
+    public function viewPdf(Invoice $invoice): StreamedResponse
+    {
+        Gate::authorize('view', $invoice);
+        $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+        $folderPath = "private/{$docType}/{$invoice->payment_id}/pdf";
+
+        $files = Storage::disk('private')->files($folderPath);
+        $pdfFile = array_filter($files, fn($file) => str_ends_with($file, '.pdf'));
+
+        if (empty($pdfFile)) {
+            abort(404, 'PDF no encontrado');
+        }
+
+        $pdfPath = reset($pdfFile); // Get the first PDF file
+
+        return Storage::disk('private')->response($pdfPath, null, [
+            'Content-Type' => 'application/pdf',
+        ]);
+    }
+
+    /**
+     * Download XML file.
+     */
+    public function downloadXml(Invoice $invoice): StreamedResponse
+    {
+        Gate::authorize('view', $invoice);
+        $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+        $folderPath = "private/{$docType}/{$invoice->payment_id}/xml";
+
+        $files = Storage::disk('private')->files($folderPath);
+        $xmlFile = array_filter($files, fn($file) => str_ends_with($file, '.xml'));
+
+        if (empty($xmlFile)) {
+            abort(404, 'XML no encontrado');
+        }
+
+        $xmlPath = reset($xmlFile); // Get the first XML file
+        $fileName = basename($xmlPath);
+
+        return Storage::disk('private')->download($xmlPath, $fileName);
+    }
+
+    /**
+     * Download CDR file.
+     */
+    public function downloadCdr(Invoice $invoice): StreamedResponse
+    {
+        Gate::authorize('view', $invoice);
+        $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+        $folderPath = "private/{$docType}/{$invoice->payment_id}/cdr";
+
+        $files = Storage::disk('private')->files($folderPath);
+        $zipFile = array_filter($files, fn($file) => str_ends_with($file, '.zip'));
+
+        if (empty($zipFile)) {
+            abort(404, 'CDR no encontrado');
+        }
+
+        $cdrPath = reset($zipFile); // Get the first ZIP file
+        $fileName = basename($cdrPath);
+
+        return Storage::disk('private')->download($cdrPath, $fileName);
     }
 }

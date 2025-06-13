@@ -83,9 +83,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('listar-payments', [PaymentController::class, 'listPayments'])->name('payments.listar');
 
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('/listar-invoices', [InvoiceController::class, 'listarInvoices'])->name('invoices.listar');
+        Route::get('/listar-invoices', [InvoiceController::class, 'listarInvoices'])->name('invoices.list');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::post('/invoices/{invoice}/annul', [InvoiceController::class, 'annul'])->name('invoices.annul');
+        Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'viewPdf'])->name('invoices.pdf');
+        Route::get('/invoices/{invoice}/xml', [InvoiceController::class, 'downloadXml'])->name('invoices.xml');
+        Route::get('/invoices/{invoice}/cdr', [InvoiceController::class, 'downloadCdr'])->name('invoices.cdr');
 
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {

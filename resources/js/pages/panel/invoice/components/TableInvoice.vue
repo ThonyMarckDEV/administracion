@@ -49,7 +49,7 @@
                                 {{ invoice.payment.amount }}
                             </TableCell>
                             <TableCell class="border-b border-gray-100 px-4 py-3 text-gray-700 dark:border-gray-700 dark:text-gray-300">
-                                {{ invoice.payment.payment_date ?? 'N/A' }}
+                                {{ invoice.payment.payment_date ? new Date(invoice.payment.payment_date).toLocaleDateString('es-PE') : 'N/A' }}
                             </TableCell>
                             <TableCell class="border-b border-gray-100 px-4 py-3 text-gray-700 dark:border-gray-700 dark:text-gray-300">
                                 {{ invoice.payment.payment_method }}
@@ -71,11 +71,31 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30"
-                                    @click="openModalShow(invoice.id)"
-                                    title="Ver Detalles"
+                                    @click="openPdfModal(invoice.id)"
+                                    title="Ver PDF"
                                 >
-                                    <Eye class="h-[16px] w-[16px]" />
-                                    <span class="sr-only">Ver Detalles</span>
+                                    <FileText class="h-[16px] w-[16px]" />
+                                    <span class="sr-only">Ver PDF</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-[30px] w-[30px] rounded-md p-0 text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30"
+                                    @click="downloadXml(invoice.id)"
+                                    title="Descargar XML"
+                                >
+                                    <FileCode class="h-[16px] w-[16px]" />
+                                    <span class="sr-only">Descargar XML</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-[30px] w-[30px] rounded-md p-0 text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                                    @click="downloadCdr(invoice.id)"
+                                    title="Descargar CDR"
+                                >
+                                    <FileArchive class="h-[16px] w-[16px]" />
+                                    <span class="sr-only">Descargar CDR</span>
                                 </Button>
                                 <Button
                                     v-if="invoice.sunat !== 'anulado'"
@@ -96,6 +116,11 @@
             </div>
         </div>
     </div>
+    <ShowPdfModal
+        :status-modal="showPdfModal"
+        :pdf-url="pdfUrl"
+        @close-modal="closePdfModal"
+    />
 </template>
 
 <script setup lang="ts">
@@ -103,9 +128,12 @@ import LoadingTable from '@/components/loadingTable.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/interface/paginacion';
-import { Eye, XCircle } from 'lucide-vue-next';
+import { FileText, FileCode, FileArchive, XCircle } from 'lucide-vue-next';
 import PaginationPayment from '../../category/components/paginationCategory.vue';
+import ShowPdfModal from './ShowPdfModal.vue';
 import { InvoiceResource } from '../interface/Invoice';
+import { ref } from 'vue';
+import axios from 'axios';
 
 defineProps<{
     invoiceList: InvoiceResource[];
@@ -113,9 +141,41 @@ defineProps<{
     loading: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'page-change', page: number): void;
-    (e: 'open-modal-show', id: number): void;
     (e: 'open-modal-annul', id: number): void;
 }>();
+
+const showPdfModal = ref(false);
+const pdfUrl = ref<string | null>(null);
+
+const openPdfModal = async (invoiceId: number) => {
+    try {
+        const response = await axios.get(`/panel/invoices/${invoiceId}/pdf`, {
+            responseType: 'blob',
+        });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        pdfUrl.value = URL.createObjectURL(blob);
+        showPdfModal.value = true;
+    } catch (error) {
+        console.error('Error al cargar el PDF:', error);
+        alert('No se pudo cargar el PDF.');
+    }
+};
+
+const closePdfModal = () => {
+    if (pdfUrl.value) {
+        URL.revokeObjectURL(pdfUrl.value);
+        pdfUrl.value = null;
+    }
+    showPdfModal.value = false;
+};
+
+const downloadXml = (invoiceId: number) => {
+    window.location.href = `/panel/invoices/${invoiceId}/xml`;
+};
+
+const downloadCdr = (invoiceId: number) => {
+    window.location.href = `/panel/invoices/${invoiceId}/cdr`;
+};
 </script>

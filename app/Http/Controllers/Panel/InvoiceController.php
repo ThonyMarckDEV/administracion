@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Panel;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
+use App\Models\VoidedDocument;
+use Carbon\Exceptions\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -340,5 +343,87 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function downloadVoidedXml(Invoice $invoice): StreamedResponse
+    {
+        try {
+            // Validar que la factura esté anulada
+            if ($invoice->sunat !== 'anulado') {
+                abort(400, 'Invoice is not voided');
+            }
 
+            // Obtener el payment_id de la factura
+            $payment_id = $invoice->payment_id;
+            if (!$payment_id) {
+                abort(404, 'Payment ID not found for this invoice');
+            }
+
+            // Determinar el tipo de documento
+            $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+            $folderPath = "{$docType}/{$payment_id}/voided/xml";
+
+            // Obtener archivos en la carpeta
+            $files = Storage::disk('public')->files($folderPath);
+            $xmlFile = array_filter($files, fn($file) => Str::endsWith(strtolower($file), '.xml'));
+
+            if (empty($xmlFile)) {
+                abort(404, 'Voided XML not found');
+            }
+
+            $xmlPath = reset($xmlFile); // Obtener el primer archivo XML
+            $fileName = basename($xmlPath);
+
+            return Storage::disk('public')->download($xmlPath, $fileName, [
+                'Content-Type' => 'application/xml',
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error downloading voided XML', [
+                'invoice_id' => $invoice->id,
+                'payment_id' => $payment_id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+            abort(500, 'Error downloading voided XML');
+        }
+    }
+
+    public function downloadVoidedCdr(Invoice $invoice): StreamedResponse
+    {
+        try {
+            // Validar que la factura esté anulada
+            if ($invoice->sunat !== 'anulado') {
+                abort(400, 'Invoice is not voided');
+            }
+
+            // Obtener el payment_id de la factura
+            $payment_id = $invoice->payment_id;
+            if (!$payment_id) {
+                abort(404, 'Payment ID not found for this invoice');
+            }
+
+            // Determinar el tipo de documento
+            $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
+            $folderPath = "{$docType}/{$payment_id}/voided/cdr";
+
+            // Obtener archivos en la carpeta
+            $files = Storage::disk('public')->files($folderPath);
+            $zipFile = array_filter($files, fn($file) => Str::endsWith(strtolower($file), '.zip'));
+
+            if (empty($zipFile)) {
+                abort(404, 'Voided CDR not found');
+            }
+
+            $cdrPath = reset($zipFile); // Obtener el primer archivo ZIP
+            $fileName = basename($cdrPath);
+
+            return Storage::disk('public')->download($cdrPath, $fileName, [
+                'Content-Type' => 'application/zip',
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error downloading voided CDR', [
+                'invoice_id' => $invoice->id,
+                'payment_id' => $payment_id ?? null,
+                'error' => $e->getMessage(),
+            ]);
+            abort(500, 'Error downloading voided CDR');
+        }
+    }
 }

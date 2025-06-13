@@ -24,15 +24,21 @@ export const InvoiceServices = {
         return response.data;
     },
 
-    async downloadXml(invoiceId: number, paymentId: number): Promise<Blob> {
-        const response = await axios.get(`/panel/invoices/${invoiceId}/xml/${paymentId}`, {
+    async downloadXml(invoiceId: number, paymentId: number, sunatStatus: string): Promise<Blob> {
+        const endpoint = sunatStatus === 'anulado' 
+            ? `/panel/invoices/${invoiceId}/voided/xml` 
+            : `/panel/invoices/${invoiceId}/xml/${paymentId}`;
+        const response = await axios.get(endpoint, {
             responseType: 'blob',
         });
         return response.data;
     },
 
-    async downloadCdr(invoiceId: number, paymentId: number): Promise<Blob> {
-        const response = await axios.get(`/panel/invoices/${invoiceId}/cdr/${paymentId}`, {
+    async downloadCdr(invoiceId: number, paymentId: number, sunatStatus: string): Promise<Blob> {
+        const endpoint = sunatStatus === 'anulado' 
+            ? `/panel/invoices/${invoiceId}/voided/cdr` 
+            : `/panel/invoices/${invoiceId}/cdr/${paymentId}`;
+        const response = await axios.get(endpoint, {
             responseType: 'blob',
         });
         return response.data;

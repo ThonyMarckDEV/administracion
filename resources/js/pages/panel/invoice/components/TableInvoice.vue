@@ -81,7 +81,7 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-green-500 hover:bg-green-100 dark:hover:bg-green-900/30"
-                                    @click="downloadXml(invoice.id, invoice.payment_id)"
+                                    @click="downloadXml(invoice.id, invoice.payment_id, invoice.sunat)"
                                     title="Descargar XML"
                                 >
                                     <FileCode class="h-[16px] w-[16px]" />
@@ -91,7 +91,7 @@
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-purple-500 hover:bg-purple-100 dark:hover:bg-purple-900/30"
-                                    @click="downloadCdr(invoice.id, invoice.payment_id)"
+                                    @click="downloadCdr(invoice.id, invoice.payment_id, invoice.sunat)"
                                     title="Descargar CDR"
                                 >
                                     <FileArchive class="h-[16px] w-[16px]" />
@@ -168,13 +168,13 @@ const closePdfModal = () => {
     showPdfModal.value = false;
 };
 
-const downloadXml = async (invoiceId: number, paymentId: number) => {
+const downloadXml = async (invoiceId: number, paymentId: number, sunatStatus: string) => {
     try {
-        const blob = await InvoiceServices.downloadXml(invoiceId, paymentId);
+        const blob = await InvoiceServices.downloadXml(invoiceId, paymentId, sunatStatus);
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `invoice-${paymentId}.xml`;
+        link.download = sunatStatus === 'anulado' ? `voided-${invoiceId}.xml` : `invoice-${invoiceId}.xml`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -185,13 +185,13 @@ const downloadXml = async (invoiceId: number, paymentId: number) => {
     }
 };
 
-const downloadCdr = async (invoiceId: number, paymentId: number) => {
+const downloadCdr = async (invoiceId: number, paymentId: number, sunatStatus: string) => {
     try {
-        const blob = await InvoiceServices.downloadCdr(invoiceId, paymentId);
+        const blob = await InvoiceServices.downloadCdr(invoiceId, paymentId, sunatStatus);
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `cdr-${paymentId}.zip`;
+        link.download = sunatStatus === 'anulado' ? `voided-cdr-${invoiceId}.zip` : `cdr-${invoiceId}.zip`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -200,5 +200,9 @@ const downloadCdr = async (invoiceId: number, paymentId: number) => {
         console.error('Error al descargar el CDR:', error);
         alert('No se pudo descargar el CDR.');
     }
+};
+
+const openModalAnnul = (invoiceId: number) => {
+    emit('open-modal-annul', invoiceId);
 };
 </script>

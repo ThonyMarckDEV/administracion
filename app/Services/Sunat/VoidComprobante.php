@@ -77,6 +77,13 @@ class VoidComprobante
             default => throw new \Exception('Invalid document type: ' . $invoice->document_type),
         };
 
+            // Determinar docType
+            $docType = match ($invoice->document_type) {
+                'F' => 'facturas',
+                'B' => 'boletas',
+                default => throw new \Exception('Invalid document type: ' . $invoice->document_type),
+            };
+
         // Validar formato de serie
         if (!preg_match('/^[FB]\d{3}$/', $invoice->serie_assigned)) {
             Log::error('Formato de serie inválido', [
@@ -136,12 +143,13 @@ class VoidComprobante
         // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
         $ruc = $company->getRuc();
         $filename = "{$ruc}-RA-{$fec_comunicacion}-{$correlativo_baja}";
-        $pagoPath = "voided/{$filename}";
+        // Nueva estructura de directorios: boletas/{idPago}/voided/{filename}
+        $pagoPath = "{$docType}/{$invoice->payment_id}/voided/{$filename}";
         $xmlPath = "{$pagoPath}/xml/{$filename}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$filename}.zip";
 
-        Storage::makeDirectory("{$pagoPath}/xml");
-        Storage::makeDirectory("{$pagoPath}/cdr");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/cdr");
 
         // Send to SUNAT
         Log::debug('Sending voided document to SUNAT', [
@@ -155,7 +163,7 @@ class VoidComprobante
 
         $result = $this->see->send($voided);
         $xmlContent = $this->see->getFactory()->getLastXml();
-        Storage::put($xmlPath, $xmlContent);
+        Storage::disk('public')->put($xmlPath, $xmlContent);
         Log::debug('Generated XML', ['xml' => $xmlContent]);
 
 

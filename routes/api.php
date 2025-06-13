@@ -12,3 +12,4 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/factura', [ComprobanteController::class, 'createFactura'])->name('factura');
 Route::post('/boleta', [ComprobanteController::class, 'createBoleta'])->name('boleta');
+Route::post('/void', [ComprobanteController::class, 'voidComprobante']);

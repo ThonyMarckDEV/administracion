@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Sunat;
 
 use App\Services\Sunat\GenerateComprobante;
+use App\Services\Sunat\VoidComprobante;
 use App\Http\Requests\StoreFacturaRequest;
 use App\Http\Requests\StoreBoletaRequest;
+use App\Http\Requests\VoidComprobanteRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
 
 class ComprobanteController extends Controller
 {
     protected $comprobanteService;
+    protected $voidComprobanteService;
 
-    public function __construct(GenerateComprobante $comprobanteService)
+    public function __construct(GenerateComprobante $comprobanteService, VoidComprobante $voidComprobanteService)
     {
         $this->comprobanteService = $comprobanteService;
+        $this->voidComprobanteService = $voidComprobanteService;
     }
 
     public function createFactura(StoreFacturaRequest $request)
@@ -50,7 +54,7 @@ class ComprobanteController extends Controller
             $validated = $request->validated();
             $boleta = $this->comprobanteService->createComprobante($validated, 'boleta');
             $result = $this->comprobanteService->sendComprobante($boleta, $validated['id_pago']);
-            
+
             Log::info('Boleta processed', [
                 'payment_id' => $validated['id_pago'],
                 'execution_time' => microtime(true) - $start,
@@ -64,6 +68,31 @@ class ComprobanteController extends Controller
             Log::error('Error processing receipt: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Error processing receipt',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function voidComprobante(VoidComprobanteRequest $request)
+    {
+        $start = microtime(true);
+        try {
+            $validated = $request->validated();
+            $result = $this->voidComprobanteService->voidComprobante($validated);
+
+            Log::info('Comprobante voided', [
+                'invoice_id' => $validated['invoice_id'],
+                'execution_time' => microtime(true) - $start,
+            ]);
+
+            return response()->json([
+                'message' => 'Comprobante voided successfully',
+                'data' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error voiding comprobante: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error voiding comprobante',
                 'error' => $e->getMessage(),
             ], 500);
         }

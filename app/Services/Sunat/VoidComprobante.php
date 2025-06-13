@@ -136,9 +136,13 @@ class VoidComprobante
         }
 
         $company = $this->buildCompany();
-        $correlativo_baja = $this->generateCorrelativoBaja(false); // No incrementar aún
+        
+        // Generar el siguiente correlativo (sin incrementar aún en BD)
+        $correlativo_num = $this->getNextCorrelativoBaja();
+        $correlativo_baja = "RA001-{$correlativo_num}"; // Formato RA001-1, RA001-2, etc.
+        
         $voided = new Voided();
-        $voided->setCorrelativo($correlativo_baja)
+        $voided->setCorrelativo($correlativo_num) // Solo el número para SUNAT (1, 2, 3, etc.)
             ->setFecGeneracion(new \DateTime($fec_generacion))
             ->setFecComunicacion(new \DateTime($fec_comunicacion))
             ->setCompany($company);
@@ -155,7 +159,8 @@ class VoidComprobante
 
         // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
         $ruc = $company->getRuc();
-        $filename = "{$ruc}-RA-{$fec_comunicacion}-{$correlativo_baja}";
+        $dateFormatted = Carbon::parse($fec_comunicacion)->format('Ymd');
+        $filename = "{$ruc}-RA-{$dateFormatted}-{$correlativo_num}";
         $pagoPath = "{$docType}/{$invoice->payment_id}/voided";
         $xmlPath = "{$pagoPath}/xml/{$filename}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$filename}.zip";
@@ -166,6 +171,7 @@ class VoidComprobante
             'invoice_id' => $data['invoice_id'],
             'tipo_doc' => $tipo_doc,
             'correlativo_baja' => $correlativo_baja,
+            'correlativo_num' => $correlativo_num,
             'fec_generacion' => $fec_generacion,
             'fec_comunicacion' => $fec_comunicacion,
             'pago_path' => $pagoPath,
@@ -215,8 +221,8 @@ class VoidComprobante
                 throw new Exception("SUNAT Status Error: Code $errorCode - $errorMessage");
             }
 
-            // Si todo es exitoso, incrementar el correlativo
-            $this->confirmCorrelativoBaja($correlativo_baja, $fec_comunicacion);
+            // Si todo es exitoso, confirmar e incrementar el correlativo en la BD
+            $this->confirmCorrelativoBaja($correlativo_num);
 
             // Crear directorios y guardar archivos
             Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
@@ -229,7 +235,7 @@ class VoidComprobante
             // Save voided document to database
             VoidedDocument::create([
                 'invoice_id' => $invoice->id,
-                'correlativo_baja' => "RA-{$fec_comunicacion}-{$correlativo_baja}",
+                'correlativo_baja' => $correlativo_baja, // RA001-1, RA001-2, etc.
                 'fec_generacion' => $fec_generacion,
                 'fec_comunicacion' => $fec_comunicacion,
                 'motivo' => $data['motivo'],
@@ -245,6 +251,7 @@ class VoidComprobante
             return [
                 'success' => $statusResult->isSuccess(),
                 'ticket' => $ticket,
+                'correlativo_baja' => $correlativo_baja,
                 'xml_path' => Storage::disk('public')->path($xmlPath),
                 'cdr_path' => Storage::disk('public')->path($cdrPath),
                 'cdr_status' => $this->processCdr($statusResult->getCdrResponse()),
@@ -274,51 +281,57 @@ class VoidComprobante
         }
     }
 
-    protected function generateCorrelativoBaja(bool $increment = true): string
+    /**
+     * Obtiene el siguiente correlativo para documentos de baja (sin incrementar en BD)
+     */
+    protected function getNextCorrelativoBaja(): int
     {
-        $date = Carbon::today()->format('Ymd'); // Formato YYYYMMDD
-        $serie = "RA{$date}"; // Ejemplo: RA20250613
+        $serie = '001'; // Serie fija para RA
 
-        // Buscar o crear el registro en series_correlatives
-        $seriesCorrelative = SeriesCorrelative::firstOrCreate(
-            [
+        // Buscar el registro existente
+        $seriesCorrelative = SeriesCorrelative::where('document_type', 'RA')
+            ->where('serie', $serie)
+            ->first();
+
+        if (!$seriesCorrelative) {
+            Log::error('Registro no encontrado en series_correlatives para RA', [
                 'document_type' => 'RA',
                 'serie' => $serie,
-            ],
-            [
-                'correlative' => 0,
-            ]
-        );
+            ]);
+            throw new Exception('No se encontró el registro de serie para documentos de baja (RA-001)');
+        }
 
-        // Obtener el correlativo actual o incrementarlo
-        $correlative = $increment ? $seriesCorrelative->correlative + 1 : $seriesCorrelative->correlative;
-
-        // Formatear el correlativo con 3 dígitos (001, 002, etc.)
-        return str_pad($correlative, 3, '0', STR_PAD_LEFT); // Ejemplo: 001
+        // Retornar el siguiente correlativo (actual + 1)
+        return $seriesCorrelative->correlative + 1;
     }
 
-    protected function confirmCorrelativoBaja(string $correlativo_baja, string $fec_comunicacion): void
+    /**
+     * Confirma e incrementa el correlativo en la base de datos después de una baja exitosa
+     */
+    protected function confirmCorrelativoBaja(int $correlativo_num): void
     {
-        $serie = "RA" . Carbon::parse($fec_comunicacion)->format('Ymd');
-        $correlative = (int) ltrim($correlativo_baja, '0');
+        $serie = '001'; // Serie fija para RA
 
         $seriesCorrelative = SeriesCorrelative::where('document_type', 'RA')
             ->where('serie', $serie)
             ->first();
 
-        if ($seriesCorrelative) {
-            $seriesCorrelative->update(['correlative' => $correlative]);
-            Log::debug('Correlativo de baja confirmado', [
-                'serie' => $serie,
-                'correlative' => $correlative,
-            ]);
-        } else {
+        if (!$seriesCorrelative) {
             Log::error('No se encontró el registro en series_correlatives para confirmar correlativo', [
                 'serie' => $serie,
-                'correlative' => $correlative,
+                'correlativo_num' => $correlativo_num,
             ]);
             throw new Exception('No se pudo confirmar el correlativo de baja');
         }
+
+        // Actualizar el correlativo en la BD
+        $seriesCorrelative->update(['correlative' => $correlativo_num]);
+        
+        Log::debug('Correlativo de baja confirmado y actualizado', [
+            'serie' => $serie,
+            'correlativo_anterior' => $correlativo_num - 1,
+            'correlativo_nuevo' => $correlativo_num,
+        ]);
     }
 
     protected function buildCompany(): Company

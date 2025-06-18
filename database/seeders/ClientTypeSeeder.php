@@ -28,6 +28,7 @@ class ClientTypeSeeder extends Seeder
         //  default customer 
         Customer::create([
             'name' => 'Cliente por default',
+            'email' => 'thonymarckyt08@gmail.com',
             'codigo' => '00000000000',
             'client_type_id' => 1,
             'state' => true,

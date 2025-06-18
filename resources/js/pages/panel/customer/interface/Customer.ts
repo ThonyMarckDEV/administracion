@@ -4,6 +4,9 @@ export type CustomerResource = {
     id: number;
     name: string;
     codigo: string;
+    email: string;
+    dni: string | null;
+    ruc: string | null;
     client_type_id: number;
     client_type: string;
     state: boolean;
@@ -13,12 +16,18 @@ export type CustomerResource = {
 export type CustomerRequest = {
     name: string;
     codigo: string;
+    email: string;
+    dni: string | null;
+    ruc: string | null;
     client_type_id: number;
 };
 
 export type CustomerRequestUpdate = {
     name: string;
     codigo: string;
+    email: string;
+    dni: string | null;
+    ruc: string | null;
     client_type_id: number;
     state: 'activo' | 'inactivo';
 };

@@ -18,6 +18,14 @@ const sidebarNavItems: NavItem[] = [
         title: 'Appearance',
         href: '/settings/appearance',
     },
+    {
+        title: 'Documents',
+        href: '/settings/certificate',
+    },
+    {
+        title: 'My Company',
+        href: '/settings/company',
+    },
 ];
 
 const page = usePage();

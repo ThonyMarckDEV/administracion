@@ -1,6 +1,6 @@
 <template>
     <div class="container mx-auto px-4 py-2">
-        <LoadingTable v-if="loading" :headers="6" :row-count="10" />
+        <LoadingTable v-if="loading" :headers="8" :row-count="10" />
         <div v-else class="space-y-4">
             <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-700 dark:shadow-none">
                 <Table class="w-full">
@@ -9,6 +9,9 @@
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ID</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">NOMBRE</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CÓDIGO</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">EMAIL</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">DNI</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">RUC</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ESTADO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">TIPO DE CLIENTE</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">FECHA</TableHead>
@@ -24,6 +27,9 @@
                             <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ customer.id }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ customer.name }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ customer.codigo }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ customer.email }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ customer.dni || '-' }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ customer.ruc || '-' }}</TableCell>
                             <TableCell class="px-4 py-3">
                                 <span
                                     v-if="customer.state === true"
@@ -68,7 +74,6 @@
                     </TableBody>
                 </Table>
             </div>
-
             <PaginationCustomer :meta="customerPaginate" @page-change="$emit('page-change', $event)" class="mt-6" />
         </div>
     </div>
@@ -106,7 +111,7 @@ onMounted(() => {
     }
 });
 
-const { customerList, customerPaginate } = defineProps<{
+const { customerList, customerPaginate, loading } = defineProps<{
     customerList: CustomerResource[];
     customerPaginate: Pagination;
     loading: boolean;
@@ -122,13 +127,11 @@ const openModalDelete = (id: number) => {
 </script>
 
 <style scoped>
-/* Mejoras específicas para modo oscuro */
 .dark .TableHeader {
     background-color: rgba(31, 41, 55, 0.5);
     border-bottom-color: rgba(55, 65, 81, 0.5);
 }
 
-/* Transiciones mejoradas */
 .TableRow {
     transition:
         background-color 0.15s ease,
@@ -139,7 +142,6 @@ const openModalDelete = (id: number) => {
     transform: translateY(-1px);
 }
 
-/* Estilo para la tabla vacía */
 .TableBody:empty::after {
     content: 'No se encontraron clientes';
     display: block;

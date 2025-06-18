@@ -23,6 +23,9 @@ class StoreCustomerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:150',
+            'email' => 'required|email|max:100|unique:customers,email',
+            'dni' => 'nullable|string|max:8|unique:customers,dni',
+            'ruc' => 'nullable|string|max:11|unique:customers,ruc',
             'codigo' => 'required|string|max:11|unique:customers,codigo',
             'client_type_id' => 'required|exists:client_types,id',
         ];

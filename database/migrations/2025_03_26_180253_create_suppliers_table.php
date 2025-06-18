@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name',50)->unique();
             $table->char('ruc', 11)->unique();
+            $table->string('email')->unique();
             $table->string('address', 255)->nullable();
             $table->boolean('state')->default(true)->comment('true: activo, false: inactivo');
             $table->timestamps();

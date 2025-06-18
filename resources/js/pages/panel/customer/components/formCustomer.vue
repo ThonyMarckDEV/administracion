@@ -24,7 +24,7 @@
                             <FormItem>
                                 <FormLabel>Nombre</FormLabel>
                                 <FormControl>
-                                    <Input type="text" placeholder="nombre y apellidos" v-bind="componentField" />
+                                    <Input type="text" placeholder="Nombre y apellidos" v-bind="componentField" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -33,7 +33,16 @@
                             <FormItem>
                                 <FormLabel>Código</FormLabel>
                                 <FormControl>
-                                    <Input type="text" placeholder="codigo" v-bind="componentField" />
+                                    <Input type="text" placeholder="Código (máx. 11 caracteres)" v-bind="componentField" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        </FormField>
+                        <FormField v-slot="{ componentField }" name="email">
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input type="email" placeholder="correo@ejemplo.com" v-bind="componentField" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -42,7 +51,7 @@
                             <FormItem>
                                 <FormLabel>Tipo cliente</FormLabel>
                                 <FormControl>
-                                    <Select v-bind="componentField">
+                                    <Select v-bind="componentField" @update:modelValue="updateDniRucFields">
                                         <SelectTrigger>
                                             <SelectValue placeholder="Selecciona el tipo" />
                                         </SelectTrigger>
@@ -59,6 +68,24 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
+                        <FormField v-if="isPersona" v-slot="{ componentField }" name="dni">
+                            <FormItem>
+                                <FormLabel>DNI</FormLabel>
+                                <FormControl>
+                                    <Input type="text" placeholder="8 dígitos" v-bind="componentField" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        </FormField>
+                        <FormField v-if="isEmpresa" v-slot="{ componentField }" name="ruc">
+                            <FormItem>
+                                <FormLabel>RUC</FormLabel>
+                                <FormControl>
+                                    <Input type="text" placeholder="11 dígitos" v-bind="componentField" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        </FormField>
                         <Button type="submit">Crear Cliente</Button>
                     </form>
                 </CardContent>
@@ -66,8 +93,8 @@
         </div>
     </AppLayout>
 </template>
+
 <script setup lang="ts">
-//composable
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,8 +109,9 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { AlertCircle } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { z } from 'zod';
+
 const { createCustomer } = useCustomer();
 const page = usePage<SharedData>();
 
@@ -94,44 +122,84 @@ const props = defineProps<{
 const hasErrors = computed(() => {
     return page.props.errors && Object.keys(page.props.errors).length > 0;
 });
+
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'clientes',
-        href: '/panel/customers',
-    },
-    {
-        title: 'Exportar',
-        href: '/panel/users/export',
-    },
-    {
-        title: 'crear usuario',
-        href: '/panel/customers/create',
-    },
+    { title: 'clientes', href: '/panel/customers' },
+    { title: 'Exportar', href: '/panel/users/export' },
+    { title: 'crear usuario', href: '/panel/customers/create' },
 ];
 
 // Form validation
+const clientTypeId = ref<number | null>(null);
+const isPersona = computed(() => clientTypeId.value === 1); // Persona
+const isEmpresa = computed(() => clientTypeId.value === 2); // Empresa
 
-const formShema = toTypedSchema(
+const formSchema = toTypedSchema(
     z.object({
         name: z
-            .string({ message: 'campo obligatorio' })
-            .min(1, { message: 'nombre mayor a 2 letras' })
-            .max(150, { message: 'nombre menor a 150 letras' }),
+            .string({ message: 'Campo obligatorio' })
+            .min(2, { message: 'Nombre mayor a 2 letras' })
+            .max(150, { message: 'Nombre menor a 150 letras' }),
         codigo: z
-            .string({ message: 'campo obligatorio' })
-            .min(1, { message: 'codigo mayor a 2 letras' })
-            .max(50, { message: 'codigo menor a 50 letras' }),
-        client_type_id: z.number({ message: 'campo obligatorio' }),
-    }),
+            .string({ message: 'Campo obligatorio' })
+            .min(2, { message: 'Código mayor a 2 caracteres' })
+            .max(11, { message: 'Código menor a 11 caracteres' }),
+        email: z
+            .string({ message: 'Campo obligatorio' })
+            .email({ message: 'Correo electrónico inválido' }),
+        client_type_id: z.number({ message: 'Campo obligatorio' }),
+        dni: z
+            .string({ message: 'DNI obligatorio para personas' })
+            .regex(/^\d{8}$/, { message: 'DNI debe tener 8 dígitos numéricos' })
+            .nullable()
+            .optional()
+            .refine((val) => (isPersona.value ? !!val : true), {
+                message: 'DNI es obligatorio para personas',
+            }),
+        ruc: z
+            .string({ message: 'RUC obligatorio para empresas' })
+            .regex(/^\d{11}$/, { message: 'RUC debe tener 11 dígitos numéricos' })
+            .nullable()
+            .optional()
+            .refine((val) => (isEmpresa.value ? !!val : true), {
+                message: 'RUC es obligatorio para empresas',
+            }),
+    }).refine(
+        (data) => {
+            if (isPersona.value && data.dni === null) return false;
+            if (isEmpresa.value && data.ruc === null) return false;
+            if (isPersona.value && data.ruc !== null) return false;
+            if (isEmpresa.value && data.dni !== null) return false;
+            return true;
+        },
+        {
+            message: 'Solo DNI para personas y RUC para empresas',
+            path: ['client_type_id'],
+        }
+    )
 );
 
-const { handleSubmit } = useForm({
-    validationSchema: formShema,
+const { handleSubmit, setFieldValue } = useForm({
+    validationSchema: formSchema,
+    initialValues: {
+        name: '',
+        codigo: '',
+        email: '',
+        client_type_id: null,
+        dni: null,
+        ruc: null,
+    },
 });
 
+const updateDniRucFields = (value: number) => {
+    clientTypeId.value = value;
+    setFieldValue('dni', null);
+    setFieldValue('ruc', null);
+};
+
 const onSubmit = handleSubmit((values) => {
-    console.log(values);
     createCustomer(values);
 });
 </script>
+
 <style scoped></style>

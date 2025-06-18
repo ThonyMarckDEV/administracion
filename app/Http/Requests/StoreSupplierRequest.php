@@ -25,6 +25,7 @@ class StoreSupplierRequest extends FormRequest
         return [
             'name' => 'required|string',
             'ruc' => 'required|string|size:11|unique:suppliers',
+            'email' => 'required|email|max:100',
             'address' => 'required|string|max:100',
             'state' => 'required|string|in:activo,inactivo',
         ];

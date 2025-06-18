@@ -14,6 +14,11 @@ class ClientType extends Model
         'name',
         'state',
     ]; 
+    protected $casts = [
+        'state' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
  
     public function Customers():HasMany{
         return $this->hasMany(Customer::class); 

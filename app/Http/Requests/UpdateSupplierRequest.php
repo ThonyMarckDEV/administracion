@@ -24,6 +24,7 @@ class UpdateSupplierRequest extends FormRequest
         return [
             'name' => 'required|string',
             'ruc' => 'required|string|size:11',
+            'email' => 'required|email|max:100|unique:suppliers,email,' . $this->route('supplier')->id,
             'address' => 'required|string|max:100', 
             'state' => 'required|string|in:activo,inactivo',
         ];

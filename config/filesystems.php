@@ -60,6 +60,12 @@ return [
             'report' => false,
         ],
 
+        'private' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private'),
+            'throw' => false, // Optional: Set to true if you want exceptions for missing files
+        ],
+
     ],
 
     /*

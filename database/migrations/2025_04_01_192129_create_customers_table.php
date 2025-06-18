@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('codigo',11)->unique();
+            $table->string('email')->unique();
+            $table->string('dni')->nullable();
+            $table->string('ruc')->nullable();
             $table->foreignId('client_type_id')->constrained('client_types','id');
             $table->boolean('state')->default(true);
             $table->timestamps();

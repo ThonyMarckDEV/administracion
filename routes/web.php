@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientTypeController;
+use App\Http\Controllers\Panel\InvoiceController;
 use App\Http\Controllers\Reportes\ClientTypePDFController;
 use App\Http\Controllers\Panel\UserController;
 use App\Http\Controllers\SupplierController;
@@ -80,6 +81,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('payments', PaymentController::class);
         # list Payments
         Route::get('listar-payments', [PaymentController::class, 'listPayments'])->name('payments.listar');
+
+        // Rutas existentes (no se modifican)
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/listar-invoices', [InvoiceController::class, 'listarInvoices'])->name('invoices.list');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::post('/invoices/{invoice}/annul', [InvoiceController::class, 'annul'])->name('invoices.annul');
+        Route::get('/invoices/{invoice}/pdf/{payment_id}', [InvoiceController::class, 'viewPdf'])->name('invoices.pdf');
+        Route::get('/invoices/{invoice}/xml/{payment_id}', [InvoiceController::class, 'downloadXml'])->name('invoices.xml');
+        Route::get('/invoices/{invoice}/cdr/{payment_id}', [InvoiceController::class, 'downloadCdr'])->name('invoices.cdr');
+        // Nuevas rutas para archivos de baja
+        Route::get('/invoices/{invoice}/voided/xml', [InvoiceController::class, 'downloadVoidedXml'])->name('invoices.voided.xml');
+        Route::get('/invoices/{invoice}/voided/cdr', [InvoiceController::class, 'downloadVoidedCdr'])->name('invoices.voided.cdr');
+
         # Route group for reports
         Route::prefix('reports')->name('reports.')->group(function () {
             # Exports to Excel

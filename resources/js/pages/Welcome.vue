@@ -334,13 +334,13 @@ export default {
     mounted() {
         // Autoplay for feature slides
         this.startAutoplay();
-
+        
         // Check for cookie first
         const savedMode = this.getCookie('appearance');
         if (savedMode) {
             this.isDarkMode = savedMode === 'dark';
         }
-
+        
         // Add animation classes
         this.animateOnScroll();
         window.addEventListener('scroll', this.animateOnScroll);
@@ -351,12 +351,12 @@ export default {
             let expires = '';
             if (days) {
                 const date = new Date();
-                date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
                 expires = '; expires=' + date.toUTCString();
             }
             document.cookie = name + '=' + (value || '') + expires + '; path=/; SameSite=Strict';
         },
-
+        
         getCookie(name) {
             const nameEQ = name + '=';
             const ca = document.cookie.split(';');
@@ -367,7 +367,7 @@ export default {
             }
             return null;
         },
-
+        
         nextSlide() {
             this.currentSlide = (this.currentSlide + 1) % this.featureSlides.length;
         },
@@ -381,84 +381,82 @@ export default {
         },
         animateOnScroll() {
             const elements = document.querySelectorAll('.fade-in');
-            elements.forEach((element) => {
+            elements.forEach(element => {
                 const elementTop = element.getBoundingClientRect().top;
                 const elementVisible = 150;
-
+                
                 if (elementTop < window.innerHeight - elementVisible) {
                     element.classList.add('is-visible');
                 }
             });
-        },
-    },
-};
+        }
+    }
+  }
 </script>
 
 <style scoped>
 /* Base styles */
 .app-container {
-    font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Dark mode */
 .dark {
-    color-scheme: dark;
+  color-scheme: dark;
 }
 
 /* Animation styles */
 .fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition:
-        opacity 1s ease,
-        transform 1s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s ease, transform 1s ease;
 }
 
 .fade-in.is-visible {
-    opacity: 1;
-    transform: translateY(0);
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Stagger children animation */
 .system-card:nth-child(1) {
-    transition-delay: 0.1s;
+  transition-delay: 0.1s;
 }
 .system-card:nth-child(2) {
-    transition-delay: 0.2s;
+  transition-delay: 0.2s;
 }
 .system-card:nth-child(3) {
-    transition-delay: 0.3s;
+  transition-delay: 0.3s;
 }
 .system-card:nth-child(4) {
-    transition-delay: 0.4s;
+  transition-delay: 0.4s;
 }
 .system-card:nth-child(5) {
-    transition-delay: 0.5s;
+  transition-delay: 0.5s;
 }
 .system-card:nth-child(6) {
-    transition-delay: 0.6s;
+  transition-delay: 0.6s;
 }
 
 /* Tech icon hover effect */
 .tech-icon {
-    transition: all 0.4s ease;
+  transition: all 0.4s ease;
 }
 
 .tech-icon:hover {
-    transform: translateY(-8px);
+  transform: translateY(-8px);
 }
 
 /* Custom transition for carousel */
 .slide-leave-active,
 .slide-enter-active {
-    transition: all 1s;
+  transition: all 1s;
 }
 .slide-enter {
-    transform: translateX(100%);
-    opacity: 0;
+  transform: translateX(100%);
+  opacity: 0;
 }
 .slide-leave-to {
-    transform: translateX(-100%);
-    opacity: 0;
+  transform: translateX(-100%);
+  opacity: 0;
 }
 </style>

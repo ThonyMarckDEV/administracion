@@ -29,6 +29,16 @@
                                 <Button
                                     variant="ghost"
                                     size="sm"
+                                    class="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
+                                    @click="openModalPdf(amount.id)"
+                                    title="Ver Recibo"
+                                >
+                                    <FileText class="h-4 w-4" />
+                                    <span class="sr-only">Ver Recibo</span>
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
                                     class="h-8 w-8 p-0 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/30 dark:hover:text-orange-300"
                                     @click="openModalCreate(amount.id)"
                                     title="Editar cliente"
@@ -53,6 +63,11 @@
                 <PaginationCategory :meta="amountsPaginate" @page-change="$emit('page-change', $event)" />
             </div>
         </div>
+        <ShowPdfModal
+            :status-modal="showPdfModal"
+            :pdf-url="pdfUrl"
+            @close-modal="closePdfModal"
+        />
     </div>
 </template>
 <script setup lang="ts">
@@ -64,10 +79,13 @@ import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/interface/paginacion';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { Trash, UserPen } from 'lucide-vue-next';
+import { FileText, Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import PaginationCategory from '../../category/components/paginationCategory.vue';
+import ShowPdfModal from './ShowPdfModal.vue';
 import { AmountResource } from '../interface/Amount';
+import { AmountServices } from '@/services/amountServices';
+
 const { toast } = useToast();
 
 const emit = defineEmits<{
@@ -85,6 +103,8 @@ const { amountsList, amountsPaginate, loading } = defineProps<{
 const page = usePage<SharedData>();
 
 const message = ref(page.props.flash.message || '');
+const showPdfModal = ref(false);
+const pdfUrl = ref<string | null>(null);
 
 const openModalCreate = (id: number) => {
     emit('open-modal-create', id);
@@ -94,10 +114,52 @@ const openModalDelete = (id: number) => {
     emit('open-modal-delete', id);
 };
 
+const openModalPdf = async (id: number) => {
+    try {
+        const response = await AmountServices.generatePdf(id);
+        if (response.status) {
+            const pdfBlob = base64ToBlob(response.pdf, 'application/pdf');
+            pdfUrl.value = URL.createObjectURL(pdfBlob);
+            showPdfModal.value = true;
+        } else {
+            toast({
+                title: 'Error',
+                description: response.message,
+                variant: 'destructive',
+            });
+        }
+    } catch (error) {
+        console.error('Error al generar el PDF:', error);
+        toast({
+            title: 'Error',
+            description: 'No se pudo generar el PDF.',
+            variant: 'destructive',
+        });
+    }
+};
+
+const closePdfModal = () => {
+    if (pdfUrl.value) {
+        URL.revokeObjectURL(pdfUrl.value);
+        pdfUrl.value = null;
+    }
+    showPdfModal.value = false;
+};
+
+const base64ToBlob = (base64: string, mimeType: string) => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+};
+
 onMounted(() => {
     if (message.value) {
         toast({
-            title: 'Notificacion',
+            title: 'Notificación',
             description: message.value,
         });
     }

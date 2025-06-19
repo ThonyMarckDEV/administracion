@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('series_correlatives', function (Blueprint $table) {
             $table->id();
-            $table->enum('document_type', ['B', 'F' , 'RA'])->comment('B: Boleta, F: Factura, RA: Dada de baja');
+            $table->enum('document_type', ['B', 'F' , 'RA' , 'RHE'])->comment('B: Boleta, F: Factura, RA: Dada de baja , RHE: Recibo por honorarios');
             $table->string('serie', 10);
             $table->unsignedBigInteger('correlative');
             $table->timestamps();

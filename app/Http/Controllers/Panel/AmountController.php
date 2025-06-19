@@ -12,6 +12,7 @@ use App\Models\Amount;
 use App\Imports\AmountImport;
 use App\Models\Category;
 use App\Models\Supplier;
+use App\Services\Sunat\GenerateReciboHonorariosPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -142,5 +143,39 @@ class AmountController extends Controller
         return response()->json([
             'message' => 'Egresos importados de manera correcta',
         ]);
+    }
+
+    /**
+     * Generate PDF for a specific amount.
+    */
+    public function generatePdf(Amount $amount)
+    {
+        Gate::authorize('view', $amount);
+
+        try {
+            $generator = new GenerateReciboHonorariosPdf();
+            $pdfContent = $generator->generate([
+                'razon_social' => $amount->suppliers->name,
+                'ruc' => $amount->suppliers->ruc,
+                'service' => $amount->description,
+                'monto' => $amount->amount,
+                'retention' => $amount->amount * 0.08,
+                'monto_neto' => $amount->amount * (1 - 0.08),
+                'fecha_emision' => Carbon::parse($amount->date_init)->format('d/m/Y'),
+                'hora_emision' => Carbon::parse($amount->date_init)->format('H:i:s'),
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'PDF generado correctamente',
+                'pdf' => base64_encode($pdfContent),
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al generar el PDF',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
 }

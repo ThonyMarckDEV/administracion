@@ -81,6 +81,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('payments', PaymentController::class);
         # list Payments
         Route::get('listar-payments', [PaymentController::class, 'listPayments'])->name('payments.listar');
+        #Generate Amount PDF
+        Route::get('/amounts/{amount}/pdf', [AmountController::class, 'generatePdf'])->name('panel.amounts.pdf');
 
         // Rutas existentes (no se modifican)
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');

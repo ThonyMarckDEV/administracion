@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Sunat\ComprobanteController;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\VoidedDocument;
+use App\Services\Sunat\VoidComprobante;
 use Carbon\Exceptions\Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -17,6 +19,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceController extends Controller
 {
+
+    protected $voidComprobanteService;
+
+    public function __construct(VoidComprobante $voidComprobanteService)
+    {
+        $this->voidComprobanteService = $voidComprobanteService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -80,12 +90,18 @@ class InvoiceController extends Controller
         ]);
     }
 
-    /**
-     * Annul the specified invoice (set sunat to 'anulado').
+   /**
+     * Annul the specified invoice.
      */
-    public function annul(Invoice $invoice)
+    public function annul(Request $request, Invoice $invoice)
     {
         Gate::authorize('delete', $invoice);
+
+        $request->validate([
+            'invoice_id' => 'required|exists:invoices,id',
+            'motivo' => 'required|string|max:255',
+        ]);
+
         if ($invoice->sunat === 'anulado') {
             return response()->json([
                 'status' => false,
@@ -93,15 +109,35 @@ class InvoiceController extends Controller
             ], 400);
         }
 
-        $invoice->sunat = 'anulado';
-        $invoice->save();
+        if ($request->invoice_id != $invoice->id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'El invoice_id no coincide con el comprobante',
+            ], 400);
+        }
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Comprobante anulado correctamente',
-        ]);
+        $start = microtime(true);
+        try {
+            $validated = $request->only(['invoice_id', 'motivo']);
+            $result = $this->voidComprobanteService->voidComprobante($validated);
+
+            Log::info('Comprobante voided', [
+                'invoice_id' => $validated['invoice_id'],
+                'execution_time' => microtime(true) - $start,
+            ]);
+
+            return response()->json([
+                'message' => 'Comprobante voided successfully',
+                'data' => $result,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Error voiding comprobante: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Error voiding comprobante',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
 
     /**
      * Servir PDF para visualización.

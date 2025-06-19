@@ -89,14 +89,7 @@ class CategoryController extends Controller
         ], 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -124,6 +117,15 @@ class CategoryController extends Controller
             'status' => true,
             'message' => 'Categoría eliminada correctamente',
         ]);
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        //
     }
 
     // EXPORTAR A EXCEL

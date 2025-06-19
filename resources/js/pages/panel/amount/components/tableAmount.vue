@@ -13,6 +13,8 @@
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">DESCRIPCION</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">MONTO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">FECHA_INIT</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">SERIE</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CORRELATIVO</TableHead>
                             <TableHead class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -25,6 +27,8 @@
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.description }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.amount }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.date_init }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.serie_assigned }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.correlative_assigned }}</TableCell>
                             <TableCell class="flex justify-end space-x-2 px-4 py-3">
                                 <Button
                                     variant="ghost"

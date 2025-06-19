@@ -23,6 +23,8 @@ class AmountResource extends JsonResource
             'description' => $this->description,
             'amount' => $this->amount,
             'date_init' => Carbon::parse($this->date_init)->toDateString(),
+            'serie_assigned' =>'RHE' . $this->serie_assigned,
+            'correlative_assigned'=>$this->correlative_assigned,
         ];
     }
 }

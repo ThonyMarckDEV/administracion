@@ -26,7 +26,7 @@ return new class extends Migration
         $defaultRecords = [
             ['document_type' => 'B', 'serie' => '001', 'correlative' => 0],
             ['document_type' => 'F', 'serie' => '001', 'correlative' => 0],
-            ['document_type' => 'RHE', 'serie' => 'E001', 'correlative' => 0],
+            ['document_type' => 'RHE', 'serie' => '001', 'correlative' => 0],
             ['document_type' => 'RA', 'serie' => '001', 'correlative' => 0],
         ];
 

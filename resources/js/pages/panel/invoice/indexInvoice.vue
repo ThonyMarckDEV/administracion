@@ -12,15 +12,7 @@
                     :loading="principal.loading"
                     @page-change="handleInvoicePageChange"
                     @open-modal-show="getIdShow"
-                    @open-modal-annul="getIdAnnul"
-                />
-                <Delete
-                    :modal="principal.statusModalAnnul"
-                    :itemId="principal.invoiceIdAnnul"
-                    title="Anular Comprobante"
-                    description="¿Está seguro de que desea anular este comprobante?"
-                    @close-modal="closeModalAnnul"
-                    @delete-item="emitAnnulInvoice"
+                    @refresh-list="handleRefreshList"
                 />
             </div>
         </div>
@@ -28,7 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import Delete from '@/components/delete.vue';
 import FilterInvoices from '@/components/filter.vue';
 import { useInvoice } from '@/composables/useInvoice';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -37,7 +28,7 @@ import { Head } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
 import TableInvoice from './components/TableInvoice.vue';
 
-const { loadInvoices, showInvoice, principal, showInvoiceData, annulInvoice } = useInvoice();
+const { loadInvoices, showInvoice, principal } = useInvoice();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -58,18 +49,8 @@ const getIdShow = (id: number) => {
     showInvoice(id);
 };
 
-const getIdAnnul = (id: number) => {
-    principal.statusModalAnnul = true;
-    principal.invoiceIdAnnul = id;
-};
-
-const emitAnnulInvoice = (id: number) => {
-    principal.statusModalAnnul = false;
-    annulInvoice(id);
-};
-
-const closeModalAnnul = () => {
-    principal.statusModalAnnul = false;
+const handleRefreshList = () => {
+    loadInvoices(principal.invoicePaginate.current_page);
 };
 
 onMounted(() => {

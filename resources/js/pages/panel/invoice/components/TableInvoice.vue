@@ -99,15 +99,15 @@
                   <span class="sr-only">Descargar CDR</span>
                 </Button>
                 <Button
-                  v-if="invoice.sunat !== 'anulado'"
-                  variant="ghost"
-                  size="sm"
-                  class="h-[30px] w-[30px] rounded-md p-0 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30"
-                  @click="openModalAnnul(invoice.id)"
-                  title="Anular Comprobante"
-                >
-                  <XCircle class="h-[16px] w-[16px]" />
-                  <span class="sr-only">Anular Comprobante</span>
+                    v-if="invoice.sunat !== 'anulado' && invoice.document_type !== 'Boleta'"
+                    variant="ghost"
+                    size="sm"
+                    class="h-[30px] w-[30px] rounded-md p-0 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30"
+                    @click="openModalAnnul(invoice.id)"
+                    title="Anular Comprobante"
+                  >
+                    <XCircle class="h-[16px] w-[16px]" />
+                    <span class="sr-only">Anular Comprobante</span>
                 </Button>
               </TableCell>
             </TableRow>

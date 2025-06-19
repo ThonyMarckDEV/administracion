@@ -52,7 +52,7 @@ class GenerateReciboHonorariosPdf
             ]));
 
             // Format document number
-            $docNumber = sprintf('%s-%08d', $data['doc_series'], $data['doc_correlative']);
+            $docNumber = sprintf('%s-%d', $data['doc_series'], $data['doc_correlative']);
 
             // Replace placeholders with dynamic data
             $replacements = [

@@ -82,20 +82,23 @@ class AmountController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     */
+    */
     public function store(StoreAmountRequest $request)
     {
         Gate::authorize('create', Amount::class);
         try {
-            // Fetch or create series_correlative for RH
-            $seriesCorrelative = SeriesCorrelative::firstOrCreate(
-                ['document_type' => 'RH', 'serie' => 'E001'],
-                ['correlative' => 1]
-            );
+            // Fetch existing series_correlative for RHE
+            $seriesCorrelative = SeriesCorrelative::where('document_type', 'RHE')
+                ->where('serie', '001')
+                ->first();
+
+            if (!$seriesCorrelative) {
+                throw new \Exception('No series_correlative found for RHE with serie 001');
+            }
 
             // Get the next correlative and increment
-            $correlative = $seriesCorrelative->correlative;
-            $seriesCorrelative->increment('correlative');
+            $correlative = $seriesCorrelative->correlative + 1;
+            $seriesCorrelative->update(['correlative' => $correlative]);
 
             // Create Amount with assigned series and correlative
             $validated = $request->validated();
@@ -106,7 +109,10 @@ class AmountController extends Controller
 
             return redirect()->route('panel.amounts.index')->with('message', 'Egreso registrado correctamente');
         } catch (\Throwable $th) {
-            Log::error('Error storing amount', ['error' => $th->getMessage()]);
+            Log::error('Error storing amount', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+            ]);
             return redirect()->route('panel.amounts.index')->with('error', 'Error al registrar el egreso: ' . $th->getMessage());
         }
     }
@@ -171,7 +177,7 @@ class AmountController extends Controller
                 'monto_neto' => $amount->amount * (1 - 0.08),
                 'fecha_emision' => Carbon::parse($amount->date_init)->format('d/m/Y'),
                 'hora_emision' => Carbon::parse($amount->date_init)->format('H:i:s'),
-                'doc_series' => $amount->serie_assigned,
+                'doc_series' => ' RHE ' . $amount->serie_assigned,
                 'doc_correlative' => $amount->correlative_assigned,
             ]);
 

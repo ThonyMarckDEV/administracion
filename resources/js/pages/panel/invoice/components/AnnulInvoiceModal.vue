@@ -75,6 +75,7 @@ const emit = defineEmits<{
 const motivo = ref('');
 
 const closeModal = () => {
+  console.log('Emitting close-modal');
   motivo.value = '';
   emit('close-modal');
 };
@@ -88,6 +89,7 @@ const submitAnnul = async () => {
   } catch (error) {
     console.error('Error al anular el comprobante:', error);
     alert('No se pudo anular el comprobante.');
+    closeModal();
   }
 };
 </script>

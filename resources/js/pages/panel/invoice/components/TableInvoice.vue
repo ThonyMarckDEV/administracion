@@ -1,4 +1,4 @@
-<!-- TableInvoice.vue -->
+<!-- components/TableInvoice.vue -->
 <template>
   <div class="container mx-auto px-4">
     <FilterInvoices @filter="applyFilters" />
@@ -21,7 +21,11 @@
             <TableHead class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Acciones</TableHead>
           </TableHeader>
           <TableBody>
+            <TableRow v-if="filteredInvoices.length === 0">
+              <TableCell colspan="12" class="text-center">No hay facturas disponibles.</TableCell>
+            </TableRow>
             <TableRow
+              v-else
               v-for="invoice in filteredInvoices"
               :key="invoice.id"
               class="transition-colors duration-150 ease-in-out hover:bg-gray-50 dark:hover:bg-gray-800/30"
@@ -167,6 +171,9 @@ const filters = ref({
   document_type: '',
   payment_id: '',
   correlative_assigned: '',
+  service_id: 0,
+  customer_id: 0,
+  payment_method: '',
 });
 
 const filteredInvoices = computed(() => {
@@ -182,12 +189,35 @@ const filteredInvoices = computed(() => {
       invoice.correlative_assigned
         .toLowerCase()
         .includes(filters.value.correlative_assigned.toLowerCase());
+    const matchesService =
+      filters.value.service_id === 0 ||
+      (invoice.payment.service?.id && invoice.payment.service.id === filters.value.service_id);
+    const matchesCustomer =
+      filters.value.customer_id === 0 ||
+      (invoice.payment.customer?.id && invoice.payment.customer.id === filters.value.customer_id);
+    const matchesPaymentMethod =
+      !filters.value.payment_method ||
+      invoice.payment.payment_method.toLowerCase() === filters.value.payment_method.toLowerCase();
 
-    return matchesDocumentType && matchesPaymentId && matchesCorrelative;
+    return (
+      matchesDocumentType &&
+      matchesPaymentId &&
+      matchesCorrelative &&
+      matchesService &&
+      matchesCustomer &&
+      matchesPaymentMethod
+    );
   });
 });
 
-const applyFilters = (newFilters: { document_type: string; payment_id: string; correlative_assigned: string }) => {
+const applyFilters = (newFilters: {
+  document_type: string;
+  payment_id: string;
+  correlative_assigned: string;
+  service_id: number;
+  customer_id: number;
+  payment_method: string;
+}) => {
   filters.value = { ...newFilters };
 };
 

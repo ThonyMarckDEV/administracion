@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Sunat\ComprobanteController;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
-use App\Models\VoidedDocument;
+use App\Models\Payment;
+use App\Models\MyCompany;
+use App\Services\Sunat\GeneratePdf;
+use App\Services\Sunat\GenerateComprobante;
 use App\Services\Sunat\VoidComprobante;
-use Carbon\Exceptions\Exception;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +21,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceController extends Controller
 {
-
     protected $voidComprobanteService;
 
     public function __construct(VoidComprobante $voidComprobanteService)
@@ -90,7 +91,7 @@ class InvoiceController extends Controller
         ]);
     }
 
-   /**
+    /**
      * Annul the specified invoice.
      */
     public function annul(Request $request, Invoice $invoice)
@@ -152,17 +153,17 @@ class InvoiceController extends Controller
         }
 
         // Obtener datos necesarios para generar el comprobante
-       $payment = \App\Models\Payment::with(['customer', 'paymentPlan.service'])->findOrFail($payment_id);
+        $payment = Payment::with(['customer', 'paymentPlan.service'])->findOrFail($payment_id);
         Log::info('Payment data for payment_id: ' . $payment_id, [
             'payment' => $payment->toArray(),
             'payment_plan' => $payment->paymentPlan ? $payment->paymentPlan->toArray() : null,
             'service' => $payment->paymentPlan && $payment->paymentPlan->service ? $payment->paymentPlan->service->toArray() : null,
         ]);
-        $company = \App\Models\MyCompany::firstOrFail();
+        $company = MyCompany::firstOrFail();
 
         // Instanciar el servicio de generación de comprobantes
-        $pdfService = app(\App\Services\Sunat\GeneratePdf::class);
-        $generateComprobante = new \App\Services\Sunat\GenerateComprobante($pdfService);
+        $pdfService = app(GeneratePdf::class);
+        $generateComprobante = new GenerateComprobante($pdfService);
 
         // Construir datos para el comprobante
         $data = $this->buildComprobanteData($invoice, $payment, $company);
@@ -191,7 +192,7 @@ class InvoiceController extends Controller
         );
     }
 
-     protected function buildComprobanteData(Invoice $invoice, $payment, $company): array
+    protected function buildComprobanteData(Invoice $invoice, $payment, $company): array
     {
         $customer = $payment->customer;
 
@@ -224,12 +225,11 @@ class InvoiceController extends Controller
         }
 
         // Log service data for debugging
-        Log::info('Service data used for payment_id: ' . $payment->id, [
+        Log::info(' personally for payment_id: ' . $payment->id, [
             'service_id' => $service->id,
             'service_name' => $service->name,
         ]);
 
-        // Rest of the method remains unchanged
         $clientData = [
             'tipo_doc' => $invoice->document_type === 'B' ? ($customer->dni ? '1' : '0') : ($customer->ruc ? '6' : ($customer->dni ? '1' : '0')),
             'num_doc' => $invoice->document_type === 'B' ? ($customer->dni ?? '-') : ($customer->ruc ?? ($customer->dni ?? '-')),
@@ -255,7 +255,7 @@ class InvoiceController extends Controller
             'tipo_operacion' => '0101',
             'serie' => $invoice->serie_assigned,
             'correlativo' => $invoice->correlative_assigned,
-            'fecha_emision' => now()->format('Y-m-d'),
+            'fecha_emision' => Carbon::parse($payment->payment_date)->setTimezone('America/Lima')->format('Y-m-d H:i:s'),
             'tipo_moneda' => 'PEN',
             'mto_oper_gravadas' => $mtoOperGravadas,
             'mto_igv' => $mtoIgv,
@@ -314,7 +314,7 @@ class InvoiceController extends Controller
 
         $decimalText = $decimalPart > 0 ? ' CON ' . ($decimalPart < 10 ? $units[$decimalPart] : $tens[floor($decimalPart / 10)] . ($decimalPart % 10 > 0 ? ' Y ' . $units[$decimalPart % 10] : '')) : '';
 
-        return strtoupper($integerText . $decimalText . ' SOLES');
+        return strtoupper($integerText . $decimalText);
     }
 
     /**
@@ -324,7 +324,6 @@ class InvoiceController extends Controller
     {
         Gate::authorize('view', $invoice);
 
-        // Validar que el payment_id coincide con el de la factura
         if ($invoice->payment_id != $payment_id) {
             abort(404, 'ID de pago no coincide con la factura');
         }
@@ -332,7 +331,6 @@ class InvoiceController extends Controller
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
         $folderPath = "{$docType}/{$payment_id}/xml";
 
-        // Obtener archivos en la carpeta
         $files = Storage::disk('public')->files($folderPath);
         $xmlFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.xml'));
 
@@ -340,7 +338,7 @@ class InvoiceController extends Controller
             abort(404, 'XML no encontrado');
         }
 
-        $xmlPath = reset($xmlFile); // Obtener el primer archivo XML
+        $xmlPath = reset($xmlFile);
         $fileName = basename($xmlPath);
 
         return Storage::disk('public')->download($xmlPath, $fileName, [
@@ -355,7 +353,6 @@ class InvoiceController extends Controller
     {
         Gate::authorize('view', $invoice);
 
-        // Validar que el payment_id coincide con el de la factura
         if ($invoice->payment_id != $payment_id) {
             abort(404, 'ID de pago no coincide con la factura');
         }
@@ -363,7 +360,6 @@ class InvoiceController extends Controller
         $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
         $folderPath = "{$docType}/{$payment_id}/cdr";
 
-        // Obtener archivos en la carpeta
         $files = Storage::disk('public')->files($folderPath);
         $zipFile = array_filter($files, fn($file) => str_ends_with(strtolower($file), '.zip'));
 
@@ -371,7 +367,7 @@ class InvoiceController extends Controller
             abort(404, 'CDR no encontrado');
         }
 
-        $cdrPath = reset($zipFile); // Obtener el primer archivo ZIP
+        $cdrPath = reset($zipFile);
         $fileName = basename($cdrPath);
 
         return Storage::disk('public')->download($cdrPath, $fileName, [
@@ -382,22 +378,18 @@ class InvoiceController extends Controller
     public function downloadVoidedXml(Invoice $invoice): StreamedResponse
     {
         try {
-            // Validar que la factura esté anulada
             if ($invoice->sunat !== 'anulado') {
                 abort(400, 'Invoice is not voided');
             }
 
-            // Obtener el payment_id de la factura
             $payment_id = $invoice->payment_id;
             if (!$payment_id) {
                 abort(404, 'Payment ID not found for this invoice');
             }
 
-            // Determinar el tipo de documento
             $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
             $folderPath = "{$docType}/{$payment_id}/voided/xml";
 
-            // Obtener archivos en la carpeta
             $files = Storage::disk('public')->files($folderPath);
             $xmlFile = array_filter($files, fn($file) => Str::endsWith(strtolower($file), '.xml'));
 
@@ -405,13 +397,13 @@ class InvoiceController extends Controller
                 abort(404, 'Voided XML not found');
             }
 
-            $xmlPath = reset($xmlFile); // Obtener el primer archivo XML
+            $xmlPath = reset($xmlFile);
             $fileName = basename($xmlPath);
 
             return Storage::disk('public')->download($xmlPath, $fileName, [
                 'Content-Type' => 'application/xml',
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error downloading voided XML', [
                 'invoice_id' => $invoice->id,
                 'payment_id' => $payment_id ?? null,
@@ -424,22 +416,18 @@ class InvoiceController extends Controller
     public function downloadVoidedCdr(Invoice $invoice): StreamedResponse
     {
         try {
-            // Validar que la factura esté anulada
             if ($invoice->sunat !== 'anulado') {
                 abort(400, 'Invoice is not voided');
             }
 
-            // Obtener el payment_id de la factura
             $payment_id = $invoice->payment_id;
             if (!$payment_id) {
                 abort(404, 'Payment ID not found for this invoice');
             }
 
-            // Determinar el tipo de documento
             $docType = $invoice->document_type === 'B' ? 'boletas' : 'facturas';
             $folderPath = "{$docType}/{$payment_id}/voided/cdr";
 
-            // Obtener archivos en la carpeta
             $files = Storage::disk('public')->files($folderPath);
             $zipFile = array_filter($files, fn($file) => Str::endsWith(strtolower($file), '.zip'));
 
@@ -447,13 +435,13 @@ class InvoiceController extends Controller
                 abort(404, 'Voided CDR not found');
             }
 
-            $cdrPath = reset($zipFile); // Obtener el primer archivo ZIP
+            $cdrPath = reset($zipFile);
             $fileName = basename($cdrPath);
 
             return Storage::disk('public')->download($cdrPath, $fileName, [
                 'Content-Type' => 'application/zip',
             ]);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error downloading voided CDR', [
                 'invoice_id' => $invoice->id,
                 'payment_id' => $payment_id ?? null,

@@ -26,7 +26,7 @@ class StoreAmountRequest extends FormRequest
             'amount' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'supplier_id' => 'required|exists:suppliers,id',
-            'date_init' => 'nullable|date_format:Y-m-d H:i:s', // Acepta fecha y hora
+            'date_init' => 'required|date',
         ];
     }
 }

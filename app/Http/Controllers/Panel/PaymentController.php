@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\PaymentPlan;
 use App\Services\Payment\PaymentDocumentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -90,11 +91,40 @@ class PaymentController extends Controller
     public function store(StorePaymentRequest $request)
     {
         Gate::authorize('create', Payment::class);
-        $validates = Payment::create($request->validated());
-        return redirect()->route('panel.payments.index')->with([
-            'status' => true,
-            'message' => 'Pago creado correctamente',
-        ]);
+        try {
+            // Prepare validated data
+            $validated = $request->validated();
+
+            // Normalize payment_date
+            $parsedDate = Carbon::parse($validated['payment_date'])->setTimezone('America/Lima');
+            // Si no tiene hora (hora es 00:00:00), usar la hora actual
+            if ($parsedDate->format('H:i:s') === '00:00:00') {
+                $parsedDate = $parsedDate->setTime(
+                    now('America/Lima')->hour,
+                    now('America/Lima')->minute,
+                    now('America/Lima')->second
+                );
+            }
+            $validated['payment_date'] = $parsedDate->format('Y-m-d H:i:s');
+
+            // Create Payment
+            $payment = Payment::create($validated);
+
+            return redirect()->route('panel.payments.index')->with([
+                'status' => true,
+                'message' => 'Pago creado correctamente',
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Error storing payment', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+                'payment_date' => $request->input('payment_date'),
+            ]);
+            return redirect()->route('panel.payments.index')->with([
+                'status' => false,
+                'error' => 'Error al registrar el pago: ' . $th->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -110,80 +140,82 @@ class PaymentController extends Controller
             'payment' => new PaymentResource($payment),
         ]);
     }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  */
-    // public function update(UpdatePaymentRequest $request, Payment $payment)
-    // {
-    //     Gate::authorize('update', $payment);
-    //     $data = $request->validated();
-    //     $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
-    //     foreach ($originalFields as $field) {
-    //         if (($data[$field] ?? null) === null) {
-    //             $data[$field] = $payment->{$field};
-    //         }
-    //     }
-    //     $payment->update($data);
-    //     if (($data['service_id'] ?? null) !== null && $payment->paymentPlan) {
-    //         Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
-    //         $payment->paymentPlan->update(['service_id' => $data['service_id']]);
-    //     }
-
-    //     return response()->json([
-    //         'status' => true,
-    //         'message' => 'Pago actualizado correctamente',
-    //         'payment' => new PaymentResource($payment),
-    //     ]);
-    // }
     
-  /**
+    /**
      * Update the specified resource in storage.
      */
     public function update(UpdatePaymentRequest $request, Payment $payment)
     {
-       Gate::authorize('update', $payment);
+        Gate::authorize('update', $payment);
 
-        $data = $request->validated();
-        $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
+        try {
+            $data = $request->validated();
+            $originalFields = ['customer_id', 'payment_plan_id', 'discount_id'];
 
-        foreach ($originalFields as $field) {
-            if (($data[$field] ?? null) === null) {
-                $data[$field] = $payment->{$field};
+            foreach ($originalFields as $field) {
+                if (!isset($data[$field])) {
+                    $data[$field] = $payment->{$field};
+                }
             }
-        }
 
-        $wasPendingOrVencido = in_array($payment->status, ['pendiente', 'vencido']);
-        $isNowPagado = $data['status'] === 'pagado';
-
-        $payment->update($data);
-
-        if (($data['service_id'] ?? null) !== null && $payment->paymentPlan) {
-            Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
-            $payment->paymentPlan->update(['service_id' => $data['service_id']]);
-        }
-
-        $responseData = [
-            'status' => true,
-            'message' => 'Pago actualizado correctamente',
-            'payment' => new PaymentResource($payment),
-        ];
-
-        // Generate document if status changed to 'pagado'
-        if ($wasPendingOrVencido && $isNowPagado) {
-            try {
-                $documentData = $this->paymentDocumentService->generateDocument($payment);
-                $responseData['document'] = $documentData;
-            } catch (\Exception $e) {
-                Log::error('Failed to generate document', ['error' => $e->getMessage()]);
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Error generating document: ' . $e->getMessage(),
-                ], 500);
+            // Normalize payment_date if provided
+            if (isset($data['payment_date'])) {
+                $parsedDate = Carbon::parse($data['payment_date'])->setTimezone('America/Lima');
+                if ($parsedDate->format('H:i:s') === '00:00:00') {
+                    $parsedDate = $parsedDate->setTime(
+                        now('America/Lima')->hour,
+                        now('America/Lima')->minute,
+                        now('America/Lima')->second
+                    );
+                }
+                $data['payment_date'] = $parsedDate->format('Y-m-d H:i:s');
             }
-        }
 
-        return response()->json($responseData);
+            $wasPendingOrVencido = in_array($payment->status, ['pendiente', 'vencido']);
+            $isNowPagado = $data['status'] === 'pagado';
+
+            $payment->update($data);
+
+            if (isset($data['service_id']) && $payment->paymentPlan) {
+                Log::info('Actualizando service_id', ['service_id' => $data['service_id']]);
+                $payment->paymentPlan->update(['service_id' => $data['service_id']]);
+            }
+
+            $responseData = [
+                'status' => true,
+                'message' => 'Pago actualizado correctamente',
+                'payment' => new PaymentResource($payment),
+            ];
+
+            // Generate document if status changed to 'pagado'
+            if ($wasPendingOrVencido && $isNowPagado) {
+                try {
+                    $documentData = $this->paymentDocumentService->generateDocument($payment);
+                    $responseData['document'] = $documentData;
+                } catch (\Exception $e) {
+                    Log::error('Failed to generate document', [
+                        'error' => $e->getMessage(),
+                        'payment_id' => $payment->id,
+                    ]);
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Error generating document: ' . $e->getMessage(),
+                    ], 500);
+                }
+            }
+
+            return response()->json($responseData);
+        } catch (\Throwable $th) {
+            Log::error('Error updating payment', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+                'payment_date' => $request->input('payment_date'),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al actualizar el pago: ' . $th->getMessage(),
+            ], 500);
+        }
     }
 
     /**

@@ -80,9 +80,9 @@ class AmountController extends Controller
         return Inertia::render('panel/amount/components/formAmount');
     }
 
-    /**
+   /**
      * Store a newly created resource in storage.
-    */
+     */
     public function store(StoreAmountRequest $request)
     {
         Gate::authorize('create', Amount::class);
@@ -100,11 +100,26 @@ class AmountController extends Controller
             $correlative = $seriesCorrelative->correlative + 1;
             $seriesCorrelative->update(['correlative' => $correlative]);
 
-            // Create Amount with assigned series and correlative
+            // Prepare validated data
             $validated = $request->validated();
+
+            // Normalize date_init
+            $parsedDate = Carbon::parse($validated['date_init'])->setTimezone('America/Lima');
+            // Si no tiene hora (hora es 00:00:00), usar la hora actual
+            if ($parsedDate->format('H:i:s') === '00:00:00') {
+                $parsedDate = $parsedDate->setTime(
+                    now('America/Lima')->hour,
+                    now('America/Lima')->minute,
+                    now('America/Lima')->second
+                );
+            }
+            $validated['date_init'] = $parsedDate->format('Y-m-d H:i:s');
+
+            // Assign series and correlative
             $validated['serie_assigned'] = $seriesCorrelative->serie;
             $validated['correlative_assigned'] = $correlative;
 
+            // Create Amount
             $amount = Amount::create($validated);
 
             return redirect()->route('panel.amounts.index')->with('message', 'Egreso registrado correctamente');
@@ -112,6 +127,7 @@ class AmountController extends Controller
             Log::error('Error storing amount', [
                 'error' => $th->getMessage(),
                 'trace' => $th->getTraceAsString(),
+                'date_init' => $request->input('date_init'),
             ]);
             return redirect()->route('panel.amounts.index')->with('error', 'Error al registrar el egreso: ' . $th->getMessage());
         }

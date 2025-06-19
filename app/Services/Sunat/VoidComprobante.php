@@ -140,12 +140,6 @@ class VoidComprobante
         // Generar el siguiente correlativo (sin incrementar aún en BD)
         $correlativo_num = $this->getNextCorrelativoBaja();
         $correlativo_baja = "RA001-{$correlativo_num}"; // Formato RA001-1, RA001-2, etc.
-        
-        $voided = new Voided();
-        $voided->setCorrelativo($correlativo_num) // Solo el número para SUNAT (1, 2, 3, etc.)
-            ->setFecGeneracion(new \DateTime($fec_generacion))
-            ->setFecComunicacion(new \DateTime($fec_comunicacion))
-            ->setCompany($company);
 
         $details = [
             (new VoidedDetail())
@@ -155,7 +149,13 @@ class VoidComprobante
                 ->setDesMotivoBaja($data['motivo'])
         ];
 
-        $voided->setDetails($details);
+        $voided = new Voided();
+        $voided->setCorrelativo($correlativo_num) // Solo el número para SUNAT (1, 2, 3, etc.)
+            ->setFecGeneracion(new \DateTime($fec_generacion))
+            ->setFecComunicacion(new \DateTime($fec_comunicacion))
+            ->setCompany($company)
+            ->setDetails($details);
+
 
         // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
         $ruc = $company->getRuc();

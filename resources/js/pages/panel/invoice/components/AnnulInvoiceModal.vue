@@ -1,4 +1,3 @@
-<!-- AnnulInvoiceModal.vue -->
 <template>
   <div
     v-if="statusModal"
@@ -24,12 +23,18 @@
             required
           >
             <option value="" disabled>Seleccione un motivo</option>
-            <option value="Error en el registro">Error en el registro</option>
-            <option value="Cancelación del servicio">
-              Cancelación del servicio
+            <option value="ERROR EN LA DESCRIPCIÓN DEL BIEN O SERVICIO">ERROR EN LA DESCRIPCIÓN DEL BIEN O SERVICIO</option>
+            <option value="ERROR EN DATOS DEL CLIENTE">
+              ERROR EN DATOS DEL CLIENTE
             </option>
-            <option value="Devolución">Devolución</option>
+            <option value="ERROR EN LA FECHA DE EMISIÓN">ERROR EN LA FECHA DE EMISIÓN</option>
             <option value="ERROR EN CALCULOS">ERROR EN CALCULOS</option>
+            <option value="FACTURA EMITIDA POR DUPLICADO">FACTURA EMITIDA POR DUPLICADO</option>
+            <option value="CANCELACIÓN DE LA OPERACIÓN">CANCELACIÓN DE LA OPERACIÓN</option>
+            <option value="DEVOLUCIÓN TOTAL DEL PRODUCTO O SERVICIO">DEVOLUCIÓN TOTAL DEL PRODUCTO O SERVICIO</option>
+            <option value="ERROR EN EL TIPO DE DOCUMENTO EMITIDO">ERROR EN EL TIPO DE DOCUMENTO EMITIDO</option>
+            <option value="ANULACIÓN POR PRUEBA O ERROR HUMANO">ANULACIÓN POR PRUEBA O ERROR HUMANO</option>
+            <option value="REFACTURACIÓN CON DATOS CORRECTOS">REFACTURACIÓN CON DATOS CORRECTOS</option>
             <option value="Otro">Otro</option>
           </select>
         </div>
@@ -47,9 +52,9 @@
             variant="destructive"
             size="sm"
             class="bg-red-600 text-white hover:bg-red-700"
-            :disabled="!motivo"
+            :disabled="!motivo || annulling"
           >
-            Anular
+            {{ annulling ? 'Anulando...' : 'Anular' }}
           </Button>
         </div>
       </form>
@@ -73,6 +78,7 @@ const emit = defineEmits<{
 }>();
 
 const motivo = ref('');
+const annulling = ref(false);
 
 const closeModal = () => {
   console.log('Emitting close-modal');
@@ -81,15 +87,18 @@ const closeModal = () => {
 };
 
 const submitAnnul = async () => {
+  if (annulling.value) return;
   try {
+    annulling.value = true;
     await InvoiceServices.annulInvoice(props.invoiceId, { invoice_id: props.invoiceId, motivo: motivo.value });
     emit('annul-success');
-    closeModal();
     alert('Comprobante anulado exitosamente.');
-  } catch (error) {
-    console.error('Error al anular el comprobante:', error);
-    alert('No se pudo anular el comprobante.');
     closeModal();
+  } catch (error: any) {
+    console.error('Error al anular el comprobante:', error);
+    alert(error.response?.data?.message || 'No se pudo anular el comprobante.');
+  } finally {
+    annulling.value = false;
   }
 };
 </script>

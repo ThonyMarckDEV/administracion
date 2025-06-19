@@ -82,7 +82,7 @@ import { usePage } from '@inertiajs/vue3';
 import { FileText, Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import PaginationCategory from '../../category/components/paginationCategory.vue';
-import ShowPdfModal from './ShowPdfModal.vue';
+import ShowPdfModal from '@/components/ShowPdfModal.vue';
 import { AmountResource } from '../interface/Amount';
 import { AmountServices } from '@/services/amountServices';
 

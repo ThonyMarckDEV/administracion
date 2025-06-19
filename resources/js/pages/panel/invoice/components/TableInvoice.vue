@@ -144,7 +144,7 @@ import { Pagination } from '@/interface/paginacion';
 import { FileText, FileCode, FileArchive, XCircle } from 'lucide-vue-next';
 import PaginationPayment from '../../category/components/paginationCategory.vue';
 import FilterInvoices from './FilterInvoices.vue';
-import ShowPdfModal from './ShowPdfModal.vue';
+import ShowPdfModal from '@/components/ShowPdfModal.vue';
 import AnnulInvoiceModal from './AnnulInvoiceModal.vue';
 import { InvoiceResource } from '../interface/Invoice';
 import { InvoiceServices } from '@/services/invoiceServices';

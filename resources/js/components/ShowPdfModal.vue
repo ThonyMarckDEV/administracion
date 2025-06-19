@@ -1,5 +1,5 @@
 <template>
-    <Dialog :open="statusModal" @close="closeModal">
+    <Dialog :open="statusModal" @update:open="closeModal">
         <DialogContent class="max-w-4xl h-[80vh]">
             <DialogTitle>Vista del Comprobante</DialogTitle>
             <DialogDescription>
@@ -15,9 +15,6 @@
                 <div v-else class="flex items-center justify-center h-full">
                     <p class="text-red-500">Error al cargar el PDF</p>
                 </div>
-            </div>
-            <div class="mt-6 flex justify-end">
-                <Button variant="outline" @click="closeModal">Cerrar</Button>
             </div>
         </DialogContent>
     </Dialog>

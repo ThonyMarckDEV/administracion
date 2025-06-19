@@ -10,12 +10,12 @@ use App\Http\Resources\AmountResource;
 use App\Http\Resources\AmountShowResource;
 use App\Models\Amount;
 use App\Imports\AmountImport;
-use App\Models\Category;
-use App\Models\Supplier;
+use App\Models\SeriesCorrelative;
 use App\Services\Sunat\GenerateReciboHonorariosPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -64,12 +64,14 @@ class AmountController extends Controller
                 ]
             ]);
         } catch (\Throwable $th) {
+            Log::error('Error listing amounts', ['error' => $th->getMessage()]);
             return response()->json([
                 'message' => 'Error al listar los egresos',
                 'error' => $th->getMessage()
             ], 500);
         }
     }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -84,8 +86,29 @@ class AmountController extends Controller
     public function store(StoreAmountRequest $request)
     {
         Gate::authorize('create', Amount::class);
-        $validated = Amount::create($request->validated());
-        return redirect()->route('panel.amounts.index')->with('message','Egreso registrado correctamente');
+        try {
+            // Fetch or create series_correlative for RH
+            $seriesCorrelative = SeriesCorrelative::firstOrCreate(
+                ['document_type' => 'RH', 'serie' => 'E001'],
+                ['correlative' => 1]
+            );
+
+            // Get the next correlative and increment
+            $correlative = $seriesCorrelative->correlative;
+            $seriesCorrelative->increment('correlative');
+
+            // Create Amount with assigned series and correlative
+            $validated = $request->validated();
+            $validated['serie_assigned'] = $seriesCorrelative->serie;
+            $validated['correlative_assigned'] = $correlative;
+
+            $amount = Amount::create($validated);
+
+            return redirect()->route('panel.amounts.index')->with('message', 'Egreso registrado correctamente');
+        } catch (\Throwable $th) {
+            Log::error('Error storing amount', ['error' => $th->getMessage()]);
+            return redirect()->route('panel.amounts.index')->with('error', 'Error al registrar el egreso: ' . $th->getMessage());
+        }
     }
 
     /**
@@ -100,6 +123,7 @@ class AmountController extends Controller
             'amount' => new AmountShowResource($amount)
         ]);
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -127,11 +151,55 @@ class AmountController extends Controller
             'message' => 'egreso eliminado correctamente',
         ]);
     }
+
+    /**
+     * Generate PDF for a specific amount.
+     */
+    public function generatePdf(Amount $amount)
+    {
+        Gate::authorize('view', $amount);
+
+        try {
+            Log::info('Generating PDF for amount', ['id' => $amount->id]);
+            $generator = new GenerateReciboHonorariosPdf();
+            $pdfContent = $generator->generate([
+                'razon_social' => $amount->suppliers->name,
+                'ruc' => $amount->suppliers->ruc,
+                'service' => $amount->description,
+                'monto' => $amount->amount,
+                'retention' => $amount->amount * 0.08,
+                'monto_neto' => $amount->amount * (1 - 0.08),
+                'fecha_emision' => Carbon::parse($amount->date_init)->format('d/m/Y'),
+                'hora_emision' => Carbon::parse($amount->date_init)->format('H:i:s'),
+                'doc_series' => $amount->serie_assigned,
+                'doc_correlative' => $amount->correlative_assigned,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'PDF generado correctamente',
+                'pdf' => base64_encode($pdfContent),
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Error generating PDF in AmountController', [
+                'amount_id' => $amount->id,
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al generar el PDF',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
     // EXPORTAR A EXCEL
     public function exportExcel()
     {
         return Excel::download(new AmountsExport, 'Egresos.xlsx');
     }
+
     // IMPORTAR EXCEL
     public function importExcel(Request $request)
     {
@@ -143,39 +211,5 @@ class AmountController extends Controller
         return response()->json([
             'message' => 'Egresos importados de manera correcta',
         ]);
-    }
-
-    /**
-     * Generate PDF for a specific amount.
-    */
-    public function generatePdf(Amount $amount)
-    {
-        Gate::authorize('view', $amount);
-
-        try {
-            $generator = new GenerateReciboHonorariosPdf();
-            $pdfContent = $generator->generate([
-                'razon_social' => $amount->suppliers->name,
-                'ruc' => $amount->suppliers->ruc,
-                'service' => $amount->description,
-                'monto' => $amount->amount,
-                'retention' => $amount->amount * 0.08,
-                'monto_neto' => $amount->amount * (1 - 0.08),
-                'fecha_emision' => Carbon::parse($amount->date_init)->format('d/m/Y'),
-                'hora_emision' => Carbon::parse($amount->date_init)->format('H:i:s'),
-            ]);
-
-            return response()->json([
-                'status' => true,
-                'message' => 'PDF generado correctamente',
-                'pdf' => base64_encode($pdfContent),
-            ]);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Error al generar el PDF',
-                'error' => $th->getMessage(),
-            ], 500);
-        }
     }
 }

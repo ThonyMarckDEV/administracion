@@ -13,7 +13,7 @@ class GenerateReciboHonorariosPdf
     {
         try {
             // Validate required data
-            $requiredFields = ['razon_social', 'ruc', 'service', 'monto', 'retention', 'monto_neto', 'fecha_emision', 'hora_emision'];
+            $requiredFields = ['razon_social', 'ruc', 'service', 'monto', 'retention', 'monto_neto', 'fecha_emision', 'hora_emision', 'doc_series', 'doc_correlative'];
             foreach ($requiredFields as $field) {
                 if (!isset($data[$field]) || empty($data[$field])) {
                     throw new \Exception("Missing or empty required field: $field");
@@ -51,6 +51,9 @@ class GenerateReciboHonorariosPdf
                 $company->departamento,
             ]));
 
+            // Format document number
+            $docNumber = sprintf('%s-%08d', $data['doc_series'], $data['doc_correlative']);
+
             // Replace placeholders with dynamic data
             $replacements = [
                 '{{logoBase64}}' => $logoBase64,
@@ -67,7 +70,7 @@ class GenerateReciboHonorariosPdf
                 '{{monto_neto}}' => number_format($data['monto_neto'], 2, '.', ''),
                 '{{fecha_emision}}' => htmlspecialchars($data['fecha_emision'], ENT_QUOTES, 'UTF-8'),
                 '{{hora_emision}}' => htmlspecialchars($data['hora_emision'], ENT_QUOTES, 'UTF-8'),
-                '{{doc_series}}' => 'N° 001-0001', // Static for now; update if dynamic
+                '{{doc_number}}' => htmlspecialchars($docNumber, ENT_QUOTES, 'UTF-8'),
             ];
             $html = str_replace(array_keys($replacements), array_values($replacements), $html);
             Log::debug('HTML after replacements', ['html' => substr($html, 0, 500)]);

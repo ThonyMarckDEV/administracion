@@ -58,7 +58,10 @@
                                     {{ payment.status }}
                                 </span>
                             </TableCell>
-                            <TableCell class="flex justify-end space-x-2 border-b border-gray-100 px-4 py-3 dark:border-gray-700">
+                            <TableCell
+                                v-if="payment.status !== 'pagado'"
+                                class="flex justify-end space-x-2 border-b border-gray-100 px-4 py-3 dark:border-gray-700"
+                            >
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -80,6 +83,10 @@
                                     <span class="sr-only">Eliminar pago</span>
                                 </Button>
                             </TableCell>
+                            <TableCell
+                                v-else
+                                class="border-b border-gray-100 px-4 py-3 dark:border-gray-700"
+                            ></TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>

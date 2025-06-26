@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Http\Controllers\Panel\InvoiceController;
 use App\Http\Controllers\Sunat\ComprobanteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -12,4 +13,4 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/factura', [ComprobanteController::class, 'createFactura'])->name('factura');
 Route::post('/boleta', [ComprobanteController::class, 'createBoleta'])->name('boleta');
-Route::post('/void', [ComprobanteController::class, 'voidComprobante']);
+Route::post('/void', [InvoiceController::class, 'annul']);

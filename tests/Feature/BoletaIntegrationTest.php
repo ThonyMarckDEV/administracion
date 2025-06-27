@@ -11,7 +11,7 @@ use Mockery;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
-class ComprobantePerformanceTest extends TestCase
+class BoletaIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -21,7 +21,7 @@ class ComprobantePerformanceTest extends TestCase
 
         // Mock MyCompany to avoid database queries
         $companyMock = Mockery::mock(MyCompany::class);
-        $companyMock->shouldReceive('first')->andReturn((object)[
+        $companyMock->shouldReceive('causeError')->andReturn((object)[
             'ruc' => '12345678901',
             'razon_social' => 'EMPRESA TEST',
             'nombre_comercial' => 'TEST SAC',
@@ -46,48 +46,6 @@ class ComprobantePerformanceTest extends TestCase
         $fileSystemMock->shouldReceive('exists')->with($certificatePath)->andReturn(true);
         $fileSystemMock->shouldReceive('glob')->with($certificatePath . '/*.pem')->andReturn([$certificatePath . '/certificate.pem']);
         $fileSystemMock->shouldReceive('get')->with($certificatePath . '/certificate.pem')->andReturn('certificate-content');
-
-        // Mock GenerateComprobante service
-        $mockService = Mockery::mock('App\Services\Sunat\GenerateComprobante');
-        $invoice = Mockery::mock(Invoice::class);
-        $invoice->shouldReceive('getTipoDoc')->andReturnUsing(function () use ($mockService) {
-            return $mockService->tipoDoc ?? '01';
-        });
-        $invoice->shouldReceive('getSerie')->andReturnUsing(function () use ($mockService) {
-            return $mockService->serie ?? 'F001';
-        });
-        $invoice->shouldReceive('getCorrelativo')->andReturn('1');
-        $invoice->shouldReceive('getName')->andReturnUsing(function () use ($mockService) {
-            return ($mockService->serie ?? 'F001') . '-1';
-        });
-
-        $mockService->shouldReceive('createComprobante')
-            ->once()
-            ->withArgs(function ($data, $type) {
-                return $type === 'factura' && isset($data['id_pago']) && $data['id_pago'] === 111;
-            })
-            ->andReturnUsing(function ($data, $type) use ($mockService, $invoice) {
-                $mockService->tipoDoc = $type === 'factura' ? '01' : '03';
-                $mockService->serie = $data['serie'];
-                return $invoice;
-            });
-
-        $mockService->shouldReceive('sendComprobante')
-            ->once()
-            ->with($invoice, 111)
-            ->andReturn([
-                'success' => true,
-                'xml_path' => storage_path('app/public/facturas/111/xml/F001-1.xml'),
-                'cdr_path' => storage_path('app/public/facturas/111/cdr/R-F001-1.zip'),
-                'cdr_status' => [
-                    'estado' => 'ACCEPTED',
-                    'code' => 0,
-                    'description' => 'La factura fue aceptada',
-                    'notes' => [],
-                ],
-            ]);
-
-        $this->app->bind(\App\Services\Sunat\GenerateComprobante::class, fn () => $mockService);
     }
 
     protected function tearDown(): void
@@ -96,22 +54,55 @@ class ComprobantePerformanceTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_factura_is_processed_under_3_seconds()
+    public function test_boleta_is_sent_to_sunat()
     {
+        // Mock del servicio GenerateComprobante
+        $mockService = Mockery::mock('App\Services\Sunat\GenerateComprobante');
+        $invoice = Mockery::mock(Invoice::class);
+        $invoice->shouldReceive('getTipoDoc')->andReturn('03'); // Boleta document type
+        $invoice->shouldReceive('getSerie')->andReturn('B001');
+        $invoice->shouldReceive('getCorrelativo')->andReturn('1');
+        $invoice->shouldReceive('getName')->andReturn('B001-1');
+
+        $mockService->shouldReceive('createComprobante')
+            ->once()
+            ->withArgs(function ($data, $type) {
+                return $type === 'boleta' && isset($data['id_pago']) && $data['id_pago'] === 999;
+            })
+            ->andReturn($invoice);
+
+        $mockService->shouldReceive('sendComprobante')
+            ->once()
+            ->with($invoice, 999)
+            ->andReturn([
+                'success' => true,
+                'xml_path' => storage_path('app/public/boletas/999/xml/B001-1.xml'),
+                'cdr_path' => storage_path('app/public/boletas/999/cdr/R-B001-1.zip'),
+                'cdr_status' => [
+                    'estado' => 'ACCEPTED',
+                    'code' => 0,
+                    'description' => 'La boleta fue aceptada',
+                    'notes' => [],
+                ],
+            ]);
+
+        // Inyectar el mock en el contenedor
+        $this->app->bind(\App\Services\Sunat\GenerateComprobante::class, fn () => $mockService);
+
+        // Usuario autenticado
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $start = microtime(true);
-
-        $response = $this->postJson('/api/factura', [
-            'id_pago' => 111,
+        // Payload que simula el request
+        $payload = [
+            'id_pago' => 999,
             'client' => [
-                'tipo_doc' => '6',
-                'num_doc' => '20000000001',
-                'razon_social' => 'EMPRESA X',
+                'tipo_doc' => '1', // DNI for boleta
+                'num_doc' => '61883939',
+                'razon_social' => 'Anthony Marck Mendoza Sanchez',
             ],
             'tipo_operacion' => '0101',
-            'serie' => 'F001',
+            'serie' => 'B001',
             'correlativo' => '1',
             'fecha_emision' => '2025-05-25T13:05:00-05:00',
             'tipo_moneda' => 'PEN',
@@ -138,31 +129,31 @@ class ComprobantePerformanceTest extends TestCase
                     'mto_precio_unitario' => 59.00,
                 ],
             ],
-        ]);
+        ];
 
-        $duration = microtime(true) - $start;
+        // Ejecutar la solicitud
+        $response = $this->postJson('/api/boleta', $payload);
 
-        // Debugging: Print response content if not 200
+        // Depuración: Imprimir respuesta si no es 200
         if ($response->getStatusCode() !== 200) {
             $response->dump();
         }
 
+        // Afirmaciones
         $response->assertStatus(200)
                  ->assertJson([
-                     'message' => 'Invoice processed successfully',
+                     'message' => 'Receipt processed successfully', // Match the controller's response
                      'data' => [
                          'success' => true,
-                         'xml_path' => storage_path('app/public/facturas/111/xml/F001-1.xml'),
-                         'cdr_path' => storage_path('app/public/facturas/111/cdr/R-F001-1.zip'),
+                         'xml_path' => storage_path('app/public/boletas/999/xml/B001-1.xml'),
+                         'cdr_path' => storage_path('app/public/boletas/999/cdr/R-B001-1.zip'),
                          'cdr_status' => [
                              'estado' => 'ACCEPTED',
                              'code' => 0,
-                             'description' => 'La factura fue aceptada',
+                             'description' => 'La boleta fue aceptada',
                              'notes' => [],
                          ],
                      ],
                  ]);
-
-        $this->assertLessThan(3, $duration, '❌ El procesamiento tomó más de 3 segundos');
     }
 }

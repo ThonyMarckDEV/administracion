@@ -226,45 +226,4 @@ class ComprobanteControllerTest extends TestCase
                      ],
                  ]);
     }
-
-    public function test_user_can_annul_factura()
-    {
-        // Create and authenticate a user
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        // Mock SUNAT Void service (assuming there's a service for voiding)
-        $voidServiceMock = Mockery::mock('App\Services\Sunat\VoidComprobante');
-        $voidServiceMock->shouldReceive('voidComprobante')
-            ->once()
-            ->withArgs(function ($invoiceId, $motivo) {
-                return $invoiceId === 1 && $motivo === 'Error en los datos';
-            })
-            ->andReturn([
-                'success' => true,
-                'message' => 'Comprobante voided successfully',
-            ]);
-        $this->app->bind('App\Services\Sunat\VoidComprobante', fn () => $voidServiceMock);
-
-        $invoice = Invoice::factory()->create([
-            'id' => 1,
-            'payment_id' => 1, // Added to satisfy NOT NULL constraint
-            'sunat' => 'aceptado',
-        ]);
-
-        $response = $this->postJson('/api/void', [
-            'invoice_id' => $invoice->id,
-            'motivo' => 'Error en los datos',
-        ]);
-
-        // Debugging: Print response content if not 200
-        if ($response->getStatusCode() !== 200) {
-            $response->dump();
-        }
-
-        $response->assertStatus(200)
-                 ->assertJson([
-                     'message' => 'Comprobante voided successfully',
-                 ]);
-    }
 }

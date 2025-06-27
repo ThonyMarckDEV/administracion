@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Models\MyCompany;
 
 class CreateMyCompanyTable extends Migration
 {
@@ -22,6 +23,20 @@ class CreateMyCompanyTable extends Migration
             $table->string('cod_local', 4);
             $table->timestamps();
         });
+
+        // Insert default data
+        MyCompany::create([
+            'ruc' => '12345678901',
+            'razon_social' => 'EMPRESA TEST',
+            'nombre_comercial' => 'TEST SAC',
+            'ubigueo' => '150101',
+            'departamento' => 'LIMA',
+            'provincia' => 'LIMA',
+            'distrito' => 'LIMA',
+            'urbanizacion' => 'URB TEST',
+            'direccion' => 'AV TEST 123',
+            'cod_local' => '0000',
+        ]);
     }
 
     public function down()

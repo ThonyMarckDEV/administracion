@@ -11,7 +11,7 @@ use Mockery;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\File;
 
-class ComprobanteIntegrationTest extends TestCase
+class FacturaIntegrationTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -38,6 +38,7 @@ class ComprobanteIntegrationTest extends TestCase
         // Mock Log facade
         Log::shouldReceive('error')->andReturnNull();
         Log::shouldReceive('debug')->andReturnNull();
+        Log::shouldReceive('info')->andReturnNull();
 
         // Mock file system operations
         $certificatePath = config('greenter.certificate_path', storage_path('app/certificates'));
@@ -94,7 +95,7 @@ class ComprobanteIntegrationTest extends TestCase
 
         // Payload que simula el request
         $payload = [
-            'id_pago' => 999,
+            'id_pago' => 999, // Corregido de 99 a 999 para coincidir con el mock
             'client' => [
                 'tipo_doc' => '6',
                 'num_doc' => '20000000001',
@@ -133,12 +134,25 @@ class ComprobanteIntegrationTest extends TestCase
         // Ejecutar la solicitud
         $response = $this->postJson('/api/factura', $payload);
 
+        // Depuración: Imprimir respuesta si no es 200
+        if ($response->getStatusCode() !== 200) {
+            $response->dump();
+        }
+
         // Afirmaciones
         $response->assertStatus(200)
                  ->assertJson([
                      'message' => 'Invoice processed successfully',
                      'data' => [
-                         'estado' => 'ACCEPTED',
+                         'success' => true,
+                         'xml_path' => storage_path('app/public/facturas/999/xml/F001-1.xml'), // Corregido de 1 a 999
+                         'cdr_path' => storage_path('app/public/facturas/999/cdr/R-F001-1.zip'), // Corregido de 1 a 999
+                         'cdr_status' => [
+                             'estado' => 'ACCEPTED',
+                             'code' => 0,
+                             'description' => 'La factura fue aceptada',
+                             'notes' => [],
+                         ],
                      ],
                  ]);
     }

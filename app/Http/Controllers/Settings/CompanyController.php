@@ -17,7 +17,7 @@ class CompanyController extends Controller
         if (!$company) {
 
             $company = MyCompany::create([
-                'ruc' => '20123456789',
+                'ruc' => '20000000001',
                 'razon_social' => 'GREEN SAC',
                 'nombre_comercial' => 'GREEN',
                 'ubigueo' => '150101',

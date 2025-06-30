@@ -278,6 +278,22 @@ class VoidComprobante
                 'document_type' => $invoice->document_type,
             ]);
             $invoice->update(['sunat' => 'anulado']);
+
+            // Update the associated payment status to 'pendiente' and set reference to null
+            if ($invoice->payment) {
+                Log::debug('Updating payment status to pendiente and setting reference to null', [
+                    'payment_id' => $invoice->payment_id,
+                    'invoice_id' => $invoice->id,
+                ]);
+                $invoice->payment->update([
+                    'status' => 'pendiente',
+                    'reference' => null,
+                ]);
+            } else {
+                Log::warning('No payment associated with invoice when updating to anulado', [
+                    'invoice_id' => $invoice->id,
+                ]);
+            }
         }
     }
 

@@ -58,8 +58,10 @@
                                     {{ payment.status }}
                                 </span>
                             </TableCell>
-                            <TableCell class="flex justify-end space-x-2 border-b border-gray-100 px-4 py-3 dark:border-gray-700">
-                                <Button
+                            <TableCell
+                                v-if="payment.status !== 'pagado'"
+                                class="flex justify-end space-x-2 border-b border-gray-100 px-4 py-3 dark:border-gray-700"
+                            >                                <Button
                                     variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-900/30"
@@ -80,6 +82,10 @@
                                     <span class="sr-only">Eliminar pago</span>
                                 </Button>
                             </TableCell>
+                            <TableCell
+                                v-else
+                                class="border-b border-gray-100 px-4 py-3 dark:border-gray-700"
+                            ></TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>
@@ -96,11 +102,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Pagination } from '@/interface/paginacion';
 import { SharedData } from '@/types';
 import { showSuccessMessage } from '@/utils/message';
+import { useToast } from '@/components/ui/toast';
 import { usePage } from '@inertiajs/vue3';
 import { Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import PaginationPayment from '../../category/components/paginationCategory.vue';
 import { PaymentResource } from '../interface/Payment';
+
+const { toast } = useToast();
 
 const emit = defineEmits<{
     (e: 'page-change', page: number): void;
@@ -125,9 +134,13 @@ const openModalDelete = (id: number) => {
     emit('open-modal-delete', id);
 };
 
+
 onMounted(() => {
     if (message.value) {
-        showSuccessMessage('Notificación', message.value);
+        toast({
+            title: 'Notificación',
+            description: message.value,
+        });
     }
 });
 </script>

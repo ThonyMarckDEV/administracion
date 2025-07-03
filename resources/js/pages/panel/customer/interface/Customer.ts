@@ -20,6 +20,7 @@ export type CustomerRequest = {
     dni: string | null;
     ruc: string | null;
     client_type_id: number;
+    state: boolean;
 };
 
 export type CustomerRequestUpdate = {
@@ -29,7 +30,7 @@ export type CustomerRequestUpdate = {
     dni: string | null;
     ruc: string | null;
     client_type_id: number;
-    state: 'activo' | 'inactivo';
+    state: boolean;
 };
 
 export type showCustomerResponse = {
@@ -39,7 +40,7 @@ export type showCustomerResponse = {
 };
 
 export type CustomerDeleteResponse = {
-    status: boolean;
+    state: boolean;
     message: string;
 };
 

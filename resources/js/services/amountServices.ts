@@ -36,4 +36,8 @@ export const AmountServices = {
         const response = await axios.get(`suppliers/${id}`);
         return response.data;
     },
+        async generatePdf(id: number): Promise<{ status: boolean; message: string; pdf: string }> {
+        const response = await axios.get(`/panel/amounts/${id}/pdf`);
+        return response.data;
+    },
 };

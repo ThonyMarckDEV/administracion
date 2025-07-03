@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Observers\PaymentObserver;
 use App\Observers\PaymentPlanObserver;
 use App\Observers\UserObserver;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -28,5 +29,10 @@ class AppServiceProvider extends ServiceProvider
         // User::observe(UserObserver::class);
         PaymentPlan::observe(PaymentPlanObserver::class);
         Payment::observe(PaymentObserver::class);
+
+
+        if (env('APP_ENV') === 'local') {
+          URL::forceScheme('https');
+        }
     }
 }

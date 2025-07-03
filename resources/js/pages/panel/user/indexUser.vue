@@ -24,8 +24,8 @@
                 <DeleteUser
                     :modal="principal.statusModal.delete"
                     :itemId="principal.idUser"
-                    title="Eliminar Servicio"
-                    description="¿Está seguro de que desea eliminar este servicio?"
+                    title="Eliminar usuario"
+                    description="¿Está seguro de que desea eliminar este usuario?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeleteUser"
                 />

@@ -71,7 +71,7 @@ class AmountPDFController extends Controller
         foreach ($amountsArray as $amount) {
             if ($pdf->GetY() > 260) { // Si la posición Y está cerca del final de la página
                 $pdf->AddPage(); // Añadir una nueva página
-                // Imprimir los encabezados nuevamente en la nueva página
+                // Imprimir los encabezados
                 $pdf->SetFont('helvetica', 'B', 10);
                 $pdf->SetFillColor(242, 242, 242); 
                 foreach ($header as $i => $col) {
@@ -82,9 +82,9 @@ class AmountPDFController extends Controller
             $pdf->SetFont('helvetica', '', 10);
 
             $pdf->MultiCell($widths[0], 10, $amount['id'], 1, 'C', 0, 0);
-            $pdf->MultiCell($widths[1], 10, $amount['category_name'], 1, 'C', 0, 0);  // Cambiado para mostrar nombre de la categoría
-            $pdf->MultiCell($widths[2], 10, $amount['supplier_name'], 1, 'C', 0, 0);  // Cambiado para mostrar nombre del proveedor
-            $pdf->MultiCell($widths[3], 10, $amount['ruc'], 1, 'C', 0, 0);  // Asegúrate de mostrar el RUC
+            $pdf->MultiCell($widths[1], 10, $amount['category_name'], 1, 'C', 0, 0); 
+            $pdf->MultiCell($widths[2], 10, $amount['supplier_name'], 1, 'C', 0, 0);  
+            $pdf->MultiCell($widths[3], 10, $amount['ruc'], 1, 'C', 0, 0);  
             $pdf->MultiCell($widths[4], 10, $amount['description'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[5], 10, 'S/ ' . number_format($amount['amount'], 2), 1, 'C', 0, 0);            
             $pdf->MultiCell($widths[6], 10, $amount['date_init'], 1, 'C', 0, 0);

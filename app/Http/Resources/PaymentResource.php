@@ -21,9 +21,9 @@ class PaymentResource extends JsonResource
             'service' => $this->paymentPlanService->first()->name,
             'discount' => $this->discount->percentage ?? 0,
             'amount' => $this->amount,
-            'payment_date' => Carbon::parse($this->payment_date)->toDateString(),
+            'payment_date' => Carbon::parse($this->payment_date)->format('d-m-Y'),
             'payment_method' => $this->payment_method,
-            'reference' => $this->reference ?? '---',
+            'reference' => $this->reference && trim($this->reference) !== '' ? $this->reference : '---',
             'status' => $this->status,
         ];
     }

@@ -13,6 +13,8 @@
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">DESCRIPCION</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">MONTO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">FECHA_INIT</TableHead>
+                                                        <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">SERIE</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CORRELATIVO</TableHead>
                             <TableHead class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -25,7 +27,19 @@
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.description }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.amount }}</TableCell>
                             <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.date_init }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.serie_assigned }}</TableCell>
+                            <TableCell class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ amount.correlative_assigned }}</TableCell>
                             <TableCell class="flex justify-end space-x-2 px-4 py-3">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    class="h-8 w-8 p-0 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
+                                    @click="openModalPdf(amount.id)"
+                                    title="Ver Recibo"
+                                >
+                                    <FileText class="h-4 w-4" />
+                                    <span class="sr-only">Ver Recibo</span>
+                                </Button>
                                 <Button
                                     variant="ghost"
                                     size="sm"
@@ -53,6 +67,11 @@
                 <PaginationCategory :meta="amountsPaginate" @page-change="$emit('page-change', $event)" />
             </div>
         </div>
+            <ShowPdfModal
+            :status-modal="showPdfModal"
+            :pdf-url="pdfUrl"
+            @close-modal="closePdfModal"
+        />
     </div>
 </template>
 <script setup lang="ts">
@@ -64,10 +83,12 @@ import { useToast } from '@/components/ui/toast';
 import { Pagination } from '@/interface/paginacion';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { Trash, UserPen } from 'lucide-vue-next';
+import { FileText, Trash, UserPen } from 'lucide-vue-next';
 import { onMounted, ref } from 'vue';
 import PaginationCategory from '../../category/components/paginationCategory.vue';
+import ShowPdfModal from '@/components/ShowPdfModal.vue';
 import { AmountResource } from '../interface/Amount';
+import { AmountServices } from '@/services/amountServices';
 const { toast } = useToast();
 
 const emit = defineEmits<{
@@ -85,6 +106,8 @@ const { amountsList, amountsPaginate, loading } = defineProps<{
 const page = usePage<SharedData>();
 
 const message = ref(page.props.flash.message || '');
+const showPdfModal = ref(false);
+const pdfUrl = ref<string | null>(null);
 
 const openModalCreate = (id: number) => {
     emit('open-modal-create', id);
@@ -94,10 +117,50 @@ const openModalDelete = (id: number) => {
     emit('open-modal-delete', id);
 };
 
+const openModalPdf = async (id: number) => {
+    try {
+        const response = await AmountServices.generatePdf(id);
+        if (response.status) {
+            const pdfBlob = base64ToBlob(response.pdf, 'application/pdf');
+            pdfUrl.value = URL.createObjectURL(pdfBlob);
+            showPdfModal.value = true;
+        } else {
+            toast({
+                title: 'Error',
+                description: response.message,
+                variant: 'destructive',
+            });
+        }
+    } catch (error) {
+        console.error('Error al generar el PDF:', error);
+        toast({
+            title: 'Error',
+            description: 'No se pudo generar el PDF.',
+            variant: 'destructive',
+        });
+    }
+};
+const closePdfModal = () => {
+    if (pdfUrl.value) {
+        URL.revokeObjectURL(pdfUrl.value);
+        pdfUrl.value = null;
+    }
+    showPdfModal.value = false;
+};
+const base64ToBlob = (base64: string, mimeType: string) => {
+    const byteCharacters = atob(base64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+};
+
 onMounted(() => {
     if (message.value) {
         toast({
-            title: 'Notificacion',
+            title: 'Notificación',
             description: message.value,
         });
     }

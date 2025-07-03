@@ -40,8 +40,8 @@ export const useCustomer = () => {
             name: '',
             codigo: '',
             email: '',
-            dni: null,
-            ruc: null,
+dni: '' as string | null,
+ruc: '' as string | null,
             client_type_id: 0,
             client_type: '',
             state: true,
@@ -57,8 +57,8 @@ export const useCustomer = () => {
             name: '',
             codigo: '',
             email: '',
-            dni: null,
-            ruc: null,
+dni: '' as string | null,
+ruc: '' as string | null,
             client_type_id: 0,
             client_type: '',
             state: true,
@@ -96,48 +96,52 @@ export const useCustomer = () => {
     };
 
     // Get customer by id
-    const getCustomerById = async (id: number) => {
-        try {
-            if (id === 0) {
-                resetCustomerData();
-                return;
-            }
-            const response = await CustomerServices.show(id);
-            if (response.status) {
-                principal.customerData = response.customer;
-                principal.idCustomer = response.customer.id;
-                if (principal.clientTypeList.length === 0) {
-                    const clientTypeResponse = await CustomerServices.getClientType();
-                    principal.clientTypeList = clientTypeResponse.data;
-                }
-                principal.statusModal.update = true;
-            }
-        } catch (error) {
-            console.error(error);
+const getCustomerById = async (id: number) => {
+    try {
+        if (id === 0) {
+            resetCustomerData();
+            return;
         }
-    };
+        const response = await CustomerServices.show(id);
+        if (response.status) {
+            principal.customerData = response.customer;
+            principal.idCustomer = response.customer.id;
+            if (principal.clientTypeList.length === 0) {
+                const clientTypeResponse = await CustomerServices.getClientType();
+                principal.clientTypeList = clientTypeResponse.data;
+            }
+            principal.statusModal.update = true;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+};
 
     // Update customer
-    const updateCustomer = async (id: number, data: CustomerRequestUpdate) => {
-        try {
-            const response = await CustomerServices.update(id, data);
-            if (response.status) {
-                showSuccessMessage('Cliente actualizado', response.message);
-                principal.statusModal.update = false;
-                loadingCustomers(principal.paginacion.current_page, principal.filter);
-            }
-        } catch (error) {
-            console.error(error);
-        } finally {
-            principal.clientTypeList = [];
+const updateCustomer = async (id: number, data: CustomerRequestUpdate) => {
+    try {
+        const response = await CustomerServices.update(id, data);
+        if (response.status) {
+            showSuccessMessage('Cliente actualizado', response.message);
+            principal.statusModal.update = false;
+            loadingCustomers(principal.paginacion.current_page, principal.filter);
         }
-    };
+    } catch (error: any) {
+        if (error.response && error.response.status === 422) {
+            console.error('Errores de validación:', error.response.data.errors);
+        } else {
+            console.error('Error desconocido:', error);
+        }
+    } finally {
+        principal.clientTypeList = [];
+    }
+};
 
     // Delete customer
     const deleteCustomer = async (id: number) => {
         try {
             const response = await CustomerServices.destroy(id);
-            if (response.status) {
+            if (response.state) {
                 showSuccessMessage('Cliente eliminado', 'El cliente se eliminó correctamente');
                 principal.statusModal.delete = false;
                 loadingCustomers(principal.paginacion.current_page, principal.filter);

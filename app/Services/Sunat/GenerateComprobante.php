@@ -12,6 +12,7 @@ use Greenter\Model\Sale\Invoice;
 use Greenter\Model\Sale\Legend;
 use Greenter\Model\Sale\SaleDetail;
 use Greenter\See;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
@@ -82,9 +83,13 @@ class GenerateComprobante
         $pagoPath = "{$docType}/{$idPago}";
         $xmlPath = "{$pagoPath}/xml/{$invoice->getName()}.xml";
         $cdrPath = "{$pagoPath}/cdr/R-{$invoice->getName()}.zip";
+        $pdfPath = "{$pagoPath}/pdf/{$invoice->getName()}.pdf";
+
 
         Storage::disk('public')->makeDirectory("{$pagoPath}/xml");
         Storage::disk('public')->makeDirectory("{$pagoPath}/cdr");
+        Storage::disk('public')->makeDirectory("{$pagoPath}/pdf");
+
 
         $result = $this->see->send($invoice);
         Storage::disk('public')->put($xmlPath, $this->see->getFactory()->getLastXml());
@@ -96,28 +101,49 @@ class GenerateComprobante
         }
 
         Storage::disk('public')->put($cdrPath, $result->getCdrZip());
+
+    $pdfContent = $this->pdfService->generate($invoice);
+    Storage::disk('public')->put($pdfPath, $pdfContent);
+
         $this->storeInvoice($invoice, $idPago, $result);
+
 
         return [
             'success' => $result->isSuccess(),
             'xml_path' => Storage::disk('public')->path($xmlPath),
             'cdr_path' => Storage::disk('public')->path($cdrPath),
+            'pdf_path' => Storage::disk('public')->path($pdfPath),
             'cdr_status' => $this->processCdr($result->getCdrResponse()),
         ];
     }
 
     protected function storeInvoice(Invoice $invoice, int $idPago, $result): void
     {
-        $cdrStatus = $this->processCdr($result->getCdrResponse());
-        $documentType = $invoice->getTipoDoc() === '01' ? 'F' : 'B'; // 'F' for factura, 'B' for boleta
+    $cdrStatus = $this->processCdr($result->getCdrResponse());
+    $documentType = $invoice->getTipoDoc() === '01' ? 'F' : 'B';
+    $serie = $invoice->getSerie();
+    $correlativo = $invoice->getCorrelativo();
 
-        InvoiceModel::create([
-            'payment_id' => $idPago,
-            'document_type' => $documentType,
-            'serie_assigned' => $invoice->getSerie(),
-            'correlative_assigned' => $invoice->getCorrelativo(),
-            'sunat' => $cdrStatus['estado'] === 'ACCEPTED' ? 'enviado' : 'anulado',
+    // ✅ ACA SE CAMBIO: Verificar si ya existe antes de insertar
+    $exists = InvoiceModel::where('serie_assigned', $serie)
+        ->where('correlative_assigned', $correlativo)
+        ->exists();
+
+    if ($exists) {
+        Log::warning('Ya existe un comprobante con esa serie y correlativo', [
+            'serie' => $serie,
+            'correlativo' => $correlativo,
         ]);
+        throw new \Exception("Ya existe un comprobante con la serie {$serie} y correlativo {$correlativo}");
+    }
+
+    InvoiceModel::create([
+        'payment_id' => $idPago,
+        'document_type' => $documentType,
+        'serie_assigned' => $serie,
+        'correlative_assigned' => $correlativo,
+        'sunat' => $cdrStatus['estado'] === 'ACCEPTED' ? 'enviado' : 'anulado',
+    ]);
     }
 
     protected function buildClient(array $clientData, string $type): Client

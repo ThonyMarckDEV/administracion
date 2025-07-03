@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 8, 2)->default(0);
             $table->timestamp('payment_date')->nullable();
             $table->enum('payment_method', ['efectivo', 'transferencia'])->default('efectivo');
-            $table->string('reference')->nullable();
+            $table->string('reference')->unique()->nullable();
             $table->enum('status', ['pendiente', 'pagado', 'vencido'])->default('pendiente');
             $table->timestamps();
         });

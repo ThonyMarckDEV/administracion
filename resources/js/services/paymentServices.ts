@@ -10,10 +10,12 @@ export const PaymentServices = {
     async getServices(texto: string): Promise<InputServiceResponse> {
         return await axios.get(`/panel/inputs/services_list?texto=${encodeURIComponent(texto)}`);
     },
-    async index(page: number, customer: string): Promise<PaymentTable> {
-        const response = await axios.get(`/panel/listar-payments?page=${page}&customer=${encodeURIComponent(customer)}`);
-        return response.data;
-    },
+async index(page: number, customer: string, status: string): Promise<PaymentTable> {
+    const response = await axios.get(
+        `/panel/listar-payments?page=${page}&customer=${encodeURIComponent(customer)}&status=${encodeURIComponent(status)}`
+    );
+    return response.data;
+},
     async show(id: number): Promise<showPayment> {
         const response = await axios.get(`/panel/payments/${id}`);
         return response.data;

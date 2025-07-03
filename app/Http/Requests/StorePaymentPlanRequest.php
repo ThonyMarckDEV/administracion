@@ -23,6 +23,7 @@ class StorePaymentPlanRequest extends FormRequest
     {
         return [
             'service_id'    => 'required|exists:services,id',
+            'customer_id'     => 'required|exists:customers,id',
             'period_id'     => 'required|exists:periods,id',
             'payment_type'  => 'required|string|in:anual,mensual',
             'amount'        => 'required|numeric|min:0|max:9999.99',

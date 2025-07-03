@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Period;
+use App\Exports\PeriodsExport;
+use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\StorePeriodRequest;
 use App\Http\Requests\UpdatePeriodRequest;
 use App\Http\Resources\PeriodResource;
@@ -106,6 +108,25 @@ class PeriodController extends Controller
         return response()->json([
             'state' => true,
             'message' => 'Periodo eliminado de manera correcta',
+        ]);
+    }
+
+        // EXPORTAR A EXCEL
+    public function exportExcel()
+    {
+        return Excel::download(new PeriodsExport, 'periodos.xlsx');
+    }
+
+    // IMPORTAR EXCEL
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'archivo' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new PeriodImport, $request->file('archivo'));
+        return response()->json([
+            'message' => 'Servicios importados de manera correcta',
         ]);
     }
 }

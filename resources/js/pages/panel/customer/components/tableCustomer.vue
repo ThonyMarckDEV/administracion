@@ -6,8 +6,31 @@
                 <Table class="w-full">
                     <TableHeader class="bg-gray-50 dark:bg-gray-800/50">
                         <TableRow class="hover:bg-transparent">
-                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ID</TableHead>
-                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">NOMBRE</TableHead>
+<TableHead
+    @click="sortBy('id')"
+    class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+>
+    <div class="inline-flex items-center space-x-1">
+        <span>ID</span>
+        <span v-if="sortField === 'id'">
+            <span v-if="sortDirection === 'asc'">▲</span>
+            <span v-else>▼</span>
+        </span>
+    </div>
+</TableHead>
+
+<TableHead
+    @click="sortBy('name')"
+    class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+>
+    <div class="inline-flex items-center space-x-1">
+        <span>NOMBRE</span>
+        <span v-if="sortField === 'name'">
+            <span v-if="sortDirection === 'asc'">▲</span>
+            <span v-else>▼</span>
+        </span>
+    </div>
+</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CÓDIGO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">EMAIL</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">DNI</TableHead>
@@ -100,6 +123,28 @@ const emit = defineEmits<{
 }>();
 
 const page = usePage<SharedData>();
+
+// Control del ordenamiento
+const sortField = ref('');
+const sortDirection = ref<'asc' | 'desc'>('asc');
+
+const sortBy = (field: keyof CustomerResource) => {
+    if (sortField.value === field) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField.value = field;
+        sortDirection.value = 'asc';
+    }
+
+    customerList.sort((a, b) => {
+        const aVal = String(a[field]).toLowerCase?.() || '';
+        const bVal = String(b[field]).toLowerCase?.() || '';
+        
+        if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1;
+        return 0;
+    });
+};
 
 const message = ref(page.props.flash?.message || '');
 onMounted(() => {

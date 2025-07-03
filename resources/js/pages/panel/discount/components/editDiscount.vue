@@ -122,7 +122,7 @@ const onSubmit = handleSubmit((values) => {
     const updatedDiscount: DiscountUpdateRequest = {
         description: values.description,
         percentage: values.percentage,
-        state: values.state === 'activo', // ← ✅ Conversión a boolean
+        state: values.state === 'activo', //Conversión a boolean
     };
 
     emit('update-discount', updatedDiscount, props.discountData.id);

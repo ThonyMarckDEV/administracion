@@ -6,24 +6,49 @@
                 <Table class="w-full">
                     <TableHeader class="bg-gray-50 dark:bg-gray-800/50">
                         <TableRow class="hover:bg-transparent">
-                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ID</TableHead>
-                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">SERVICIO</TableHead>
+<TableHead
+    @click="sortBy('id')"
+    class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+>
+    <div class="inline-flex items-center space-x-1">
+        <span>ID</span>
+        <span v-if="sortField === 'id'">
+            <span v-if="sortDirection === 'asc'">▲</span>
+            <span v-else>▼</span>
+        </span>
+    </div>
+</TableHead>
+
+<TableHead
+    @click="sortBy('service_name')"
+    class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none"
+>
+    <div class="inline-flex items-center space-x-1">
+        <span>SERVICIO</span>
+        <span v-if="sortField === 'name'">
+            <span v-if="sortDirection === 'asc'">▲</span>
+            <span v-else>▼</span>
+        </span>
+    </div>
+</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">CLIENTE</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">PERIODO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">TIPO DE PAGO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">MONTO</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">DURACIÓN</TableHead>
                             <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ESTADO</TableHead>
-                            <TableHead class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
+                            <TableHead class="px-4 py-3 font-medium text-gray-700 dark:text-gray-300">ACCIONES</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <TableRow v-for="paymentPlan in paymentPlanList" :key="paymentPlan.id" class="transition-colors hover:bg-gray-50 dark:hover:bg-gray-800/30">
                             <TableCell class="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">{{ paymentPlan.id }}</TableCell>
-                            <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ paymentPlan.service_name }}</TableCell>
-                            <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ paymentPlan.period_name }}</TableCell>
-                            <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ paymentPlan.payment_type ? 'Anual' : 'Mensual' }}</TableCell>
-                            <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ paymentPlan.amount }}</TableCell>
-                            <TableCell class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ paymentPlan.duration }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.service_name }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.customer_name }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.period_name }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.payment_type ? 'Anual' : 'Mensual' }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.amount }}</TableCell>
+                            <TableCell class="px-4 py-3 font-medium text-gray-700 dark:text-gray-400">{{ paymentPlan.duration }}</TableCell>
                             <TableCell class="px-4 py-3">
                                 <span v-if="paymentPlan.state === true" class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:bg-green-900/30 dark:text-green-200">
                                     <span class="mr-1 h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></span>Activo
@@ -73,6 +98,28 @@ const emit = defineEmits<{
 }>();
 
 const page = usePage<SharedData>();
+
+// 🔥 MODIFICADO: control del ordenamiento
+const sortField = ref('');
+const sortDirection = ref<'asc' | 'desc'>('asc');
+
+const sortBy = (field: keyof PaymentPlanResource) => {
+    if (sortField.value === field) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField.value = field;
+        sortDirection.value = 'asc';
+    }
+
+    paymentPlanList.sort((a, b) => {
+        const aVal = String(a[field]).toLowerCase?.() || '';
+        const bVal = String(b[field]).toLowerCase?.() || '';
+        
+        if (aVal < bVal) return sortDirection.value === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortDirection.value === 'asc' ? 1 : -1;
+        return 0;
+    });
+};
 
 const message = ref(page.props.flash?.message || '');
 onMounted(() => {

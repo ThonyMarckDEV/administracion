@@ -50,18 +50,18 @@ export const usePayment = () => {
         }
     };
 
-    const loadingPayments = async (page: number = 1, customer: string = '') => {
-        try {
-            principal.loading = true;
-            const response = await PaymentServices.index(page, customer);
-            principal.paymentList = response.payments;
-            principal.paginacion = response.pagination;
-        } catch (error) {
-            console.error('Error loading payments:', error);
-        } finally {
-            principal.loading = false;
-        }
-    };
+const loadingPayments = async (page: number = 1, customer: string = '', status: string = '') => {
+    try {
+        principal.loading = true;
+        const response = await PaymentServices.index(page, customer, status);
+        principal.paymentList = response.payments;
+        principal.paginacion = response.pagination;
+    } catch (error) {
+        console.error('Error loading payments:', error);
+    } finally {
+        principal.loading = false;
+    }
+};
     const showPayment = async (id: number) => {
         try {
             const response = await PaymentServices.show(id);

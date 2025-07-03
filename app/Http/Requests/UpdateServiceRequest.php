@@ -23,7 +23,7 @@ class UpdateServiceRequest extends FormRequest
             'name' => 'sometimes|string|max:255',
             'cost' => 'sometimes|numeric|min:0',
             'ini_date' => 'sometimes|date',
-            'state' => 'sometimes|in:activo,inactivo,pendiente',
+            'state' => 'required|boolean',
         ];
     }
 }

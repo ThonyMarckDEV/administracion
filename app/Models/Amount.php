@@ -9,11 +9,20 @@ class Amount extends Model
 {
     protected $table = 'category_supplier';
     protected $fillable = [
-        'supplier_id',
         'category_id',
+        'supplier_id',
         'description',
         'amount',
         'date_init',
+        'serie_assigned',
+        'correlative_assigned',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'date_init' => 'datetime',
+        'serie_assigned' => 'string',
+        'correlative_assigned' => 'integer',
     ];
 
     public function suppliers(): BelongsTo

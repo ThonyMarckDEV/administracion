@@ -4,6 +4,7 @@
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 dark:border-sidebar-border md:min-h-min">
                 <div class="flex justify-between items-center mb-4 px-6 mt-4">
+                 <ToolsPaymentPlan @import-success="loadingPaymentPlan" />
                     <FilterPaymentPlan @search="searchPaymentPlan" />
                 </div>
                 <TablePaymentPlan
@@ -18,6 +19,7 @@
                     :payment-plan-data="principal.paymentPlanData"
                     :modal="principal.stateModal.update"
                     :payment-plan-service="principal.serviceList"
+                    :payment-plan-customer="principal.customerList"
                     :payment-plan-period="principal.periodList"
                     @close-modal="closeModel"
                     @update-payment-plan="emitUpdatePaymentPlan"
@@ -46,6 +48,8 @@ import DeletePaymentPlan from '../../../components/delete.vue';
 import EditPaymentPlan from './components/editPaymentPlan.vue';
 import { PaymentPlanRequestUpdate } from './interface/PaymentPlan';
 import { usePaymentPlan } from '@/composables/usePaymentPlan';
+import ToolsPaymentPlan from './components/toolsPaymentPlan.vue';
+
 
 const { principal, loadingPaymentPlan, getPaymentPlanById, updatePaymentPlan, deletePaymentPlan } = usePaymentPlan();
 

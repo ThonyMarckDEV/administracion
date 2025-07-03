@@ -27,9 +27,9 @@ class AmountsExport implements FromCollection, WithHeadings, WithMapping, WithSt
             $amount->categories->name, // Categoria
             $amount->suppliers->name,  // Proveedor
             $amount->suppliers->ruc,   // RUC
-            $amount->description,
-            $amount->amount,
-        $amount->date_init,
+            $amount->description,    // Descripción
+            $amount->amount,         //
+        $amount->date_init,          // Fecha de inicio
     ];
 }
 

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Str;
 
 class VoidComprobante
 {
@@ -141,11 +142,7 @@ class VoidComprobante
         $correlativo_num = $this->getNextCorrelativoBaja();
         $correlativo_baja = "RA001-{$correlativo_num}"; // Formato RA001-1, RA001-2, etc.
         
-        $voided = new Voided();
-        $voided->setCorrelativo($correlativo_num) // Solo el número para SUNAT (1, 2, 3, etc.)
-            ->setFecGeneracion(new \DateTime($fec_generacion))
-            ->setFecComunicacion(new \DateTime($fec_comunicacion))
-            ->setCompany($company);
+
 
         $details = [
             (new VoidedDetail())
@@ -155,7 +152,12 @@ class VoidComprobante
                 ->setDesMotivoBaja($data['motivo'])
         ];
 
-        $voided->setDetails($details);
+        $voided = new Voided();
+        $voided->setCorrelativo($correlativo_num) // Solo el número para SUNAT (1, 2, 3, etc.)
+            ->setFecGeneracion(new \DateTime($fec_generacion))
+            ->setFecComunicacion(new \DateTime($fec_comunicacion))
+            ->setCompany($company)
+            ->setDetails($details);
 
         // Generate correct filename for SUNAT (RUC-RA-YYYYMMDD-NNN)
         $ruc = $company->getRuc();
@@ -265,7 +267,14 @@ class VoidComprobante
             throw $e;
         }
     }
+protected function generateUniqueReference(): string
+{
+    do {
+        $reference = '--' . strtoupper(Str::random(10)) . '--';
+    } while (\App\Models\Payment::where('reference', $reference)->exists());
 
+    return $reference;
+}
     protected function updateVoidedInvoice(Invoice $invoice, $cdrResponse): void
     {
         $cdrStatus = $this->processCdr($cdrResponse);
@@ -278,6 +287,25 @@ class VoidComprobante
                 'document_type' => $invoice->document_type,
             ]);
             $invoice->update(['sunat' => 'anulado']);
+
+            // Update the associated payment status to 'pendiente' and set reference to null
+        if ($invoice->payment) {
+            Log::debug('Updating payment status to pendiente and generating new reference', [
+                'payment_id' => $invoice->payment_id,
+                'invoice_id' => $invoice->id,
+            ]);
+
+            $newReference = $this->generateUniqueReference();
+
+            $invoice->payment->update([
+                'status' => 'pendiente',
+                'reference' => $newReference,
+                ]);
+            } else {
+                Log::warning('No payment associated with invoice when updating to anulado', [
+                    'invoice_id' => $invoice->id,
+                ]);
+            }
         }
     }
 

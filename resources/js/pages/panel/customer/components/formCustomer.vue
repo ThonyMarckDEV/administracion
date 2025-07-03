@@ -86,6 +86,25 @@
                                 <FormMessage />
                             </FormItem>
                         </FormField>
+                                                <FormField v-slot="{ componentField }" name="state">
+                            <FormItem>
+                                <FormLabel>Estado</FormLabel>
+                                <FormControl>
+                                    <Select v-bind="componentField" disabled>
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue placeholder="Selecciona el estado" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>Estado</SelectLabel>
+                                                <SelectItem value="activo"> Activo </SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        </FormField>
                         <Button type="submit">Crear Cliente</Button>
                     </form>
                 </CardContent>
@@ -111,6 +130,7 @@ import { AlertCircle } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
 import { computed, ref } from 'vue';
 import { z } from 'zod';
+import { CustomerRequestUpdate } from '../interface/Customer';
 
 const { createCustomer } = useCustomer();
 const page = usePage<SharedData>();
@@ -164,7 +184,8 @@ const formSchema = toTypedSchema(
             .refine((val) => (isEmpresa.value ? !!val : true), {
                 message: 'RUC es obligatorio para empresas',
             }),
-    }).refine(
+            state: z.enum(['activo', 'inactivo'], { message: 'estado invalido' }),
+     }).refine(
         (data) => {
             if (isPersona.value && data.dni === null) return false;
             if (isEmpresa.value && data.ruc === null) return false;
@@ -182,12 +203,7 @@ const formSchema = toTypedSchema(
 const { handleSubmit, setFieldValue } = useForm({
     validationSchema: formSchema,
     initialValues: {
-        name: '',
-        codigo: '',
-        email: '',
-        client_type_id: null,
-        dni: null,
-        ruc: null,
+        state: 'activo',
     },
 });
 
@@ -198,7 +214,17 @@ const updateDniRucFields = (value: number) => {
 };
 
 const onSubmit = handleSubmit((values) => {
-    createCustomer(values);
+    const customerData: CustomerRequestUpdate= {
+        name: values.name,
+        codigo: values.codigo,
+        email: values.email,
+        client_type_id: values.client_type_id,
+        state: values.state === 'activo',
+        dni: values.dni ?? null,
+        ruc: values.ruc ?? null,
+    };
+
+    createCustomer(customerData);
 });
 </script>
 

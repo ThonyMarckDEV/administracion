@@ -9,7 +9,7 @@ export type ClientTypeResource = {
 
 export type ClientTypeRequest = {
     name: string;
-    state: 'activo' | 'inactivo';
+    state: boolean;
 };
 
 export type showClientTypeResponse = {
@@ -25,7 +25,7 @@ export type ClientTypeDeleteResponse = {
 
 export type ClientTypeUpdateRequest = {
     name: string;
-    state: 'activo' | 'inactivo';
+    state: boolean;
 };
 
 export type ClientTypeResponse = {

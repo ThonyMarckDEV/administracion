@@ -24,8 +24,8 @@
                 <DeleteSupplier
                     :modal="principal.stateModal.delete"
                     :itemId="principal.idSupplier"
-                    title="Eliminar Servicio"
-                    description="¿Está seguro de que desea eliminar este servicio?"
+                    title="Eliminar Proveedor"
+                    description="¿Está seguro de que desea eliminar este proveedor?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeleteSupplier"
                 />

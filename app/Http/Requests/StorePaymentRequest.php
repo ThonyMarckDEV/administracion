@@ -28,7 +28,7 @@ class StorePaymentRequest extends FormRequest
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
             'payment_method' => 'required|string|in:efectivo,transferencia', // Add payment method validation
-            'reference' => 'nullable|string|max:255',
+            'reference' => 'required|string|max:255|unique:payments,reference',
         ];
     }
 }

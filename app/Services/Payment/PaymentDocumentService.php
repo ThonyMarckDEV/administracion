@@ -66,7 +66,7 @@ class PaymentDocumentService
         }
         
         // Obtener la serie y correlativo
-        $seriesCorrelative = SeriesCorrelative::where('document_type', $documentType)->first();
+         $seriesCorrelative = SeriesCorrelative::where('document_type', $documentType)->lockForUpdate()->first();
 
         if (!$seriesCorrelative) {
             Log::error('Series not found for document type', [
@@ -75,6 +75,12 @@ class PaymentDocumentService
             ]);
             throw new \Exception("No series found for document type: {$documentType}");
         }
+        $seriesCorrelative->increment('correlative');
+        $seriesCorrelative->refresh();
+
+        $serie = ($documentType === 'B' ? 'B' : 'F') . $seriesCorrelative->serie;
+        $correlativo = (string) $seriesCorrelative->correlative;
+        $documentNumber = "{$serie}-{$correlativo}";
 
         // Calcular montos
         $mtoOperGravadas = round($payment->amount / 1.18, 2);
@@ -139,14 +145,13 @@ class PaymentDocumentService
             $comprobante = $this->comprobanteService->createComprobante($documentData, $type);
             $result = $this->comprobanteService->sendComprobante($comprobante, $payment->id);
 
-            $seriesCorrelative->increment('correlative');
             Log::info('Document generated successfully', [
                 'payment_id' => $payment->id,
                 'document_type' => $documentType,
                 'document_number' => $documentNumber,
                 'result' => $result,
             ]);
-            return $documentData;
+            return $result;
         } catch (\Exception $e) {
             Log::error('GenerateComprobante exception', [
                 'error' => $e->getMessage(),

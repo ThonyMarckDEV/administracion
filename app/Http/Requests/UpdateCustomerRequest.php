@@ -28,7 +28,7 @@ class UpdateCustomerRequest extends FormRequest
             'ruc' => 'nullable|string|max:11|unique:customers,ruc,' . $this->route('customer')->id,
             'codigo' => 'required|string|max:11|unique:customers,codigo,' . $this->route('customer')->id,
             'client_type_id' => 'required|exists:client_types,id',
-            'state' => 'required|string|in:activo,inactivo',
+            'state' => 'required|boolean',
         ];
     }
 }

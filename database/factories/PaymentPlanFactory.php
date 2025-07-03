@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\Period;
 use App\Models\Service;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,6 +23,7 @@ class PaymentPlanFactory extends Factory
         $paymentType = $this->faker->boolean();
         return [
             'service_id' => $this->faker->randomElement(Service::pluck('id')),
+            'customer_id' => $this->faker->randomElement(Customer::pluck('id')),
             'period_id' => $this->faker->randomElement(Period::pluck('id')),
             'payment_type' => $paymentType,
             'amount' => $this->faker->randomFloat(2, 50, 500),

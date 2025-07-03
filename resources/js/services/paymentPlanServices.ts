@@ -1,4 +1,4 @@
-import { InputService, InputPeriod, InputServiceResponse, InputPeriodResponse } from '@/interface/Inputs';
+import { InputService, InputPeriod, InputServiceResponse, InputPeriodResponse, InputCustomerResponse } from '@/interface/Inputs';
 import {
     PaymentPlanDeleteResponse,
     PaymentPlanRequest,
@@ -42,5 +42,10 @@ export const PaymentPlanServices = {
     //get period
     async getPeriod(): Promise<InputPeriodResponse> {
         return await axios.get('/panel/inputs/period_list');
+    },
+
+        //get customer
+    async getCustomer(): Promise<InputCustomerResponse> {
+        return await axios.get('/panel/inputs/customer_list');
     }
 }

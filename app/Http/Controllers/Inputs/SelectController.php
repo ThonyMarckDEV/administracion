@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\ClientType;
 use App\Models\Discount;
 use App\Models\Period;
+use App\Models\Customer;
 use App\Models\Service;
 use Illuminate\Http\Request;
 
@@ -55,6 +56,15 @@ class SelectController extends Controller
             ->orderBy('id')
             ->get();
         return response()->json($periods);
+    }
+
+        // get customer list
+    public function getCustomerList()
+    {
+        $customers = Customer::select('id', 'name')
+            ->orderBy('id')
+            ->get();
+        return response()->json($customers);
     }
 
     public function getDiscountList()

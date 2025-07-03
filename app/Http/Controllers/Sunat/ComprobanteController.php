@@ -15,10 +15,8 @@ class ComprobanteController extends Controller
     protected $comprobanteService;
     protected $voidComprobanteService;
 
-    public function __construct(GenerateComprobante $comprobanteService, VoidComprobante $voidComprobanteService)
-    {
+public function __construct(GenerateComprobante $comprobanteService)    {
         $this->comprobanteService = $comprobanteService;
-        $this->voidComprobanteService = $voidComprobanteService;
     }
 
     public function createFactura(StoreFacturaRequest $request)
@@ -73,28 +71,4 @@ class ComprobanteController extends Controller
         }
     }
 
-    public function voidComprobante(VoidComprobanteRequest $request)
-    {
-        $start = microtime(true);
-        try {
-            $validated = $request->validated();
-            $result = $this->voidComprobanteService->voidComprobante($validated);
-
-            Log::info('Comprobante voided', [
-                'invoice_id' => $validated['invoice_id'],
-                'execution_time' => microtime(true) - $start,
-            ]);
-
-            return response()->json([
-                'message' => 'Comprobante voided successfully',
-                'data' => $result,
-            ], 200);
-        } catch (\Exception $e) {
-            Log::error('Error voiding comprobante: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'Error voiding comprobante',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
 }

@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 
 class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithCustomStartCell
 {
@@ -17,7 +18,7 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithS
     */
     public function collection()
     {
-        return Service::orderBy('id', 'asc')->get();
+        return Service::orderBy('name', 'asc')->get();
     }
 
     public function map($service): array
@@ -26,8 +27,8 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithS
             $service->id,
             $service->name,
             $service->cost,
-            $service->ini_date,
-            $service->state === 'activo' ? 'Activo' : ($service->state === 'pendiente' ? 'Pendiente' : 'Inactivo'),
+            $service->ini_date->format('d-m-Y'),
+            $service->state === 'inactivo' ? 'Inactivo' : 'Activo',
         ];
     }
 
@@ -48,6 +49,12 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function styles(Worksheet $sheet)
     {
+        $sheet->getColumnDimension('A')->setWidth(8);   // ID
+        $sheet->getColumnDimension('B')->setWidth(50);  // Nombre
+        $sheet->getColumnDimension('C')->setWidth(12);  // Costo
+        $sheet->getColumnDimension('D')->setWidth(18);  // Fecha
+        $sheet->getColumnDimension('E')->setWidth(15);  // Estado
+
         $sheet->getStyle('A1:E1')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -80,5 +87,7 @@ class ServicesExport implements FromCollection, WithHeadings, WithMapping, WithS
         $sheet->getStyle('C2:C' . ($sheet->getHighestRow()))->getNumberFormat()->setFormatCode('[$S/] #,##0.00');
 
         return [];
+
     }
+    
 }

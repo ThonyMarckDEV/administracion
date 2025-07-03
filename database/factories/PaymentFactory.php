@@ -24,7 +24,7 @@ class PaymentFactory extends Factory
             'payment_plan_id' => PaymentPlan::factory(),
             'discount_id' => Discount::factory(),
             'amount' => $this->faker->randomFloat(2, 10, 1000),
-            'payment_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
+            'payment_date' => $this->faker->dateTimeBetween('-1 year', 'now')->format('d-m-Y'),
             'payment_method' => $this->faker->randomElement(['efectivo', 'transferencia']),
             'reference' => $this->faker->uuid(),
             'status' => $this->faker->randomElement(['pendiente', 'pagado', 'vencido']),

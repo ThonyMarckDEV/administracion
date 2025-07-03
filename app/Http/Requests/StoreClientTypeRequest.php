@@ -23,7 +23,6 @@ class StoreClientTypeRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'state' => 'required|string|in:activo,inactivo',
         ];
     }
 }

@@ -29,7 +29,7 @@ class UpdatePaymentRequest extends FormRequest
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
             'payment_method' => 'required|string|in:efectivo,transferencia',
-            'reference' => 'nullable|string|max:255',
+            'reference' => 'required|string|max:255|unique:payments,reference,' . $this->route('payment')->id,
             'status' => 'required|string|in:pendiente,pagado,vencido',
         ];
     }

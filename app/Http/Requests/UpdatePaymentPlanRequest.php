@@ -23,11 +23,12 @@ class UpdatePaymentPlanRequest extends FormRequest
     {
         return [
             'service_id'    => 'required|exists:services,id',
+            'customer_id'     => 'required|exists:customers,id',
             'period_id'     => 'required|exists:periods,id',
             'payment_type'  => 'required|string|in:anual,mensual',
             'amount'        => 'required|numeric|min:0|max:9999.99',
             'duration'      => 'required|integer|min:1|max:120',
-            'state'         => 'required|string|in:activo,inactivo',
+            'state' => 'required|boolean',
         ];
     }
 }

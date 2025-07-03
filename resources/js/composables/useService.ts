@@ -39,7 +39,7 @@ export const useService = () => {
             name: '',
             cost: 0,
             ini_date: '',
-            state: '',
+            state: true,
             created_at: '',
         },
     });
@@ -51,7 +51,7 @@ export const useService = () => {
             name: '',
             cost: 0,
             ini_date: '',
-            state: '',
+            state: true,
             created_at: '',
         };
     };
@@ -117,7 +117,7 @@ export const useService = () => {
                     name: '',
                     cost: 0,
                     ini_date: '',
-                    state: '',
+                    state: true,
                     created_at: '',
                 };
                 return;

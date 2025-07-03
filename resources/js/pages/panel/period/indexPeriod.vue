@@ -25,7 +25,7 @@
                     :modal="principal.stateModal.delete"
                     :itemId="principal.idPeriod"
                     title="Eliminar periodo"
-                    description="¿Está seguro de que desea eliminar este tipo de cliente?"
+                    description="¿Está seguro de que desea eliminar este tipo de periodo?"
                     @close-modal="closeModalDelete"
                     @delete-item="emitDeletePeriod"
                 />

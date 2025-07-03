@@ -119,7 +119,7 @@ const onSubmit = handleSubmit((values) => {
     const discountData = {
         description: values.description,
         percentage: Number(values.percentage),
-        state: values.state === 'activo', // ✅ convierte string a boolean
+        state: values.state === 'activo', // Convierte string a boolean
     };
 
     createDiscount(discountData);

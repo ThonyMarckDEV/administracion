@@ -1,5 +1,6 @@
 <template>
     <div class="container mx-auto px-4">
+        <FilterInvoices @filter="applyFilters" />
         <LoadingTable v-if="loading" :headers="12" :row-count="10" />
         <div v-else class="space-y-4">
             <div class="overflow-auto rounded-xl border border-gray-200 shadow-sm dark:border-gray-700">
@@ -19,8 +20,12 @@
                         <TableHead class="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300">Acciones</TableHead>
                     </TableHeader>
                     <TableBody>
+                        <TableRow v-if="filteredInvoices.length === 0">
+                        <TableCell colspan="12" class="text-center">No hay facturas disponibles.</TableCell>
+                        </TableRow>
                         <TableRow
-                            v-for="invoice in invoiceList"
+                            v-else
+                            v-for="invoice in filteredInvoices"
                             :key="invoice.id"
                             class="transition-colors duration-150 ease-in-out hover:bg-gray-50 dark:hover:bg-gray-800/30"
                         >
@@ -98,8 +103,7 @@
                                     <span class="sr-only">Descargar CDR</span>
                                 </Button>
                                 <Button
-                                    v-if="invoice.sunat !== 'anulado'"
-                                    variant="ghost"
+                                    v-if="invoice.sunat !== 'anulado' && invoice.document_type.toLowerCase() !== 'boleta'"                                    variant="ghost"
                                     size="sm"
                                     class="h-[30px] w-[30px] rounded-md p-0 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30"
                                     @click="openModalAnnul(invoice.id)"
@@ -117,25 +121,34 @@
         </div>
     </div>
     <ShowPdfModal
-        :status-modal="showPdfModal"
-        :pdf-url="pdfUrl"
-        @close-modal="closePdfModal"
+      :status-modal="showPdfModal"
+      :pdf-url="pdfUrl"
+      @close-modal="closePdfModal"
+    />
+    <AnnulInvoiceModal
+      :status-modal="showAnnulModal"
+      :invoice-id="selectedInvoiceId"
+      @close-modal="closeModalAnnul"
+      @annul-success="handleAnnulSuccess"
     />
 </template>
 
 <script setup lang="ts">
+import { computed, ref } from 'vue';
 import LoadingTable from '@/components/loadingTable.vue';
 import Button from '@/components/ui/button/Button.vue';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pagination } from '@/interface/paginacion';
 import { FileText, FileCode, FileArchive, XCircle } from 'lucide-vue-next';
 import PaginationPayment from '../../category/components/paginationCategory.vue';
+import FilterInvoices from './FilterInvoices.vue';
 import ShowPdfModal from './ShowPdfModal.vue';
+import AnnulInvoiceModal from './AnnulInvoiceModal.vue';
 import { InvoiceResource } from '../interface/Invoice';
-import { ref } from 'vue';
 import { InvoiceServices } from '@/services/invoiceServices';
 
-defineProps<{
+// Destructure props
+const { invoiceList, invoicePaginate, loading } = defineProps<{
     invoiceList: InvoiceResource[];
     invoicePaginate: Pagination;
     loading: boolean;
@@ -143,11 +156,64 @@ defineProps<{
 
 const emit = defineEmits<{
     (e: 'page-change', page: number): void;
-    (e: 'open-modal-annul', id: number): void;
+    (e: 'refresh-list'): void;
 }>();
 
 const showPdfModal = ref(false);
 const pdfUrl = ref<string | null>(null);
+const showAnnulModal = ref(false);
+const selectedInvoiceId = ref<number>(0);
+
+const filters = ref({
+  document_type: '',
+  payment_id: '',
+  correlative_assigned: '',
+    service_id: 0,
+  customer_id: 0,
+  payment_method: '',
+});
+const filteredInvoices = computed(() => {
+  return invoiceList.filter((invoice) => {
+    const matchesDocumentType =
+      !filters.value.document_type ||
+      invoice.document_type.toLowerCase() === filters.value.document_type.toLowerCase();
+    const matchesPaymentId =
+      !filters.value.payment_id ||
+      invoice.payment_id.toString().includes(filters.value.payment_id);
+    const matchesCorrelative =
+      !filters.value.correlative_assigned ||
+      invoice.correlative_assigned
+        .toLowerCase()
+        .includes(filters.value.correlative_assigned.toLowerCase());
+            const matchesService =
+      filters.value.service_id === 0 ||
+      (invoice.payment.service?.id && invoice.payment.service.id === filters.value.service_id);
+    const matchesCustomer =
+      filters.value.customer_id === 0 ||
+      (invoice.payment.customer?.id && invoice.payment.customer.id === filters.value.customer_id);
+    const matchesPaymentMethod =
+      !filters.value.payment_method ||
+      invoice.payment.payment_method.toLowerCase() === filters.value.payment_method.toLowerCase();
+    
+      return (
+      matchesDocumentType &&
+      matchesPaymentId &&
+      matchesCorrelative &&
+      matchesService &&
+      matchesCustomer &&
+      matchesPaymentMethod
+    );  });
+});
+const applyFilters = (newFilters: {
+  document_type: string;
+  payment_id: string;
+  correlative_assigned: string;
+  service_id: number;
+  customer_id: number;
+  payment_method: string;
+}) => {
+  filters.value = { ...newFilters };
+};
 
 const openPdfModal = async (invoiceId: number, paymentId: number) => {
     try {
@@ -203,6 +269,16 @@ const downloadCdr = async (invoiceId: number, paymentId: number, sunatStatus: st
 };
 
 const openModalAnnul = (invoiceId: number) => {
-    emit('open-modal-annul', invoiceId);
+  selectedInvoiceId.value = invoiceId;
+  showAnnulModal.value = true;
+};
+const closeModalAnnul = () => {
+    console.log('Closing annul modal');
+  showAnnulModal.value = false;
+  selectedInvoiceId.value = 0;
+};
+const handleAnnulSuccess = () => {
+    console.log('Annul success, emitting refresh-list');
+  emit('refresh-list');
 };
 </script>

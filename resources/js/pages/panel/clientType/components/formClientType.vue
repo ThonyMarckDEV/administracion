@@ -22,25 +22,25 @@
                         </FormField>
 
                         <!-- Campo para elegir el estado del tipo de cliente -->
-                         <FormField v-slot="{ componentField }" name="state">
-                            <FormItem>
-                                <FormLabel>Estado</FormLabel>
-                                <FormControl>
-                                    <Select v-bind="componentField" class="w-full rounded-md border border-slate-950 p-2">
-                                        <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="Selecciona el estado"/>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>Estado</SelectLabel>
-                                                <SelectItem value="activo">Activo</SelectItem>
-                                                <SelectItem value="inactivo">Inactivo</SelectItem>
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                </FormControl>
-                            </FormItem>
-                        </FormField>
+              <FormField v-slot="{ componentField }" name="state">
+                    <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                            <Select v-bind="componentField" disabled>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Estado</SelectLabel>
+                                        <SelectItem value="activo">Activo</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
 
                         <!-- BOTONES PARA ENVIAR O BORRAR -->
                         <div class="container flex justify-end gap-4">
@@ -88,24 +88,33 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 //Form validation
-const formSchema = toTypedSchema(
+const formShema = toTypedSchema(
     z.object({
         name: z
             .string({message: 'Campo obligatorio'})
             .min(1, {message: 'El nombre debe tener al menos 1 caracter'})
             .max(50, {message: 'El nombre debe debe tener menos de 50 caracteres '}),
-        state: z
-            .enum(['activo', 'inactivo'], {message: 'Estado invalido'}),
+        state: z.enum(['activo', 'inactivo'], { message: 'Estado inválido' }),
     }),
 );
 
 //form submit
-const { handleSubmit } = useForm ({
-    validationSchema: formSchema,
+
+const { handleSubmit } = useForm({
+    validationSchema: formShema,
+        initialValues: {         
+        state: 'activo',     
+    },
 });
 
+
 const onSubmit = handleSubmit((values) => {
-    createClientType(values);
+    const clientTypeData = {
+        name: values.name,
+        state: values.state === 'activo',
+    };
+
+    createClientType(clientTypeData);
 });
 </script>
 <style scoped></style>

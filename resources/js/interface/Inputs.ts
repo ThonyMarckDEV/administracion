@@ -17,6 +17,7 @@ export interface InputSupplier {
 export interface InputService {
     id: number;
     name: string;
+    cost: number;
 }
 
 export interface InputPeriod {

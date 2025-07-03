@@ -12,8 +12,8 @@ export const InvoiceServices = {
         return response.data;
     },
 
-    async annulInvoice(id: number): Promise<AnnulInvoiceResponse> {
-        const response = await axios.post(`/panel/invoices/${id}/annul`);
+    async annulInvoice(id: number, data: { invoice_id: number; motivo: string }): Promise<AnnulInvoiceResponse> {
+        const response = await axios.post(`/panel/invoices/${id}/annul`, data);
         return response.data;
     },
 

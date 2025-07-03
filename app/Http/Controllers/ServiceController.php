@@ -30,7 +30,7 @@ class ServiceController extends Controller
             $name = $request->get('name');
             $services = Service::when($name, function ($query, $name) {
                 return $query->where('name', 'like', "%$name%");
-            })->orderBy('id')->paginate(12);
+            })->orderBy('id','asc')->paginate(12);
 
             return response()->json([
                 'services' => ServiceResource::collection($services),
@@ -93,6 +93,7 @@ class ServiceController extends Controller
         Gate::authorize('update', $service);
         try {
             $validatedData = $request->validated();
+            $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
             $service->update($validatedData);
             return response()->json(new ServiceResource($service));
         } catch (\Throwable $th) {

@@ -108,11 +108,10 @@ const { handleSubmit, setValues } = useForm({
       name: props.serviceData.name,
       cost: props.serviceData.cost,
       ini_date: props.serviceData.ini_date,
-      state: props.serviceData.state,
+      state: props.serviceData.state ? 'activo' : 'inactivo',
   },
 });
 
-// Watch for changes in service data
 // Watch for changes in service data
 watch(
   () => props.serviceData,
@@ -123,10 +122,7 @@ watch(
               cost: newData.cost,
               // Extract just the date part from the timestamp
               ini_date: newData.ini_date ? newData.ini_date.split('T')[0] : '',
-              // Convert state to string 'activo' or 'inactivo'
-              state: newData.state === true || newData.state === 'activo' 
-                     ? 'activo' 
-                     : 'inactivo'
+              state: newData.state ? 'activo' : 'inactivo',
           });
       }
   },
@@ -136,7 +132,9 @@ watch(
 // Submit handler
 const onSubmit = handleSubmit((values) => {
   console.log('Formulario enviado con:', values);
-  emit('update-service', values, props.serviceData.id);
-  closeModal();
+emit('update-service', {
+  ...values,
+  state: values.state === 'activo'
+}, props.serviceData.id);  closeModal();
 });
 </script>

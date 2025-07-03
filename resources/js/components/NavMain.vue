@@ -17,6 +17,7 @@ defineProps<{
     items4: NavItem[];
     items5: NavItem[];
     items6: NavItem[];
+    items7: NavItem[];
 }>();
 
 const page = usePage<SharedData>();
@@ -98,7 +99,7 @@ const isMenuActivo = (item: NavItem) => {
                 </SidebarMenuButton>
             </SidebarMenuItem>
         </SidebarMenu> 
-        <SidebarGroupLabel>Seguridad</SidebarGroupLabel>
+        <SidebarGroupLabel>Acceso</SidebarGroupLabel>
         <SidebarMenu>
             <Collapsible v-for="item in items2" :key="item.title" as-child :default-open="isMenuActivo(item) || item.isActive"  class="group/collapsible" >
                 <SidebarMenuItem>
@@ -123,5 +124,16 @@ const isMenuActivo = (item: NavItem) => {
                 </SidebarMenuItem>
             </Collapsible>
         </SidebarMenu>
+                <SidebarGroupLabel>Estilos</SidebarGroupLabel>
+         <SidebarMenu>
+            <SidebarMenuItem v-for="item in items7" :key="item.title">
+                <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
+                    <Link :href="item.href">
+                        <component :is="item.icon" />
+                        <span>{{ item.title }}</span>
+                    </Link>
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu> 
     </SidebarGroup>
 </template>

@@ -21,6 +21,11 @@ use App\Http\Controllers\Panel\PaymentController;
 use App\Http\Controllers\PaymentPlanController;
 use App\Http\Controllers\PeriodController;
 use App\Http\Controllers\Reportes\CustomerPDFController;
+use App\Http\Controllers\Reportes\PeriodPDFController;
+use App\Http\Controllers\Reportes\PaymentPlanPDFController;
+use App\Http\Controllers\Reportes\PaymentPDFController;
+use App\Http\Controllers\Reportes\InvoicePDFController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -28,9 +33,8 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+
 
 # list prueba suppliers 
 
@@ -81,7 +85,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('payments', PaymentController::class);
         # list Payments
         Route::get('listar-payments', [PaymentController::class, 'listPayments'])->name('payments.listar');
-
+        #Generate Amount PDF
+        Route::get('/amounts/{amount}/pdf', [AmountController::class, 'generatePdf'])->name('panel.amounts.pdf');
+        
         // Rutas existentes (no se modifican)
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/listar-invoices', [InvoiceController::class, 'listarInvoices'])->name('invoices.list');
@@ -105,7 +111,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-excel-customers', [CustomerController::class, 'exportExcel'])->name('customers.excel');
             Route::get('/export-excel-periods', [PeriodController::class, 'exportExcel'])->name('periods.excel');
             Route::get('/export-excel-amounts', [AmountController::class, 'exportExcel'])->name('amounts.excel');
-
+            Route::get('/export-excel-payment_plans', [PaymentPlanController::class, 'exportExcel'])->name('payment_plans.excel');
+            Route::get('/export-excel-payments', [PaymentController::class, 'exportExcel'])->name('payments.excel');
+            Route::get('/export-excel-invoices', [InvoiceController::class, 'exportExcel'])->name('invoices.excel');
             # Exports to PDF
             Route::get('/export-pdf-users', [UserPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-suppliers', [SupplierPDFController::class, 'exportPDF']);
@@ -113,8 +121,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/export-pdf-clientTypes', [ClientTypePDFController::class, 'exportPDF']);
             Route::get('/export-pdf-categories', [CategoryPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-customers', [CustomerPDFController::class, 'exportPDF']);
-            Route::get('/export-pdf-periods', [PeriodController::class, 'exportPDF']);
+            Route::get('/export-pdf-periods', [PeriodPDFController::class, 'exportPDF']);
             Route::get('/export-pdf-amounts', [AmountPDFController::class, 'exportPDF']);
+            Route::get('/export-pdf-payment_plans', [PaymentPlanPDFController::class, 'exportPDF']);
+            Route::get('/export-pdf-payments', [PaymentPDFController::class, 'exportPDF']);
+            Route::get('/export-pdf-invoices', [InvoicePDFController::class, 'exportPDF']);
 
             #Excel imports
             Route::post('/import-excel-clientTypes', [ClientTypeController::class, 'importExcel'])->name('reports.clientTypes.import');
@@ -127,6 +138,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/import-excel-categories', [CategoryController::class, 'importExcel'])->name('reports.categories.import');
         });
 
+        # Ruta para dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth']);
+
         # Route group for inputs, selects and autocomplete
         Route::prefix('inputs')->name('inputs.')->group(function () {
             # get client_type list
@@ -134,6 +148,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('categories_list', [SelectController::class, 'getCategoriesList'])->name('categories_list');
             Route::get('service_list', [SelectController::class, 'getServiceList'])->name('service_list');
             Route::get('period_list', [SelectController::class, 'getPeriodList'])->name('period_list');
+            Route::get('customer_list', [SelectController::class, 'getCustomerList'])->name('customer_list');
             Route::get('discount_list', [SelectController::class, 'getDiscountList'])->name('discount_list');
             // automplete
             Route::get('suppliers_list', [AutoCompleteController::class, 'getSuppliersList'])->name('suppliers_list');

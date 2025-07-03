@@ -11,7 +11,7 @@
             <!-- Formulario -->
             <form @submit="onSubmit" class="flex flex-col gap-4 py-4">
                 <!-- Seleccionar el Servicio -->
-                <FormField v-slot="{ componentField }" name="service_name">
+                <FormField v-slot="{ componentField }" name="service_id">
                     <FormItem>
                         <FormLabel>Servicio</FormLabel>
                         <FormControl>
@@ -32,8 +32,30 @@
                     </FormItem>
                 </FormField>
 
+                <!-- Seleccionar cliente -->
+                <FormField v-slot="{ componentField }" name="customer_id">
+                    <FormItem>
+                        <FormLabel>Cliente</FormLabel>
+                        <FormControl>
+                            <Select v-bind="componentField">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona el Cliente"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Cliente</SelectLabel>
+                                        <SelectItem v-for="customer in props.paymentPlanCustomer" :key="customer.id" :value="customer.id">
+                                            {{ customer.name }}
+                                        </SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </FormControl>
+                    </FormItem>
+                </FormField>
+
                 <!-- Seleccionar el periodo -->
-                <FormField v-slot="{ componentField }" name="period_name">
+                <FormField v-slot="{ componentField }" name="period_id">
                     <FormItem>
                         <FormLabel>Periodo</FormLabel>
                         <FormControl>
@@ -114,6 +136,12 @@
                         <FormMessage />
                     </FormItem>
                 </FormField>
+
+                <!--guardar y cerrar    -->
+                <DialogFooter>
+                    <Button type="submit">Guardar cambios</Button>
+                    <Button type="button" variant="outline" @click="closeModal">Cancelar</Button>
+                </DialogFooter>
             </form>
         </DialogContent>
     </Dialog>
@@ -129,7 +157,7 @@ import { toTypedSchema } from '@vee-validate/zod';
 import { useForm } from 'vee-validate';
 import { watch } from 'vue';
 import { z } from 'zod';
-import { InputService, InputPeriod } from '@/interface/Inputs';
+import { InputService, InputPeriod, InputCustomer} from '@/interface/Inputs';
 import { PaymentPlanRequestUpdate, PaymentPlanResource } from '../interface/PaymentPlan';
 
 const props = defineProps<{
@@ -137,6 +165,7 @@ const props = defineProps<{
     paymentPlanData: PaymentPlanResource;
     paymentPlanService: InputService[];
     paymentPlanPeriod: InputPeriod[];
+    paymentPlanCustomer: InputCustomer[];
 }>();
 
 const emit = defineEmits<{
@@ -152,6 +181,8 @@ const formShema = toTypedSchema(
     z.object({
         service_id: z
             .number({message: 'Campo obligatorio'}),
+        customer_id: z
+        .number({message: 'Campo obligatorio'}),
         period_id: z
             .number({message: 'Campo obligatorio'}),
         payment_type: z
@@ -174,6 +205,7 @@ const { handleSubmit, setValues } = useForm({
     validationSchema: formShema,
     initialValues: {
         service_id: props.paymentPlanData.service_id,
+        customer_id: props.paymentPlanData.customer_id,
         period_id: props.paymentPlanData.period_id,
         payment_type: props.paymentPlanData ? 'anual' : 'mensual',
         amount: props.paymentPlanData.amount,
@@ -188,6 +220,7 @@ watch(
         if (newData) {
             setValues({
                 service_id: newData.service_id,
+                customer_id: newData.customer_id,
                 period_id: newData.period_id,
                 payment_type: newData.payment_type ? 'anual' : 'mensual',
                 amount: newData.amount,
@@ -200,7 +233,17 @@ watch(
 );
 
 const onSubmit = handleSubmit((values) => {
-    emit('updatePaymentPlan', values, props.paymentPlanData.id);
+        const updatedPaymentPlan: PaymentPlanRequestUpdate = {
+        service_id: values.service_id,
+        customer_id: values.customer_id,
+        period_id: values.period_id,
+        payment_type: values.payment_type,
+        amount: values.amount,
+        duration: values.duration,
+        state: values.state === 'activo',
+    };
+    emit('updatePaymentPlan', updatedPaymentPlan, props.paymentPlanData.id);
+        closeModal();
 });
 
 </script>

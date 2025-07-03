@@ -23,7 +23,6 @@ class StoreServiceRequest extends FormRequest
             'name' => 'required|string|max:255',
             'cost' => 'required|numeric|min:0',
             'ini_date' => 'required|date',
-            'state' => 'required|in:activo,inactivo,pendiente',
         ];
     }
 }

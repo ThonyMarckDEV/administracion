@@ -180,7 +180,7 @@ const closeModal = () => {
 const formShema = toTypedSchema(
     z.object({
         amount: z.number().min(1, 'minimo 1').max(10000, 'maximo 10000'),
-        payment_date: z.string({ message: 'Campo obligatorio' }),
+        payment_date: z.string().refine(val => !isNaN(Date.parse(val)), 'Fecha inválida'),
         payment_method: z.string({ message: 'Campo obligatorio' }),
         reference: z.string({ message: 'Campo obligatorio' }),
         status: z.string({ message: 'Campo obligatorio' }),
@@ -211,7 +211,9 @@ watch(
         console.log('newData', newData);
         setValues({
             amount: Number(newData.amount),
-            payment_date: newData.payment_date,
+            payment_date: newData.payment_date
+        ? newData.payment_date.split('-').reverse().join('-') // convierte "26-10-2025" a "2025-10-26"
+        : '',
             payment_method: newData.payment_method,
             reference: newData.reference,
             status: newData.status,

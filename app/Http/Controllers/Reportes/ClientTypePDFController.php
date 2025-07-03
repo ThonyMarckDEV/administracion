@@ -17,6 +17,7 @@ class ClientTypePDFController extends Controller
             return [
                 'id' => $clientType->id,
                 'name' => $clientType->name,
+                'created_at' => $clientType->created_at->format('d-m-Y H:i:s'),
                 'state' => $clientType->state == 1 ? 'Activo' : 'Inactivo'
             ];
         })->toArray();
@@ -49,8 +50,8 @@ class ClientTypePDFController extends Controller
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->SetFillColor(242, 242, 242); 
 
-        $header = ['ID', 'Tipo de cliente', 'Estado'];
-        $widths = [30, 120, 40];
+        $header = ['ID', 'Tipo de cliente','Fecha', 'Estado'];
+        $widths = [30, 30, 30, 30];
 
         foreach ($header as $i => $col) {
             $pdf->MultiCell($widths[$i], 10, $col, 1, 'C', 1, 0);
@@ -75,6 +76,7 @@ class ClientTypePDFController extends Controller
 
         $pdf->MultiCell($widths[0], 10, $clientType['id'], 1, 'C', 0, 0);
         $pdf->MultiCell($widths[1], 10, $clientType['name'], 1, 'C', 0, 0);
+        $pdf->MultiCell($widths[1], 10, $clientType['created_at'], 1, 'C', 0, 0);
         $pdf->MultiCell($widths[2], 10, $clientType['state'], 1, 'C', 0, 0);
         $pdf->Ln();
         }

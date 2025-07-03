@@ -53,25 +53,27 @@ export const useInvoice = () => {
         }
     };
 
-    const annulInvoice = async (id: number) => {
-        principal.value.loading = true;
-        try {
-            const response = await InvoiceServices.annulInvoice(id);
-            if (response.status) {
-                showSuccessMessage('Éxito', response.message);
-                await loadInvoices(principal.value.invoicePaginate.current_page);
-            }
-        } catch (error: any) {
-            if (error.response?.status === 403) {
-                showErrorMessage('Error', 'No tienes permiso para anular este comprobante.');
-            } else {
-                showErrorMessage('Error', 'Error al anular el comprobante.');
-            }
-            console.error('Error annulling invoice:', error);
-        } finally {
-            principal.value.loading = false;
-        }
-    };
+  const annulInvoice = async (id: number, data: { invoice_id: number; motivo: string }) => {
+    principal.value.loading = true;
+    try {
+      const response = await InvoiceServices.annulInvoice(id, data);
+      if (response.status) {
+        showSuccessMessage('Éxito', response.message);
+        // Removed loadInvoices call to avoid duplicate refresh
+      }
+      return response;
+    } catch (error: any) {
+      if (error.response?.status === 403) {
+        showErrorMessage('Error', 'No tienes permiso para anular este comprobante.');
+      } else {
+        showErrorMessage('Error', error.response?.data?.message || 'Error al anular el comprobante.');
+      }
+      console.error('Error annulling invoice:', error);
+      throw error; // Re-throw to handle in AnnulInvoiceModal
+    } finally {
+      principal.value.loading = false;
+    }
+  };
 
     return { loadInvoices, showInvoice, annulInvoice, principal, showInvoiceData };
 };

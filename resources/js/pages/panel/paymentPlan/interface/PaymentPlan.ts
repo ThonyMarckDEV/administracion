@@ -4,6 +4,8 @@ export type PaymentPlanResource = {
     id: number;
     service_id: number;
     service_name: string;
+    customer_id: number;
+    customer_name: string;
     period_id: number;
     period_name: string;
     payment_type: boolean;
@@ -14,6 +16,7 @@ export type PaymentPlanResource = {
 
 export type PaymentPlanRequest = {
     service_id: number;
+    customer_id: number;
     period_id: number;
     payment_type: 'anual' | 'mensual';
     amount: number;
@@ -22,11 +25,12 @@ export type PaymentPlanRequest = {
 
 export type PaymentPlanRequestUpdate = {
     service_id: number;
+    customer_id: number;
     period_id: number;
     payment_type: 'anual' | 'mensual';
     amount: number;
     duration: number;
-    state: 'activo' | 'inactivo';
+    state: boolean;
 };
 
 export type showPaymentPlanResponse = {

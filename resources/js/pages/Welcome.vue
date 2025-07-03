@@ -275,6 +275,7 @@ export default {
                         'Interfaces elegantes y experiencias de usuario premium',
                         'Arquitectura escalable con tecnologías de vanguardia',
                     ],
+                    imgUrl: '/images/landing/system/img-1.png',    
                     imgWidth: 600,
                     imgHeight: 450,
                 },

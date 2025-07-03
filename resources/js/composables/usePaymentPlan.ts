@@ -1,4 +1,4 @@
-import { InputService, InputPeriod } from '@/interface/Inputs';
+import { InputService, InputPeriod, InputCustomer } from '@/interface/Inputs';
 import { Pagination } from '@/interface/paginacion';
 import { PaymentPlanResource, PaymentPlanRequest, PaymentPlanRequestUpdate } from '@/pages/panel/paymentPlan/interface/PaymentPlan';
 import { PaymentPlanServices } from '@/services/paymentPlanServices';
@@ -19,6 +19,7 @@ export const usePaymentPlan = () => {
         paymentPlanData: PaymentPlanResource;
         serviceList: InputService[];
         periodList: InputPeriod[];
+        customerList: InputCustomer[];
     }>({
         paymentPlanList: [],
         paginacion: {
@@ -40,6 +41,8 @@ export const usePaymentPlan = () => {
             id: 0,
             service_id: 0,
             service_name: '',
+            customer_id: 0,
+            customer_name: '',
             period_id: 0,
             period_name: '',
             payment_type: true,
@@ -49,6 +52,7 @@ export const usePaymentPlan = () => {
         },
         serviceList: [],
         periodList: [],
+        customerList: [],
     });
 
     // reset paymentPlan data
@@ -57,6 +61,8 @@ export const usePaymentPlan = () => {
             id: 0,
             service_id: 0,
             service_name: '',
+            customer_id: 0,
+            customer_name: '',
             period_id: 0,
             period_name: '',
             payment_type: true,
@@ -73,12 +79,14 @@ export const usePaymentPlan = () => {
                 principal.paymentPlanList = response.paymentPlans;
                 principal.paginacion = response.pagination;
                 console.log(response);
-                const [periodResponse, serviceResponse] = await Promise.all([
+                const [periodResponse, serviceResponse, customerResponse] = await Promise.all([
                     PaymentPlanServices.getPeriod(),
                     PaymentPlanServices.getService(),
+                    PaymentPlanServices.getCustomer(),
                 ]);
                 principal.periodList = periodResponse.data;
                 principal.serviceList = serviceResponse.data;
+                principal.customerList = customerResponse.data;
             } catch (error) {
                 console.error(error);
             } finally {
@@ -95,7 +103,7 @@ export const usePaymentPlan = () => {
         }
     };
 
-    // get paymentPlan by id
+    // get product by id
     const getPaymentPlanById = async (id: number) => {
         try {
             if (id === 0) {
@@ -103,17 +111,23 @@ export const usePaymentPlan = () => {
                 return;
             }
             const response = await PaymentPlanServices.show(id);
-            if (response.status){
+            if (response.status) {
                 principal.paymentPlanData = response.paymentPlan;
-                console.log(principal.paymentPlanData.payment_type);
                 principal.idPaymentPlan = response.paymentPlan.id;
-                if(principal.paymentPlanList.length === 0){
-                    const [periodResponse, serviceResponse] = await Promise.all([
-                        PaymentPlanServices.getPeriod(),
-                        PaymentPlanServices.getService(),
-                      ]);
-                    principal.periodList = periodResponse.data;
+                if (principal.serviceList.length === 0) {
+                    const serviceResponse = await PaymentPlanServices.getService();
                     principal.serviceList = serviceResponse.data;
+                    console.log('envie la peticion');
+                }
+                if (principal.customerList.length === 0) {
+                    const customerResponse = await PaymentPlanServices.getCustomer();
+                    principal.customerList = customerResponse.data;
+                    console.log('envie la peticion');
+                }
+                if (principal.periodList.length === 0) {
+                    const periodResponse = await PaymentPlanServices.getPeriod();
+                    principal.periodList = periodResponse.data;
+                    console.log('envie la peticion');
                 }
                 principal.stateModal.update = true;
             }
@@ -122,20 +136,21 @@ export const usePaymentPlan = () => {
         }
     };
 
-    //update paymentPlan
+    // update product
     const updatePaymentPlan = async (id: number, data: PaymentPlanRequestUpdate) => {
-        try{
+        try {
             const response = await PaymentPlanServices.update(id, data);
             if (response.status) {
-                showSuccessMessage('Plan de pago actualizado', 'El plan de pago se actualizo correctamente');
+                showSuccessMessage('Plan de pago actualizado', 'El plan de pago se actualizó correctamente');
                 principal.stateModal.update = false;
                 loadingPaymentPlan(principal.paginacion.current_page, principal.filter);
             }
         } catch (error) {
             console.error(error);
-        } finally{
-            principal.periodList = [];
+        } finally {
             principal.serviceList = [];
+            principal.customerList = [];
+            principal.periodList = [];
         }
     };
 

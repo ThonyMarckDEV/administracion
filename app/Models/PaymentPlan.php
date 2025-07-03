@@ -14,6 +14,7 @@ class PaymentPlan extends Model
     
     protected $fillable = [
         'service_id',
+        'customer_id',
         'period_id',
         'payment_type',
         'amount',
@@ -28,6 +29,10 @@ class PaymentPlan extends Model
 
     public function service():BelongsTo{
         return $this->belongsTo(Service::class,'service_id', 'id');
+    }
+
+    public function customer():BelongsTo{
+        return $this->belongsTo(Customer::class, 'customer_id', 'id');
     }
 
     public function period():BelongsTo{

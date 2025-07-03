@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Service;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -25,11 +26,12 @@ class ServiceImport implements ToCollection, WithHeadingRow
                     continue; // Saltar fila incompleta
                 }
 
-                // Normalizar estado
+                // Normalizar estado y convertir a booleano
                 $estado = strtolower(trim($row['estado']));
                 if (!in_array($estado, ['activo', 'inactivo', 'pendiente'])) {
                     continue; // Saltar si el estado no es válido
                 }
+                $estadoBool = $estado === 'activo';
 
                 // Formatear la fecha
                 $rawDate = $row['fecha_inicio'];
@@ -46,11 +48,11 @@ class ServiceImport implements ToCollection, WithHeadingRow
                     'name'      => trim($row['nombre']),
                     'cost'      => (float) $row['costo'],
                     'ini_date'  => $fecha,
-                    'state'     => $estado,
+                    'state'     => $estadoBool,
                 ]);
 
             } catch (\Exception $e) {
-                // Saltar fila si ocurre error (puedes loguear si quieres)
+                Log::error('Error importando fila de servicio: ' . $e->getMessage());
                 continue;
             }
         }

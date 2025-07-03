@@ -92,18 +92,17 @@ class CustomerController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCustomerRequest $request, Customer $customer)
-    {
-        Gate::authorize('update', $customer);
-        $validated = $request->validated();
-        $validated['state'] = ($validated['state'] ?? 'inactivo') === 'activo';
-        $customer->update($validated);
-        return response()->json([
-            'status' => true,  
-            'message' => 'Cliente actualizado correctamente desde backend',
-            'customer' => new CustomerResource($customer)
-        ]);
-    }
+public function update(UpdateCustomerRequest $request, Customer $customer)
+{
+    Gate::authorize('update', $customer);
+    $customer->update($request->validated());
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Cliente actualizado correctamente desde backend',
+        'customer' => new CustomerResource($customer),
+    ]);
+}
 
     /**
      * Remove the specified resource from storage.

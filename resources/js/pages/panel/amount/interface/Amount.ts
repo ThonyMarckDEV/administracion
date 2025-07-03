@@ -17,6 +17,8 @@ export interface AmountResponseShow {
     description: string;
     amount: number;
     date_init: string;
+    serie_assigned: string;
+    correlative_assigned: string;
 }
 export type AmountResponse = {
     amounts: AmountResource[];

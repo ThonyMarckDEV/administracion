@@ -14,7 +14,7 @@ export type ServiceRequest = {
     cost: number;
     ini_date: string;
     password?: string;
-    state: 'activo' | 'inactivo';
+    state:boolean
 };
 
 export type ShowServiceResponse = {
@@ -32,7 +32,7 @@ export type ServiceUpdateRequest = {
     name: string;
     cost: number;
     ini_date: string;
-    state: 'activo' | 'inactivo';
+    state:boolean;
 };
 
 export type ServiceResponse = {

@@ -10,11 +10,12 @@ use App\Http\Resources\AmountResource;
 use App\Http\Resources\AmountShowResource;
 use App\Models\Amount;
 use App\Imports\AmountImport;
-use App\Models\Category;
-use App\Models\Supplier;
+use App\Models\SeriesCorrelative;
+use App\Services\Sunat\GenerateReciboHonorariosPdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -63,6 +64,7 @@ class AmountController extends Controller
                 ]
             ]);
         } catch (\Throwable $th) {
+            Log::error('Error listing amounts', ['error' => $th->getMessage()]);
             return response()->json([
                 'message' => 'Error al listar los egresos',
                 'error' => $th->getMessage()
@@ -83,8 +85,50 @@ class AmountController extends Controller
     public function store(StoreAmountRequest $request)
     {
         Gate::authorize('create', Amount::class);
-        $validated = Amount::create($request->validated());
-        return redirect()->route('panel.amounts.index')->with('message','Egreso registrado correctamente');
+        try {
+            // Fetch existing series_correlative for RHE
+            $seriesCorrelative = SeriesCorrelative::where('document_type', 'RHE')
+                ->where('serie', '001')
+                ->first();
+
+            if (!$seriesCorrelative) {
+                throw new \Exception('No series_correlative found for RHE with serie 001');
+            }
+
+            // Get the next correlative and increment
+            $correlative = $seriesCorrelative->correlative + 1;
+            $seriesCorrelative->update(['correlative' => $correlative]);
+
+            // Prepare validated data
+            $validated = $request->validated();
+
+            // Normalize date_init
+            $parsedDate = Carbon::parse($validated['date_init'])->setTimezone('America/Lima');
+            // Si no tiene hora (hora es 00:00:00), usar la hora actual
+            if ($parsedDate->format('H:i:s') === '00:00:00') {
+                $parsedDate = $parsedDate->setTime(
+                    now('America/Lima')->hour,
+                    now('America/Lima')->minute,
+                    now('America/Lima')->second
+                );
+            }
+            $validated['date_init'] = $parsedDate->format('Y-m-d H:i:s');
+
+            // Assign series and correlative            $validated['serie_assigned'] = $seriesCorrelative->serie;
+            $validated['correlative_assigned'] = $correlative;
+
+            // Create the amount
+            $amount = Amount::create($validated);
+
+            return redirect()->route('panel.amounts.index')->with('message', 'Egreso registrado correctamente');
+        } catch (\Throwable $th) {
+            Log::error('Error storing amount', [
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+                'date_init' => $request->input('date_init'),
+            ]);
+            return redirect()->route('panel.amounts.index')->with('error', 'Error al registrar el egreso: ' . $th->getMessage());
+        }
     }
 
     /**
@@ -130,6 +174,49 @@ class AmountController extends Controller
     public function exportExcel()
     {
         return Excel::download(new AmountsExport, 'Egresos.xlsx');
+    }
+
+
+    /**
+     * Generate PDF for a specific amount.
+    */
+    public function generatePdf(Amount $amount)
+    {
+        Gate::authorize('view', $amount);
+
+        try {
+            Log::info('Generating PDF for amount', ['id' => $amount->id]);
+            $generator = new GenerateReciboHonorariosPdf();
+            $pdfContent = $generator->generate([
+                'razon_social' => $amount->suppliers->name,
+                'ruc' => $amount->suppliers->ruc,
+                'service' => $amount->description,
+                'monto' => $amount->amount,
+                'retention' => $amount->amount * 0.08,
+                'monto_neto' => $amount->amount * (1 - 0.08),
+                'fecha_emision' => Carbon::parse($amount->date_init)->format('d/m/Y'),
+                'hora_emision' => Carbon::parse($amount->date_init)->format('H:i:s'),
+                'doc_series' => ' RHE ' . $amount->serie_assigned,
+                'doc_correlative' => $amount->correlative_assigned,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'PDF generado correctamente',
+                'pdf' => base64_encode($pdfContent),
+            ]);
+        } catch (\Throwable $th) {
+                Log::error('Error generating PDF in AmountController', [
+                'amount_id' => $amount->id,
+                'error' => $th->getMessage(),
+                'trace' => $th->getTraceAsString(),
+            ]);
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al generar el PDF',
+                'error' => $th->getMessage(),
+            ], 500);
+        }
     }
     // IMPORTAR EXCEL
     public function importExcel(Request $request)

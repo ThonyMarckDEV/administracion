@@ -25,6 +25,7 @@ class ClientTypesExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             $clientType->id,
             $clientType->name,
+            $clientType->created_at->format('d-m-Y H:i:s'),
             $clientType->state == 1 ? 'Activo' : 'Inactivo',
         ];
     }
@@ -33,6 +34,7 @@ class ClientTypesExport implements FromCollection, WithHeadings, WithMapping, Wi
         return[
             'ID',
             'Tipo de cliente',
+            'Fecha',
             'Estado'
         ];
     }
@@ -44,6 +46,11 @@ class ClientTypesExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function styles(Worksheet $sheet)
     {
+        $sheet->getColumnDimension('A')->setWidth(8);   // ID
+        $sheet->getColumnDimension('B')->setWidth(30);  // Nombre
+        $sheet->getColumnDimension('C')->setWidth(30);  // Nombre
+        $sheet->getColumnDimension('D')->setWidth(12);  // Costo
+
         $sheet->getStyle('A1:C1')->applyFromArray([
             'font' => [
                 'bold' => true,

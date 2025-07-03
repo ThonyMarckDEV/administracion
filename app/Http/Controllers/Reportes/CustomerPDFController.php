@@ -10,7 +10,7 @@ class CustomerPDFController extends Controller
 {
     public function exportPDF()
     {
-        $customers = Customer::orderBy('id', 'asc')->get();
+        $customers = Customer::orderBy('name', 'asc')->get();
 
         $customersArray = $customers->map(function ($customer) {
             return [
@@ -18,6 +18,7 @@ class CustomerPDFController extends Controller
                 'name' => $customer->name,
                 'codigo' => $customer->codigo,
                 'client_type' => $customer->clienteType->name ?? 'Sin tipo',
+                'created_at' => $customer->created_at->format('d-m-Y H:i:s'),
                 'state' => $customer->state ? 'Activo' : 'Inactivo'
             ];
         })->toArray();
@@ -42,8 +43,8 @@ class CustomerPDFController extends Controller
         $pdf->SetFont('helvetica', 'B', 10);
         $pdf->SetFillColor(242, 242, 242);
 
-        $header = ['ID', 'Nombre', 'Código', 'Tipo de cliente', 'Estado'];
-        $widths = [15, 50, 30, 60, 25];
+        $header = ['ID', 'Nombre', 'Código', 'Tipo de cliente','Fecha de creación', 'Estado'];
+        $widths = [15, 50, 30, 30, 30, 30];
 
         foreach ($header as $i => $col) {
             $pdf->MultiCell($widths[$i], 10, $col, 1, 'C', 1, 0);
@@ -68,6 +69,7 @@ class CustomerPDFController extends Controller
             $pdf->MultiCell($widths[1], 10, $customer['name'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[2], 10, $customer['codigo'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[3], 10, $customer['client_type'], 1, 'C', 0, 0);
+            $pdf->MultiCell($widths[3], 10, $customer['created_at'], 1, 'C', 0, 0);
             $pdf->MultiCell($widths[4], 10, $customer['state'], 1, 'C', 0, 0);
             $pdf->Ln();
         }

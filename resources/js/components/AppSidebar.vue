@@ -19,7 +19,9 @@ import {
     Percent,
     Settings2,
     Shield,
+    SunMoon,
     Truck,
+    User,
     UserSquare,
     ListCheck
 } from 'lucide-vue-next';
@@ -103,101 +105,30 @@ const mainNavItems6: NavItem[] = [
 
 const mainNavItems2: NavItem[] = [
     {
-        title: 'Seguridad',
+        title: 'Personal',
         href: '#',
-        icon: Shield,
+        icon: User,
         items: [
             {
                 title: 'Usuarios',
                 href: '/panel/users',
             },
-            {
-                title: 'Roles',
-                href: '#',
-            },
-            {
-                title: 'Permisos',
-                href: '#',
-            },
-        ],
-    },
-    {
-        title: 'Models',
-        href: '#',
-        icon: Map,
-        items: [
-            {
-                title: 'Genesis',
-                href: '#',
-            },
-            {
-                title: 'Explorer',
-                href: '#',
-            },
-            {
-                title: 'Quantum',
-                href: '#',
-            },
-        ],
-    },
-    {
-        title: 'Documentation',
-        href: '#',
-        icon: BookOpen,
-        items: [
-            {
-                title: 'Introduction',
-                href: '#',
-            },
-            {
-                title: 'Get Started',
-                href: '#',
-            },
-            {
-                title: 'Tutorials',
-                href: '#',
-            },
-            {
-                title: 'Changelog',
-                href: '#',
-            },
-        ],
-    },
-    {
-        title: 'Configuraciones',
-        href: '#',
-        icon: Settings2,
-        items: [
-            {
-                title: 'General',
-                href: '/settings/profile',
-            },
-            {
-                title: 'Team',
-                href: '#',
-            },
-            {
-                title: 'Billing',
-                href: '#',
-            },
-            {
-                title: 'Limits',
-                href: '#',
-            },
+            //{
+              //  title: 'Roles',
+                //href: '#',
+            //},
+            //{
+              //  title: 'Permisos',
+                //href: '#',
+            //},
         ],
     },
 ];
-
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
+const mainNavItems7: NavItem[] = [
+     {
+        title: 'Apariencia',
+        href: '/settings/appearance',
+        icon: SunMoon,
     },
 ];
 </script>
@@ -224,6 +155,8 @@ const footerNavItems: NavItem[] = [
                 :items4="mainNavItems4"
                 :items5="mainNavItems5"
                 :items6="mainNavItems6"
+                :items7="mainNavItems7"
+
             />
         </SidebarContent>
 

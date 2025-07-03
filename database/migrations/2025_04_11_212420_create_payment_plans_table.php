@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('payment_plans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('service_id')->constrained('services');
+            $table->foreignId('customer_id')->constrained('customers');
             $table->foreignId('period_id')->constrained('periods');
             $table->boolean('payment_type')->default(true)->comment('true: anual, false: mensual');
             $table->decimal('amount', 6,2)->default(0);

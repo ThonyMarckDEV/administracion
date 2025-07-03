@@ -35,31 +35,30 @@
                         <FormMessage />
                     </FormItem>
                 </FormField>
-                <FormField v-slot="{ componentField }" name="state">
-                    <FormItem>
-                        <FormLabel>Estado</FormLabel>
-                        <FormControl>
-                            <Select v-bind="componentField">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona el estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Estado</SelectLabel>
-                                        <SelectItem value="activo">Activo</SelectItem>
-                                        <SelectItem value="inactivo">Inactivo</SelectItem>
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                </FormField>
+<FormField name="state" v-slot="{ value, handleChange }">
+  <FormItem>
+    <FormLabel>Estado</FormLabel>
+    <FormControl>
+      <Select :modelValue="value" @update:modelValue="(val) => { console.log('Nuevo estado seleccionado:', val); handleChange(val); }">
+        <SelectTrigger>
+          <SelectValue :placeholder="value ?? 'Selecciona el estado'" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="activo">Activo</SelectItem>
+            <SelectItem value="inactivo">Inactivo</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </FormControl>
+    <FormMessage />
+  </FormItem>
+</FormField>
                 <FormField v-slot="{ componentField }" name="client_type_id">
                     <FormItem>
                         <FormLabel>Tipo cliente</FormLabel>
                         <FormControl>
-                            <Select v-bind="componentField" @update:modelValue="updateDniRucFields">
+                            <Select v-bind="componentField">
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecciona el tipo" />
                                 </SelectTrigger>
@@ -190,7 +189,7 @@ const { handleSubmit, setValues, setFieldValue } = useForm({
         codigo: props.customerData.codigo,
         email: props.customerData.email,
         client_type_id: props.customerData.client_type_id,
-        state: props.customerData.state ? 'activo' : 'inactivo',
+        state: props.customerData.state ? 'activo' : 'inactivo' ,
         dni: props.customerData.dni,
         ruc: props.customerData.ruc,
     },
@@ -209,20 +208,26 @@ watch(
                 dni: newData.dni,
                 ruc: newData.ruc,
             });
-            clientTypeId.value = newData.client_type_id;
         }
     },
     { deep: true, immediate: true }
 );
 
-const updateDniRucFields = (value: number) => {
-    clientTypeId.value = value;
-    setFieldValue('dni', null);
-    setFieldValue('ruc', null);
-};
+
 
 const onSubmit = handleSubmit((values) => {
-    emit('updateCustomer', values, props.customerData.id);
+    const updatedCustomer: CustomerRequestUpdate = {
+        name: values.name,
+        codigo: values.codigo,
+        email: values.email,
+        client_type_id: values.client_type_id,
+        state: values.state === 'activo',
+        dni: values.dni ?? null,
+        ruc: values.ruc ?? null,
+    };
+
+    emit('updateCustomer', updatedCustomer, props.customerData.id);
+    clouseModal();
 });
 </script>
 

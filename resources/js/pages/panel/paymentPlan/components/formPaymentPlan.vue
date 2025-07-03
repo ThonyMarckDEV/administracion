@@ -31,20 +31,46 @@
                     
                     <form @submit="onSubmit" class="flex flex-col gap-6">
                         
-                        <!-- Seleccionar el Servicio -->
-                        <FormField v-if="props.paymentPlanService" v-slot="{ componentField }" name="service_id">
+                    <!-- Servicio -->
+                        <FormField name="service_id">
+                        <FormItem>
+                            <FormLabel>Servicio</FormLabel>
+                            <FormControl>
+                            <Select v-model="selectedServiceId">
+                                <SelectTrigger>
+                                <SelectValue placeholder="Selecciona el servicio"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Servicio</SelectLabel>
+                                    <SelectItem
+                                    v-for="service in props.paymentPlanService"
+                                    :key="service.id"
+                                    :value="service.id"
+                                    >
+                                    {{ service.name }}
+                                    </SelectItem>
+                                </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                            </FormControl>
+                        </FormItem>
+                        </FormField>
+
+                                                <!-- Seleccionar el Cliente -->
+                        <FormField v-if="props.paymentPlanCustomer" v-slot="{ componentField }" name="customer_id">
                             <FormItem>
-                                <FormLabel>Servicio</FormLabel>
+                                <FormLabel>Cliente</FormLabel>
                                 <FormControl>
                                     <Select v-bind="componentField">
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona el servicio"/>
+                                            <SelectValue placeholder="Selecciona el cliente"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
-                                                <SelectLabel>Servicio</SelectLabel>
-                                                <SelectItem v-for="service in props.paymentPlanService" :key="service.id" :value="service.id">
-                                                    {{ service.name }}
+                                                <SelectLabel>Cliente</SelectLabel>
+                                                <SelectItem v-for="customer in props.paymentPlanCustomer" :key="customer.id" :value="customer.id">
+                                                    {{ customer.name }}
                                                 </SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
@@ -95,24 +121,26 @@
                         </FormField>
 
                         <!-- Monto -->
-                        <FormField v-slot="{ componentField }" name="amount">
-                            <FormItem>
-                                <FormLabel>Monto</FormLabel>
-                                <FormControl>
-                                    <Input v-bind="componentField" type="number" step="0.01" placeholder="Ingrese el monto" />
-                                </FormControl>
-                            </FormItem>
-                        </FormField>
 
-                        <!-- Duracción -->
-                         <FormField v-slot="{ componentField }" name="duration">
-                            <FormItem>
-                                <FormLabel>Duración</FormLabel>
-                                <FormControl>
-                                    <Input v-bind="componentField" type="number" step="0.01" placeholder="Ingrese la duración" />
-                                </FormControl>
-                            </FormItem>
-                         </FormField>
+                            <FormField name="amount">
+                                <FormItem>
+                                    <FormLabel>Monto</FormLabel>
+                                    <FormControl>
+                                        <Input :value="amount" readonly class="bg-gray-100" />
+                                    </FormControl>
+                                </FormItem>
+                            </FormField>
+
+                        <!-- Duración -->
+
+                            <FormField name="duration">
+                                <FormItem>
+                                    <FormLabel>Duración</FormLabel>
+                                    <FormControl>
+                                        <Input v-model="duration" type="number" step="1" placeholder="Ingrese la duración" />
+                                    </FormControl>
+                                </FormItem>
+                            </FormField>
 
                          <!-- Boton de crear -->
                          <Button type="submit">Crear plan de pago</Button>
@@ -129,15 +157,15 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { toTypedSchema } from '@vee-validate/zod';
 import { AlertCircle } from 'lucide-vue-next';
 import { useForm } from 'vee-validate';
-import { computed } from 'vue';
-import { z } from 'zod';
+import { computed, ref, watch } from 'vue'; 
+import { custom, z } from 'zod';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { InputService, InputPeriod } from '@/interface/Inputs';
+import { InputService, InputPeriod, InputCustomer } from '@/interface/Inputs';
 import { usePaymentPlan } from '@/composables/usePaymentPlan';
 
 const { createPaymentPlan } = usePaymentPlan();
@@ -146,6 +174,7 @@ const page = usePage<SharedData>();
 const props = defineProps<{
     paymentPlanService: InputService[];
     paymentPlanPeriod: InputPeriod[];
+    paymentPlanCustomer: InputCustomer[];
 }>();
 
 const hasErrors = computed(() => {
@@ -167,6 +196,8 @@ const formShema = toTypedSchema(
     z.object({
         service_id: z
             .number({message: 'Campo obligatorio'}),
+        customer_id: z
+            .number({message: 'Campo obligatorio'}),
         period_id: z
             .number({message: 'Campo obligatorio'}),
         payment_type: z
@@ -181,8 +212,47 @@ const formShema = toTypedSchema(
     }),
 );
 
-const { handleSubmit } = useForm({
+// 🔧 SE CAMBIÓ AQUÍ — nuevos refs para lógica reactiva
+const selectedServiceId = ref<number>(0);
+const duration = ref<number>(1);
+const amount = ref<number>(0);
+
+// 🔧 SE CAMBIÓ AQUÍ — obtener el objeto servicio seleccionado
+const selectedService = computed(() =>
+    props.paymentPlanService.find((service) => service.id === selectedServiceId.value) || null
+);
+
+// 🔧 SE CAMBIÓ AQUÍ — cálculo automático del monto con tipo consistente
+watch([selectedService, duration], () => {
+    const rawCost = selectedService.value?.cost ?? 0;
+    const costo = typeof rawCost === 'string' ? parseFloat(rawCost) : rawCost;
+    const durac = duration.value;
+
+    if (costo > 0 && durac > 0) {
+        amount.value = parseFloat((costo / durac).toFixed(2));
+    } else {
+        amount.value = 0;
+    }
+});
+
+
+const { handleSubmit, setFieldValue } = useForm({
     validationSchema: formShema,
+    initialValues: {
+        service_id: 0,         
+        customer_id: 0,        
+        period_id: 0,          
+        payment_type: 'anual', // Valor por defecto
+        amount: 0,
+        duration: 1,
+    },
+});
+
+// Sincronizar con el formulario (sin null)
+watch(amount, (val) => setFieldValue('amount', val));
+watch(duration, (val) => setFieldValue('duration', val));
+watch(selectedServiceId, (val) => {
+    if (val > 0) setFieldValue('service_id', val);
 });
 
 const onSubmit = handleSubmit((values) => {

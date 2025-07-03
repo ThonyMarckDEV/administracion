@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class AutoCompleteController extends Controller
 {
+    // Obtener Proveedores
     public function getSuppliersList(Request $request)
     {
         $ruc = $request->get('texto');
@@ -24,7 +25,7 @@ class AutoCompleteController extends Controller
             ->get();
         return response()->json($suppliers);
     }
-
+// Obtener Clientes
     public function getCustomerList(Request $request)
     {
         $name = $request->get('texto');
@@ -39,7 +40,7 @@ class AutoCompleteController extends Controller
             ->get();
         return response()->json($customers);
     }
-
+// Obtener Servicios
     public function getServiceList(Request $request)
     {
         $name = $request->get('texto');

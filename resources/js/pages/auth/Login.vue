@@ -28,12 +28,12 @@ const submit = () => {
 </script>
 
 <template>
-    <AuthBase title="inicio sesion" description="sistema de administracion" :image="image">
-        <Head title="inicio" />
+    <AuthBase title="Inicio de sesión" description="Sistema de administracion" :image="image">
+        <Head title="Inicio" />
         <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
-                    <Label for="username">ingresar el usuario</Label>
+                    <Label for="username">Ingresar el usuario</Label>
                     <Input
                         id="username"
                         type="username"
@@ -49,7 +49,7 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
-                        <Label for="password">contraseña</Label>
+                        <Label for="password">Contraseña</Label>
                         <!-- <TextLink v-if="canResetPassword" :href="route('password.request')" class="text-sm" :tabindex="5">
                             Forgot password?
                         </TextLink> -->
@@ -69,13 +69,13 @@ const submit = () => {
                 <div class="flex items-center justify-between" :tabindex="3">
                     <Label for="remember" class="flex items-center space-x-3">
                         <Checkbox id="remember" v-model:checked="form.remember" :tabindex="4" />
-                        <span>Remember me</span>
+                        <span>Recordar Usuario</span>
                     </Label>
                 </div>
 
                 <Button type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
-                    ingresar
+                    Ingresar
                 </Button>
             </div>
             <!-- 
